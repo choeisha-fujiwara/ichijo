@@ -1,0 +1,122 @@
+@use "mixin" as m;
+
+* {
+	box-sizing: border-box;
+}
+body {
+	font-family: 'Noto Sans Jp', sans-serif;
+	font-size: 13px;
+	font-weight: 400;
+	position: relative;
+	background: var(--color-base);
+	color: var(--color-primary);
+	-webkit-font-smoothing: antialiased;
+}
+img {
+	width: 100%;
+	display: block;
+}
+a, a:hover {
+	color: var(--color-secondary);
+	transition: .2s ease-out;
+	outline: none;
+	text-decoration: none;
+}
+p b {
+	display: block;
+}
+a[href^="tel:"] {
+	pointer-events: none;
+}
+.pc-hidden {
+	display: none;
+}
+.hidden-obj {
+	display: none;
+}
+.loading-end {
+	opacity: 0;
+	transition: opacity .3s ease-out;
+}
+.loading-hidden {
+	visibility: hidden;
+}
+.container {
+	width:100%;
+	height: auto;
+	margin: 0 auto;
+	position: relative;
+	height: 100vh;
+	overflow: hidden;
+}
+.contents {
+	min-width: 800px;
+	max-height: calc(100vh - 24px);
+	display: flex;
+	@include m.flexStartStretch;
+	width: 100%;
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+    &-webkit-scrollbar {
+        display:none;
+    }
+}
+.content {
+    width: 100%;
+    height: auto;
+	min-height: calc(100vh - 24px);
+    padding: 80px 32px 0 96px;
+	position: relative;
+    @include m.flexStartCenter;
+    flex-wrap: nowrap;
+	flex-direction: column;
+	&.modal-mode {
+		height: calc(100vh - 88px);
+		overflow: hidden;
+	}
+}
+.content-header {
+	width: 100%;
+	@include m.flexEndCenter;
+}
+
+@include m.mq(sp) {
+	.sp-hidden {
+		display: none;
+	}
+	.pc-hidden {
+		display: inherit;
+	}
+}
+@keyframes hidden {
+	100% {
+		opacity: 0;
+	}
+}
+@keyframes show {
+	100% {
+		opacity: 1;
+	}
+}
+@keyframes showToHidden {
+	0% {
+		opacity: 0;
+	}
+	10% {
+		opacity: 1;
+	}
+	80% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+@keyframes hiddenToShow {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}

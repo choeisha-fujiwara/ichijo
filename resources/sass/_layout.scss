@@ -1,0 +1,114 @@
+@use "mixin" as m;
+
+.header {
+	width: 100%;
+    min-width: 1040px;
+	height: 64px;
+	padding: 24px 24px 24px 20px;
+	background: var(--color-base);
+	border-bottom: 1px solid var(--color-line);
+    position: fixed;
+    z-index: 9999;
+    @include m.flexBetweenCenter;
+    .header-logo {
+        @include m.flexStartCenter;
+    }
+    h1 {
+        font-size: 22px;
+        letter-spacing: .02em;
+        text-rendering: optimizeLegibility;
+        height: 32px;
+        border-right: 1px solid var(--color-line);
+        padding-right: 16px;
+        line-height: 1;
+        a {
+            @include m.flexStartCenter;
+            img {
+                width: 32px;
+                padding: 4px 8px 0 0;
+                margin-right: 4px;
+            }
+            span {
+                color: var(--color-primary);
+                padding: 0;
+            }
+            .logo {
+                color: var(--color-active);
+                margin: 4px 6px 1px 0;
+            }
+        }
+    }
+    .user-name {
+        margin-right: auto;
+        margin-left: 16px;
+        font-size: 16px;
+        font-weight: 500;
+    }
+    .page-name {
+        margin-right: auto;
+        padding: 0 16px 0;
+        font-size: 13px;
+        &.active {
+            a {
+                color: var(--color-active);
+            }
+        }
+        .modal-name {
+            opacity: 0;
+            animation: hiddenToShow .2s ease-out both;
+        }
+    }
+    .header-contents {
+        @include m.flexBetweenCenter; 
+    }
+    .download-btn {
+        height: 40px;
+        padding: 0 16px 1px;
+        margin: 0 0 0 16px;
+        border-radius: 20px;
+        @include m.flexCenterCenter;
+        background: var(--color-secondary);
+        transition: .3s .3s ease-out;
+        color: var(--color-em);
+        span {
+            margin: 0 8px 0 -4px;
+            color: var(--color-em);
+        }
+        &.active {
+            transition: .3s ease-out;
+            background: var(--color-active);
+            &:hover {
+                cursor: pointer;
+                transition: .3s ease-out;
+                background: var(--color-active-hover);
+                --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+                --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
+                box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+                transition: .2s ease-in;
+            }
+        }
+        &.shop {
+            display: none;
+        }
+    }    
+}
+.footer {
+	width: 100%;
+	height: 48px;
+	text-align: center;
+	font-weight: 300;
+	padding: 14px 0 16px;
+    font-size: 12px;
+    background: var(--color-base);
+    border-top: 1px solid var(--color-line);
+    height: 24px;
+    padding: 2px 0 0;
+    z-index: 9999;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    transform-origin: center;
+    &.modal-mode {
+        animation: hiddenToShow .2s ease-out both;
+    }
+}
