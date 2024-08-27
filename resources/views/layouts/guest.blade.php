@@ -9,12 +9,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Poppins:wght@500&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/overcast/jquery-ui.min.css">
 <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
-<!--本番環境は npm run build した後の build/assets/***.css をリンク-->
-<!--link rel="stylesheet" href="{{-- asset('build/assets/app-BjztzLmn.css') --}}"-->
-<link rel="icon" href="{{ asset('images/favicon.ico') }}">
+<link rel="stylesheet" href="{{ asset('build/assets/guest-HO8XXNXx.css') }}">
 <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon-180x180.png') }}" sizes="180x180">
-<!--ローカル環境用-->
-@vite(['resources/css/app.css', 'resources/sass/guest.scss', 'resources/js/guest.js'])
+<!--開発環境用-->
+{{-- @vite(['resources/css/app.css', 'resources/sass/guest.scss', 'resources/js/guest.js']) --}}
 <!---->
 <title>{{ config('app.name') }}</title>
 </head>

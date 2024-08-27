@@ -1,3 +1,7 @@
 @use 'destyle';
 @use 'mixin';
 @use 'form';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
