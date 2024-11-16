@@ -17,7 +17,6 @@ img {
 	display: block;
 }
 a, a:hover {
-	color: var(--color-secondary);
 	transition: .2s ease-out;
 	outline: none;
 	text-decoration: none;
@@ -36,7 +35,7 @@ a[href^="tel:"] {
 }
 .loading-end {
 	opacity: 0;
-	transition: opacity .3s ease-out;
+	transition: opacity .6s ease-in;
 }
 .loading-hidden {
 	visibility: hidden;
@@ -65,7 +64,7 @@ a[href^="tel:"] {
     width: 100%;
     height: auto;
 	min-height: calc(100vh - 24px);
-    padding: 80px 32px 0 96px;
+    padding: 80px 32px 0 80px;
 	position: relative;
     @include m.flexStartCenter;
     flex-wrap: nowrap;

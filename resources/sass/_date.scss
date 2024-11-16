@@ -1,0 +1,48 @@
+@use "mixin" as m;
+
+#ui-datepicker-div {
+    right: 48px;
+    left: auto !important;
+    margin-top: 8px;
+    background: var(--color-gray-50);
+    border: 1px solid var(--color-line);
+    padding: 8px;
+}
+.ui-widget.ui-widget-content {
+    border: none;
+}
+.ui-widget-header {
+    background: #eee;
+    border: 1px solid var(--color-line-deep);
+}
+.ui-datepicker .ui-datepicker-prev {
+    &:hover {
+        border: none;
+        background: var(--color-gray-300);
+        top: 3px;
+        left: 2px;
+    }
+}
+.ui-datepicker .ui-datepicker-next {
+    &:hover {
+        border: none;
+        background: var(--color-gray-300);
+        top: 3px;
+        right: 2px;
+    }
+}
+.ui-datepicker-group-first .ui-datepicker-title {
+    &::after {
+        display: none;
+    }
+}
+.ui-datepicker .ui-datepicker-prev,
+.ui-datepicker .ui-datepicker-next {
+    top: 3px;
+}
+.ui-widget-header .ui-icon {
+    background: url(../images/icon-arrow-left.svg) center center no-repeat;
+}
+.ui-datepicker-next .ui-icon {
+    background: url(../images/icon-arrow-right.svg) center center no-repeat;
+}

@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Customer extends Model
+class Post extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'shop_id',
-        'shop_name',
+        'state_post',
+        'state_comment',
+        'state_ng',
         'comment_admin',
         'comment_manager',
         'comment_shop',
@@ -43,4 +45,19 @@ class Customer extends Model
         'q19',
         'q20',
     ];
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function state(): HasOne
+    {
+        return $this->hasOne(State::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'shop_id', 'shop_id');
+    }
 }

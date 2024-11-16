@@ -6,6 +6,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class User extends Authenticatable
 {
@@ -42,6 +45,34 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'last_login_at' => 'datetime',
         ];
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function posts(): HasMany
+    {
+        return $this->hasMany(Post::class, 'shop_id', 'shop_id');
+    }
+
+    public function area(): HasOne
+    {
+        return $this->hasOne(Area::class, 'id', 'area_id');
+    }
+
+    public function states(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            State::class,
+            Post::class,
+            'shop_id',
+            'post_id',
+            'id',
+            'id'
+        );
     }
 }

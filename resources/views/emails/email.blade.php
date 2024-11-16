@@ -6,7 +6,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="format-detection" content="telephone=no">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex, nofollow, noarchive" />
     <style>body{margin:0;padding:0;background:#fff;}.loading{width:100%;height:100%;background:#fff;position:fixed;top:0;left:0;z-index:99999999;display:flex;justify-content:center;align-items:center;font-family:sans-serif;font-weight:300;}</style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,8 +16,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/overcast/jquery-ui.min.css">
     <title>神座アンケートフォーム</title>
 </head>
-    <body style="width: 100%; margin: 0; padding:32px 0 0; font-size: 14px; color: #334155; background-color: #f3f4f6" topmargin="0" bottomargin="0" leftmargin="0" rightmargin="0" marginwidth="0" marginheight="0">
-        <table style="width: 100%; height: 100vh; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; border-color: inherit; border-collapse: collapse; background-color: #f3f4f6; box-shadow: 0 4px 6px -1px #000;">
+    <body style="width: 100%; margin: 0; padding: 20% 0 0; font-size: 14px; color: #334155; background-color: #f3f4f6; border: none" topmargin="0" bottomargin="0" leftmargin="0" rightmargin="0" marginwidth="0" marginheight="0">
+        <table style="width: 100%; height: auto; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; border-color: inherit; border: none; border-collapse: collapse; background-color: #f3f4f6;">
             <thead>
                 <tr>
                     <td style="width: 100%; height: 64px; margin: 0 auto" colspan="5"></td>
@@ -37,7 +36,7 @@
                     <td style="width: 25%; height: 63px;"></td>
                     <td style="width: 25%; height: 63px; background: #fff"></td>
                     <td style="width: 320px; height: 63px; background: #fff;">
-                        <img src="{{ $message->embed('images/logo-yoko.png') }}" width="320" height="63" style="width: 320px; height: 63px; margin: 0; display: block; text-align: center">
+                        <img src="{{ $message->embed('images/logo-landscape.png') }}" width="320" height="63" style="width: 320px; height: 63px; margin: 0; display: block; text-align: center" alt="KAMUKURA">
                     </td>
                     <td style="width: 25%; height: 63px; background: #fff"></td>
                     <td style="width: 25%; height: 63px;"></td>
@@ -82,7 +81,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td style="width: 100%; height: 96px; margin: 0 auto" colspan="5"></td>
+                    <td style="width: 100%; height: 96px; margin: 0 auto box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .2);" colspan="5"></td>
                 </tr>
             </tbody>
         </table>

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\FormPostRequest;
 use App\Models\User;
-use App\Models\Customer;
+use App\Models\Post;
 use App\Services\GuestService;
 use App\Mail\SendMail;
 use Illuminate\Support\Facades\Mail;
@@ -33,15 +33,19 @@ class GuestController extends Controller
      */
     public function store(FormPostRequest $request)
     {
-        $data = new Customer();
+        //$request->session()->regenerateToken();
+
+        $user = User::where('shop_id', $request->shop_id)->first();
+
         $services = new GuestService;
+        $request = $services->requestConvert($request);   
+        $data = new Post();
+        $data->fill($request->all())->save();
 
-        $data = $services->requestConvert($request, $data);
-        $data->save();
+        $state = $services->stateCheck($data);
 
-        $name = $request->shop_name;
-        $area = $request->area;
-        $emails = User::where('area', '=', $area)->orWhere('role', '=', 'admin')->get();
+        $emails = $services->mailList($data);
+        $name = $user->name;
 
         foreach ($emails as $email) {
             Mail::to($email->email)->send(new SendMail($email, $name));
@@ -55,13 +59,13 @@ class GuestController extends Controller
      */
     public function show(string $id)
     {
-        $user = User::find($id);
-        
-        if (empty($user) || $user->role !== 'shop') {
+        $shop = User::where('shop_id', $id)->first();
+
+        if (empty($shop)) {
             abort(404);
         }
 
-        return view('guest.index', compact('user'));
+        return view('guest.index', compact('shop'));
     }
 
     /**

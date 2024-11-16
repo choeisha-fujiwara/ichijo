@@ -17,13 +17,18 @@ $theme-colors: (
   active: #3773e0,
   hover: #eaebef,
   error: #f90f0f,
+  error-deep: #ED1A1A,
   warning: #FDD835,
   safety: #34a853,
+  safety-deep: #389C53,
   base: #f6f8fc,
+  base-deep: #E8EAED,
   base-translucent: rgba(246,248,252,.8),
   accent: #d3d3d3,
   line-deep: #dbdce0,
+  line-deep-more: #9ca3af,
   line: #e1e3e1,
+  line-em: #e1e3e1,
   em: #ffffff,
   strong: #ebf1fa,
   dark: #212121,
@@ -33,28 +38,71 @@ $theme-colors: (
   active-light-hover: #f7fafe,
   text-em: #202124,
   text-light: #afb0af,
+  text-box: #afb0af,
   read: #f3f6fc,
   blue-light: #eaf1fb,
   blue-light-hover: #dbeafe,
   card-line: #f5f5f5,
   text-strong: #af0000,
+  gray-light: #f2f2f2,
+  thead: #ffffff,
+  table: #ffffff,
+  chart-top1: #1E88E5,
+  chart-top2: #F1F5F9,
+  chart-bottom1: #334155,
+  chart-bottom2: #F1F5F9,
+  chart-mid: #F1F5F9,
+  gray-500: #6B7280,
+  gray-400: #9CA3AF,
+  gray-300: #D1D5DB,
+  gray-200: #E5E7EB,
+  gray-100: #F3F4F6,
+  gray-50: #FAFAFA,
 );
 
 // Dark Theme Colors
 $dark-theme-colors: (
-    primary: #202124,
-    secondary: #606368,
+    primary: #e7e7e7,
+    secondary: #e7e7e7,
     active: #3773e0,
-    hover: #f5f5f5,
-    error: #F44336,
-    base: #f8f9fa,
+    hover: #353C45,
+    error: #ea3323,
+    error-deep: #ED1A1A,
+    warning: #FDD835,
+    safety: #34a853,
+    safety-deep: #389C53,
+    base: #23282F,
+    base-deep: #1A1D21,
+    base-translucent: rgba(0,0,0,.8),
     accent: #d3d3d3,
-    line: #dbdce0,
+    line-deep: #636C78,
+    line-deep-more: #374151,
+    line: #464c55,
+    line-em: #636C78,
     em: #ffffff,
-    strong: #f2f3f4,
+    all-black: #454746,
+    strong: #ebf1fa,
     dark: #212121,
     table-hover: #e8eaed,
-  );
+    active-hover: #2E7CE8,
+    active-light: #f1f6fe,
+    active-light-hover: #f7fafe,
+    text-em: #202124,
+    text-light: #2E3238,
+    text-box: #2E3238,
+    read: #f3f6fc,
+    blue-light: #353C45,
+    blue-light-hover: #1D2633,
+    card-line: #464c55,
+    text-strong: #af0000,
+    gray-light: #dedfe3,
+    thead: #353C45,
+    table: #353C45,
+    chart-top1: #FF1744,
+    chart-top2: #4C71B6,
+    chart-bottom1: #303236,
+    chart-bottom2: #495161,  
+    );
 
 /* CSS Variables */
 :root {
@@ -85,6 +133,11 @@ $dark-theme-colors: (
     justify-content: flex-start;
     align-items: stretch;
 }
+@mixin flexStartEnd {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+}
 @mixin flexCenterStretch {
     display: flex;
     justify-content: center;
@@ -99,6 +152,11 @@ $dark-theme-colors: (
     display: flex;
     justify-content: center;
     align-items: flex-start;
+}
+@mixin flexCenterEnd {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
 }
 @mixin flexBetweenStart {
     display: flex;
@@ -115,6 +173,11 @@ $dark-theme-colors: (
     justify-content: space-between;
     align-items: stretch;
 }
+@mixin flexBetweenEnd {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+}
 @mixin flexEndStart {
     display: flex;
     justify-content: flex-end;
@@ -124,4 +187,19 @@ $dark-theme-colors: (
     display: flex;
     justify-content: flex-end;
     align-items: center;
+}
+@mixin flexAroundStart {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+}
+@mixin flexAroundCenter {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+@mixin flexAroundEnd {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
 }

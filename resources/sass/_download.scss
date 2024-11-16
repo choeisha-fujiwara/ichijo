@@ -1,0 +1,113 @@
+@use "mixin" as m;
+
+.modal {
+    &.download {
+        padding-bottom: 160px;
+        background-color: var(--color-base-translucent);
+        .modal-contents {
+            width: auto;
+            padding-bottom: 32px;
+        }
+    }
+}
+.download-header {
+    @include m.flexBetweenCenter;
+    .download-close {
+        line-height: 1;
+        margin-top: -44px;
+        margin-right: -22px;
+        .icon {
+            font-size: 16px;
+            color: var(--color-secondary);
+            transition: .2s ease-out;
+            &:hover {
+                transition: .2s ease-out;
+                cursor: pointer;
+                color: var(--color-active);
+            }    
+        }
+    }
+}
+.download-selections {
+    @include m.flexStartCenter;
+    .select-wrap {
+        width: auto;
+    }
+    .datepickers {
+        @include m.flexBetweenCenter;
+        .datepicker {
+            @include m.flexStartCenter;
+            input[type="text"] {
+                width: 100%;
+                height: 32px;
+                text-align: center;
+                border: 1px solid var(--color-line);
+                border-radius: 4px;
+                padding: 1px 8px 4px;
+                font-weight: 500;
+                &:hover {
+                    background: var(--color-em);
+                }
+                &:focus {
+                    background: var(--color-em);
+                    color: var(--color-line);
+                    outline: none;
+                    pointer-events: none;
+                }
+                &::placeholder {
+                    color: var(--color-text);
+                }
+            }
+        }
+        .icon {
+            padding-left: 2px;
+        }
+    }
+    .submit-label {
+        @include m.flexCenterCenter;
+        width: 48px;
+        height: 48px;
+        margin-left: 24px;
+        background: var(--color-line);
+        color: var(--color-em);
+        border-radius: 50%;
+        font-weight: 300;
+        transition: .2s ease-in;
+        pointer-events: none;
+        &.active {
+            background: var(--color-active);
+            pointer-events: all;
+            &:hover {
+                cursor: pointer;
+                background: var(--color-active-hover);
+                --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+                --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
+                box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+                transition: .2s ease-in;
+            }    
+        }
+    }
+}
+.ui-datepicker {
+    .ui-datepicker-title {
+        @include m.flexCenterCenter;
+    }
+}
+.ui-datepicker-group-first {
+    .ui-datepicker-title {
+        &::after {
+            content: '';
+            width: 0;
+            height: 0;
+            display: block;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid var(--color-secondary);
+        }    
+        select.ui-datepicker-month {
+            width: auto;
+            margin: 0 0 0 -4px;
+            outline: none;
+        }
+    }
+}

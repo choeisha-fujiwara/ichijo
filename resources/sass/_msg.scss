@@ -1,0 +1,42 @@
+@use "mixin" as m;
+
+.msg {
+    position: fixed;
+    bottom: 40px;
+    right: 16px;
+    z-index: 99999;
+    li, p {
+        z-index: 99999;
+        padding: 7px 16px 8px;
+        margin: 16px 0 0;
+        background: var(--color-active);
+        color: var(--color-em);
+        border-radius: 4px;
+        animation: show 5s ease-out 0s both;
+        opacity: 0;
+        text-align: center;
+    }
+    &.err {
+        li, p {
+            background: var(--color-error);
+        }
+    }
+    .end {
+        visibility: hidden;
+        display: none;
+    }
+}
+@keyframes show {
+	0% {
+		opacity: 0;
+	}
+	10% {
+		opacity: 1;
+	}
+	90% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}

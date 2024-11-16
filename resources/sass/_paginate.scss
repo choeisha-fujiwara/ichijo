@@ -1,0 +1,25 @@
+@use "mixin" as m;
+
+.paginations {
+    width: 128px;
+    height: 48px;
+    padding-top: 0;
+    position: relative;
+    .page {
+        font-weight: 500;
+        white-space: nowrap;
+    }
+    .pagination {
+        margin-right: 3px;
+        @include m.flexEndCenter;
+    }
+    .paginate {
+        @include m.flexEndStart;
+        span {
+            margin-top: -4px;
+        }
+    }
+    .no-link {
+        color: var(--color-text-light);
+    }
+}

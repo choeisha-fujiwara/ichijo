@@ -34,7 +34,6 @@ class FormPostRequest extends FormRequest
             'q02' => ['required'],
             'q03' => ['required'],
             'q04' => ['required'],
-            'q05' => ['required'],
             'q09' => ['required'],
             'q11' => ['required'],
             'q12' => ['required'],

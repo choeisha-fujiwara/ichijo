@@ -33,6 +33,7 @@
 
             .content {
                 text-align: center;
+                padding: 0 2rem;
             }
 
             .title {

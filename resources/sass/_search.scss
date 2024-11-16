@@ -1,0 +1,52 @@
+@use "mixin" as m;
+
+.search-box {
+    padding: 0;
+    position: relative;
+    @include m.flexEndCenter;
+    .search {
+        width: 100%;
+        @include m.flexEndCenter;
+    }
+    input[type="text"] {
+        width: 240px;
+        height: 40px;
+        background: var(--color-blue-light);
+        border-radius: 24px;
+        padding: 0 20px 2px;
+        transition: .2s ease-out;
+        &::placeholder {
+            opacity: .7;
+        }
+        &:hover {
+            background: var(--color-blue-light-hover);
+            transition: .2s ease-out;
+        }
+        &:focus {
+            background: var(--color-blue-light-hover);
+        }
+    }
+    .search-btn {
+        margin-left: 8px;
+        padding: 1px 0 0;
+        z-index: 999;
+        transition: .2s ease-out;
+        &:hover {
+            cursor: pointer;
+            color: var(--color-active);
+        }
+        &.active {
+            cursor: pointer;
+            color: var(--color-active);
+        }
+    }
+}
+.search-msg {
+    position: absolute;
+    height: 48px;
+    @include m.flexStartCenter;
+    span {
+        font-size: 20px;
+        padding: 2px 4px 0 2px;
+    }
+}

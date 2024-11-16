@@ -1,3 +1,5 @@
+@use "mixin" as m;
+
 body {
     font-family: 'Noto Sans Jp', sans-serif;
 }
@@ -12,6 +14,10 @@ body {
 .preface {
     background: url("../images/bg-b.png") center center repeat-y;
     background-size: 100% auto;
+}
+.loading-end {
+	opacity: 0;
+	transition: opacity .3s ease-out;
 }
 input[type="radio"], input[type="checkbox"] {
     opacity: 0;
@@ -160,6 +166,42 @@ input[type="radio"]:checked + .radio-label::after {
 .flashing {
     animation: flashing 2s ease-in infinite;
 }
+.flex-start-label {
+	@include m.flexStartCenter;
+    flex-wrap: wrap;
+    @include m.mq(sp) {
+        @include m.flexBetweenCenter;
+    }
+    label {
+        margin-right: 2rem;
+    }
+}
+.send-modal {
+    width: 100vw;
+    height: 100vh;
+    padding-bottom: 32px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, .8);
+    transform: translateY(160vh);
+    transition: .3s ease-out;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 9999;
+    @include m.flexCenterCenter;
+    &.active {
+        opacity: 1;
+        transform: translateY(0);
+        transition: .3s ease-out;
+        visibility: visible;
+        pointer-events: none;
+        img {
+            transform-origin: center;
+            animation: rotation .8s linear infinite;
+        }    
+    }
+}
 
 @keyframes hidden {
 	100% {
@@ -183,6 +225,14 @@ input[type="radio"]:checked + .radio-label::after {
 	}
     100% {
 		opacity: 1;
+	}
+}
+@keyframes rotation {
+	0% {
+		opacity: 1;
+	}
+    100% {
+        transform: rotate(360deg);
 	}
 }
 

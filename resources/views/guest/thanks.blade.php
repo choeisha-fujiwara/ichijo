@@ -11,7 +11,7 @@
             <p class="text-justify px-6 pb-8 leading-7 text-base font-normal">ご回答いただいた内容は、商品の品質向上・サービス改善に向けての貴重なご意見としてお取り扱いいたします。<br>今後とも、末長くご愛顧賜りますよう何卒よろしくお願い申し上げます。</p>
         </div>
         <div class="mx-auto text-center pb-8">
-            <img src="{{ asset('images/logo-yoko.png') }}" class="w-1/2 m-auto" alt="神座">
+            <img src="{{ asset('images/logo-landscape.png') }}" class="w-1/2 m-auto" alt="神座">
         </div>
     </div>
 </x-guest-layout>

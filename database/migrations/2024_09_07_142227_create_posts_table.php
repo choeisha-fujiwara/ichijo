@@ -11,17 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customers', function (Blueprint $table) {
+        Schema::create('posts', function (Blueprint $table) {
             $table->id();
             $table->integer('shop_id');
-            $table->string('shop_name');
-            $table->string('state_topic')->nullable();
-            $table->string('state_admin')->nullable();
-            $table->string('state_manager')->nullable();
-            $table->string('state_shop')->nullable();
-            $table->text('comment_admin')->nullable();
-            $table->text('comment_manager')->nullable();
-            $table->text('comment_shop')->nullable();
             $table->text('email')->nullable();
             $table->string('gender')->nullable();
             $table->string('age')->nullable();
@@ -59,6 +51,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('customers');
+        Schema::dropIfExists('posts');
     }
 };

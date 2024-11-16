@@ -1,0 +1,140 @@
+@use "mixin" as m;
+
+.menu {
+	padding: 64px 0 0;
+    background: var(--color-base);
+    border-right: 1px solid var(--color-base);
+    width: 64px;
+    height: 100%;
+    min-height: calc(100vh - 88px);
+    transition: width .3s ease-out, box-shadow .2s .2s ease-out;
+    position: absolute;
+    z-index: 999;
+    &.active {
+        width: 232px;
+        box-shadow: 4px 0px 12px -4px rgba(0,0,0,0.1);
+        transition: width .3s ease-out, box-shadow .3s .3s ease-out;
+        li {
+            width: 196px;
+            transition: .3s ease-out;
+            .menu-text {
+                opacity: 1;
+                transition: .1s ease-out;
+            }
+        }
+    }
+    ul {
+        position: fixed;
+        top: 96px;
+        left: 2px;
+    }
+    li {
+        width: 40px;
+        height: 40px;
+        margin: 0 8px 16px 18px;
+        padding: 5px 0 0 8px;
+        border-radius: 20px;
+        transition: .3s ease-out;
+        overflow: hidden;
+        white-space: nowrap;
+        background: var(--color-blue-light);
+        &.active {
+            background: var(--color-active);
+            a {
+                color: var(--color-em);
+            }
+            &:hover {
+                background: var(--color-active);
+                a {
+                    transition: .1s ease-out;
+                    color: var(--color-em);
+                }
+            }
+        }
+        span {
+            padding-right: 16px;
+            &.menu-text {
+                padding-bottom: 2px;
+                opacity: 0;
+                transition: .1s ease-out;
+            }
+        }
+        &:hover {
+            background: var(--color-active);
+            transition: .1s ease-out;
+            cursor: pointer;
+            a {
+                color: var(--color-em);
+                font-weight: 500;
+            }
+        }
+    }
+    .logout {
+        position: fixed;
+        height: 40px;
+        &:hover {
+            color: var(--color-em);
+        }
+        span {
+            padding: 3.25px 0 0 2px;
+        }
+    } 
+    a {
+        height: 32px;
+        padding: 0 0 1px;
+        margin-bottom: 16px;
+        @include m.flexStartCenter;
+    }
+    .badge {
+        width: 20px;
+        height: 20px;
+        padding-bottom: 0px;
+        border-radius: 50%;
+        position: fixed;
+        top: 88px;
+        left: 48px;
+        background: var(--color-error);
+        color: var(--color-em);
+        font-size: 9px;
+        font-weight: 500;
+        transition: .3s ease-out;
+        @include m.flexCenterCenter;
+        z-index: 99;
+        animation: badge .3s ease-out 0s both;
+        transform-origin: center;
+        &.active {
+            animation: move .3s ease-out 0s both;
+        }
+    }
+}
+.menu ul li.logout p {
+    @include m.flexStartCenter;
+    .menu-text {
+        transition: .1s ease-out;
+        padding: 3px 0 0 12.5px;
+    }
+    &:hover {
+        transition: .1s ease-out;
+        color: var(--color-em);
+        font-weight: 500;
+    }
+}
+@keyframes badge {
+	0% {
+        transform: scale(0);
+	}
+	80% {
+		transform: scale(1.2);
+	}
+    100% {
+		transform: scale(1);
+	}
+}
+@keyframes move {
+	0% {
+        transform: translateX(0);
+	}
+    100% {
+		transform: translateX(154px);
+    }
+}

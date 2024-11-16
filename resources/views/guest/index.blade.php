@@ -2,7 +2,7 @@
     <div class="content mx-auto">
         <div class="preface py-8 px-6 border-b text-white">
             <div class="mx-auto text-center">
-                <h1 class="pb-6 text-xl leading-relaxed">{{ @$user->name }}<br/>お客様アンケート</h1>
+                <h1 class="pb-6 text-xl leading-relaxed">{{ @$shop->name }}<br/>お客様アンケート</h1>
                 <img src="{{ asset('images/logo.png') }}" class="w-1/2 m-auto" alt="神座">
             </div>
             <div class="pt-6">
@@ -47,9 +47,7 @@
                     @include('guest.tel')
                     @include('guest.zipcode')
                     @include('guest.address')
-                    <input type="hidden" name="shop_id" value="{{ $user->id, old('shop_id') }}" />
-                    <input type="hidden" name="shop_name" value="{{ $user->name, old('shop_name') }}" />
-                    <input type="hidden" name="area" value="{{ $user->area, old('area') }}" />
+                    <input type="hidden" name="shop_id" value="{{ $shop->shop_id, old('shop_id') }}" />
                     <div class="acceptance relative flex justify-start items-center flex-col pt-2">
                         <label class="acceptance-label relative cursor-pointer" for="acceptance">個人情報の取り扱いに同意</label>
                         <input class="acceptance hidden-object" type="checkbox" value="同意" id="acceptance" name="acceptance" {{ old('acceptance') == '同意' ? 'checked' : '' }} />
@@ -59,5 +57,8 @@
                 </div>
             </form>
         </div>
+    </div>
+    <div class="send-modal">
+        <img src="{{ asset('images/icon-refresh.svg') }}" alt="送信中" />
     </div>
 </x-guest-layout>

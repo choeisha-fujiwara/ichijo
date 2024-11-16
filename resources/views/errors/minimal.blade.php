@@ -20,11 +20,12 @@
         <div class="container relative flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 sm:items-center sm:pt-0">
             <div class="max-w-xl mx-auto sm:px-6 lg:px-8">
                 <div class="content flex flex-col items-center sm:justify-start sm:pt-0">
-                    <div class="mb-4 px-4 text-lg text-gray-600 tracking-wider">
-                        @yield('code')
+                    <div class="mb-4 text-sm px-4 text-gray-600 tracking-wider">
+                        {{-- エラー：@yield('code') --}}
+                        ERROR
                     </div>
 
-                    <div class="pt-4 text-m text-gray-600 uppercase tracking-wider">
+                    <div class="pt-4 text-sm text-gray-600 uppercase tracking-wider" style="padding:8px 24px">
                         @yield('message')
                     </div>
                 </div>

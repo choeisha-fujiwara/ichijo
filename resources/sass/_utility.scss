@@ -1,0 +1,68 @@
+@use "mixin" as m;
+
+.back-btn {
+    width: 100%;
+    padding: 32px 0 0;
+    @include m.flexEndCenter;
+}
+.to-top {
+    position: absolute;
+    bottom: 16px;
+    right: 49px;
+    a {
+        font-size: 18px;
+        color: var(--color-active);
+    }
+}
+.active-btn {
+    background: var(--color-text-light);
+    transition: .3s ease-out;
+    pointer-events: none;
+    &.active {
+        pointer-events: all;
+        transition: .3s ease-out;
+        background: var(--color-active);
+    }
+}
+.material-symbols-outlined {
+    font-variation-settings:
+    'FILL' 1,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+    &.left-alignment {
+        margin-left: -2px;
+        margin-top: 1px;
+    }
+    &.thin {
+        font-variation-settings:
+        'FILL' 0,
+        'wght' 200,
+        'GRAD' 0,
+        'opsz' 24
+    }
+    &.regular {
+        font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 26
+    }
+}
+
+.ui-datepicker .ui-datepicker-prev {
+    &:hover {
+        border: none;
+        background: #D1D5DB;
+        top: 2px;
+        left: 2px;
+    }
+}
+.ui-datepicker .ui-datepicker-next {
+    &:hover {
+        border: none;
+        background: #D1D5DB;
+        top: 2px;
+        right: 2px;
+    }
+}

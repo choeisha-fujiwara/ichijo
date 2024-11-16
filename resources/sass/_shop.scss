@@ -1,0 +1,136 @@
+@use "mixin" as m;
+
+.content {
+    &.shop {
+        min-width: 960px;
+        padding-top: 64px;
+    }
+}
+.shop-table {
+    width: 100%;
+    margin: 0 auto;
+    padding: 12px 0 32px;
+    .tr {
+        background: var(--color-table);
+        @include m.flexBetweenCenter;
+    }
+    .thead {
+        width: calc(100% - 120px);
+        min-width: 840px;
+        position: fixed;
+        top: 98px;
+        left: 84px;
+        .tr {
+            white-space: nowrap;
+            padding: 10px 0 10px 24px;
+            font-weight: 500;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border-bottom: 1px solid var(--color-line);
+            &.fixed {
+                transition: .2s ease-out;
+                border-radius: 16px 16px 0 0;
+                --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+                --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
+                box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+            }    
+        }
+    }
+    .tbody {
+        .tr {
+            white-space: nowrap;
+            padding: 8px 0 8px 24px;
+            border-bottom: 1px solid var(--color-line);
+        }
+    }
+    .th, .td {
+        width: 15%;
+        text-align: center;
+        @include m.flexCenterCenter;
+        transition: .3s ease-out;
+        span {
+            padding-right: 8px;
+        }
+        a {
+            color: var(--color-primary);
+            &:hover {
+                color: var(--color-active);
+                transition: .3s ease-out;
+            }
+        }
+    }
+    .shop-name {
+        width: 24%;
+        min-width: 200px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-weight: 500;
+        @include m.flexStartCenter;
+        .icon {
+            padding: 0 16px 0 0;
+        }
+    }
+    .shop-area, .shop-group {
+        min-width: 48px;
+    }
+    .unread {
+        color: var(--color-safety);
+        transition: .3s ease-out;
+        &:hover {
+            transition: .3s ease-out;
+            color: var(--color-safety-deep);
+        }
+    }
+    .read {
+        label {
+            pointer-events: none;
+            cursor: text;
+        }
+    }
+    .active {
+        color: var(--color-error);
+        transition: .3s ease-out;
+        &:hover {
+            transition: .3s ease-out;
+            color: var(--color-error-deep);
+        } 
+    }
+    .inactive {
+        label {
+            pointer-events: none;
+            cursor: text;
+        }
+    }
+    .approval {
+        transition: .3s ease-out;
+        &:hover {
+            transition: .3s ease-out;
+            color: var(--color-error-dark);
+        }
+    }
+    .unapproved {
+        label {
+            pointer-events: none;
+            cursor: text;
+        }
+    }
+    .login-at {
+        width: 32%;
+    }
+    .shop-search {
+        margin-right: -8px;
+        input {
+            display: none;
+        }
+        span {
+            padding: 4px 4px 0 0;
+            font-size: 21px;
+            transition: .3s ease-out;
+            &:hover {
+                color: var(--color-active);
+                transition: .3s ease-out;
+            }
+        }
+    }
+}

@@ -9,20 +9,20 @@
                 <input type="checkbox" name="q01[]" value="ラーメン" {{ is_array(old('q01')) && in_array('ラーメン', old('q01')) ? 'checked' : '' }} />
                 <span class="">ラーメン</span>
             </label>
-            <label class="checkbox-label" data-options="option02">
-                <input type="checkbox" name="q01[]" value="餃子" {{ old('q01[]') == '餃子' ? 'checked' : '' }} />
+            <label class="checkbox-label {{ is_array(old('q01')) && in_array('餃子', old('q01')) ? 'checked' : '' }}" data-options="option02">
+                <input type="checkbox" name="q01[]" value="餃子" {{ is_array(old('q01')) && in_array('餃子', old('q01')) ? 'checked' : '' }} />
                 <span class="">餃子</span>
             </label>
-            <label class="w-1/2 mr-2 checkbox-label">
-                <input type="checkbox" name="q01[]" value="からあげ" {{ old('q01[]') == 'からあげ' ? 'checked' : '' }} />
+            <label class="w-1/2 mr-2 checkbox-label {{ is_array(old('q01')) && in_array('からあげ', old('q01')) ? 'checked' : '' }}">
+                <input type="checkbox" name="q01[]" value="からあげ" {{ is_array(old('q01')) && in_array('からあげ', old('q01')) ? 'checked' : '' }} />
                 <span class="">からあげ</span>
             </label>
-            <label class="checkbox-label" data-options="option01">
-                <input type="checkbox" name="q01[]" value="炒飯" {{ old('q01[]') == '炒飯' ? 'checked' : '' }} />
+            <label class="checkbox-label {{ is_array(old('q01')) && in_array('炒飯', old('q01')) ? 'checked' : '' }}" data-options="option01">
+                <input type="checkbox" name="q01[]" value="炒飯" {{ is_array(old('q01')) && in_array('炒飯', old('q01')) ? 'checked' : '' }} />
                 <span class="">炒飯</span>
             </label>
-            <label class="w-1/2 mr-2 checkbox-label">
-                <input type="checkbox" name="q01[]" value="季節メニュー" {{ old('q01[]') == '季節メニュー' ? 'checked' : '' }} />
+            <label class="w-1/2 mr-2 checkbox-label {{ is_array(old('q01')) && in_array('季節メニュー', old('q01')) ? 'checked' : '' }}">
+                <input type="checkbox" name="q01[]" value="季節メニュー" {{ is_array(old('q01')) && in_array('季節メニュー', old('q01')) ? 'checked' : '' }} />
                 <span class="">季節メニュー</span>
             </label>
         </div>
