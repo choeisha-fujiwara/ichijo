@@ -2,8 +2,8 @@
     <div class="chart-title">
         <p><span class="material-symbols-outlined icon">stacked_bar_chart</span><span>{{ $section }}</span></p>
         <p class="legend">
-            <span class="material-symbols-outlined legend legend1">square</span><span class="legend1">非常に満足した</span>
-            <span class="material-symbols-outlined legend legend2">square</span><span class="legend2">全く満足できなかった</span>
+            <span class="material-symbols-outlined legend legend1 top">square</span><span class="legend1">非常に満足</span>
+            <span class="material-symbols-outlined legend legend2 top">square</span><span class="legend2 top">非常に不満</span>
         </p>
     </div>
     <div class="chart-area">
@@ -31,8 +31,8 @@
 <div class="report-content sec" data-items="sec">
     <div class="chart-title">
         <p class="legend">
-            <span class="material-symbols-outlined legend legend1">square</span><span class="legend1">非常に満足した+満足した</span>
-            <span class="material-symbols-outlined legend legend2">square</span><span class="legend2">全く満足できなかった+満足できなかった</span>
+            <span class="material-symbols-outlined legend legend1">square</span><span class="legend1">非常に満足+満足</span>
+            <span class="material-symbols-outlined legend legend2">square</span><span class="legend2">非常に不満+不満</span>
         </p>
     </div>
     <div class="chart-area">

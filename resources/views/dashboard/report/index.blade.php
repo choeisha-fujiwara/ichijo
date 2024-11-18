@@ -99,8 +99,8 @@
     <script>
         var data = @json($sources);
         var sections = data[0][0][0];
-        var items1 = ['', '非常に満足した', 'まったく満足できなかった', '満足した', '満足できなかった', 'どちらでもない'];
-        var items2 = ['', '非常に満足した+満足した', 'まったく満足できなかった+満足できなかった', 'どちらでもない'];
+        var items1 = ['', '非常に満足した', '満足した', 'どちらでもない', '満足できなかった', 'まったく満足できなかった'];
+        var items2 = ['', '非常に満足した+満足した', 'どちらでもない', 'まったく満足できなかった+満足できなかった'];
         
         if (data[0][0]['q02'].length > 7) {
             $('.report-contents').removeClass('small-box')
@@ -131,8 +131,10 @@
                 for (ii = 0; ii < count; ii++) {
                     var annotation = data[section][i][ii];
                     var tooltip = tooltips[section][i][ii];
+                    var before = data[section][i][ii - 1];
+                    console.log(annotation + before);
                     var height = annotation * chartHeight / 100;
-                    var bar = '<div class="' + section + ' ' + cat + ' chart-bar bar' + ii + (annotation < 3 ? ' small' : '') + '"><p class="annotation">' + annotation + (ii !== 0 ? '%' : '') + '</p><p class="tooltip">' + items[ii] + '<br>' + tooltip + '件</p></div>';
+                    var bar = '<div class="' + section + ' ' + cat + ' chart-bar bar' + ii + (annotation < 3 ? ' small' : '') + (before < 3 ? ' before-small' : '') + '"><p class="annotation">' + annotation + (ii !== 0 ? '%' : '') + '</p><p class="tooltip">' + items[ii] + '<br>' + (tooltip !== undefined ? tooltip : 0) + '件</p></div>';
                     $('.' + section + ' .' + cat + ' .bars' + i).append(bar);
                     $('.' + section + ' .' + cat + ' .bars' + i + ' .bar' + ii).height(height);
                 }

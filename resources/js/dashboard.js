@@ -202,7 +202,11 @@ $('.legend1').on('click', function() {
         $(path + '.chart-bar').addClass('hidden');
         $(path + '.bar1').removeClass('reduction');
         $(path + '.bar1').addClass('restate');
-        $(path + '.bar2').removeClass('restate');
+        if ($(this).hasClass('top')) {
+            $(path + '.bar5').removeClass('restate');
+        } else {
+            $(path + '.bar3').removeClass('restate');
+        }
     }
 });
 $('.legend2').on('click', function() {
@@ -217,8 +221,16 @@ $('.legend2').on('click', function() {
         $(path + '.legend1').addClass('off');
         $(path + '.chart-bar').removeClass('hidden');
         $(path + '.chart-bar').addClass('hidden');
+        $(path + '.chart-bar').removeClass('reduction');
         $(path + '.bar1').addClass('reduction');
-        $(path + '.bar2').addClass('restate');
+        $(path + '.bar2').addClass('reduction');
+        if ($(this).hasClass('top')) {
+            $(path + '.bar3').addClass('reduction');
+            $(path + '.bar4').addClass('reduction');
+            $(path + '.bar5').addClass('restate');
+        } else {
+            $(path + '.bar3').addClass('restate');
+        }
     }
 });
 function legendReset(path) {
@@ -227,7 +239,9 @@ function legendReset(path) {
     $(path + '.chart-bar').removeClass('hidden');
     $(path + '.bar1').removeClass('reduction');
     $(path + '.bar1').removeClass('restate');
-    $(path + '.bar2').removeClass('restate');
+    $(path + '.bar2').removeClass('reduction');
+    $(path + '.bar3').removeClass('reduction');
+    $(path + '.bar4').removeClass('reduction');
 };
 
 

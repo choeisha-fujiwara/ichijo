@@ -288,7 +288,7 @@
                         flex-direction: column-reverse;
                         .chart-bar {
                             width: 100%;
-                            color: var(--color-gray-500);
+                            color: var(--color-em);
                             position: relative;
                             @include m.flexCenterCenter;
                             transform: scaleY(0);
@@ -346,28 +346,26 @@
                                 }
                                 &.top {
                                     &.bar1 {
-                                        color: var(--color-em);
                                         background: var(--color-chart-top1);
                                         transition: .6s .2s cubic-bezier(0.17,0.84,0.44,1);
                                     }
                                     &.bar2 {
-                                        color: var(--color-em);
-                                        background: var(--color-chart-bottom1);
+                                        background: var(--color-chart-top2);
                                         transition: .6s .4s cubic-bezier(0.17,0.84,0.44,1);
                                     }
                                     &.bar3 {
-                                        border-top: 1px solid var(--color-line);
-                                        background: var(--color-chart-top2);
+                                        // border-top: 1px solid var(--color-line);
+                                        background: var(--color-chart-mid);
                                         transition: .6s .6s cubic-bezier(0.17,0.84,0.44,1);
                                     }
                                     &.bar4 {
-                                        border-top: 1px solid var(--color-line);
+                                        // border-top: 1px solid var(--color-line);
                                         background: var(--color-chart-bottom2);
                                         transition: .6s .8s cubic-bezier(0.17,0.84,0.44,1);
                                     }
                                     &.bar5 {
                                         border-top: none;
-                                        background: var(--color-chart-mid);
+                                        background: var(--color-chart-bottom1);
                                         transition: .6s  1s cubic-bezier(0.17,0.84,0.44,1);
                                     }
                                 }
@@ -379,12 +377,12 @@
                                     }
                                     &.bar2 {
                                         color: var(--color-em);
-                                        background: var(--color-chart-bottom1);
+                                        background: var(--color-chart-mid);
                                         transition: .6s .4s cubic-bezier(0.17,0.84,0.44,1);
                                     }
                                     &.bar3 {
                                         border-top: none;
-                                        background: var(--color-chart-mid);
+                                        background: var(--color-chart-bottom1);
                                         transition: .6s .6s cubic-bezier(0.17,0.84,0.44,1);
                                     }
                                 }
@@ -407,6 +405,15 @@
                                         &::before {
                                             display: none;
                                         }
+                                    }
+                                }
+                                &.before-small {
+                                    .annotation {
+                                        margin-bottom: 24px;
+                                        &::before {
+                                            display: none;
+                                        }
+    
                                     }
                                 }
                             }

@@ -383,13 +383,15 @@ if (! function_exists('compositionRatio')) {
     {
         $cat1 = [
             '非常に満足した',
-            'まったく満足できなかった',
             '満足した',
+            'どちらでもない',
             '満足できなかった',
+            'まったく満足できなかった',
         ];
 
         $cat2 = [
             '満足した',
+            'どちらでもない',
             '満足できなかった',
         ];
 
@@ -440,8 +442,8 @@ if (! function_exists('reportDataCreate'))
                 $arrays[$section][$month][] = number_format(round(100 - array_sum($arrays[$section][$month]), 1), 1);
                 array_unshift($arrays[$section][$month], $month);
 
-                $reals[$section][$month][] = $data->where($section, 'どちらでもない')->where('month', $month)->count();
-                array_unshift($reals[$section][$month], $month);
+                // $reals[$section][$month][] = $data->where($section, 'どちらでもない')->where('month', $month)->count();
+                // array_unshift($reals[$section][$month], $month);
             }
             foreach ($arrays as $array) {
                 $chart[$section] = array_values($array);
