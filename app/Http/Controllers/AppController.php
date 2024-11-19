@@ -28,9 +28,13 @@ class AppController extends Controller
         $data->count = activeCount($user);
         $data->tilde = hasTildeCheck($data);
 
-        return view('dashboard.top.index', compact('user', 'data'));
-    }
-
+        return response()
+            ->view('dashboard.top.index', compact('user', 'data'))
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 0);
+    }    
+    
     /**
      * Show the form for creating a new resource.
      */

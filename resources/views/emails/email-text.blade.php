@@ -3,7 +3,7 @@
 {{ $name }} 宛に神座アンケートフォームへの
 投稿がありましたのでご確認ください。
 
-https://www.cs.kamukura-customer.com/dashboard
+https://www.cs.kamukura-customer.com/dashboard/top
 
 ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
 株式会社理想実業

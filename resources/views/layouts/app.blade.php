@@ -3,12 +3,8 @@
 {{-- <html lang="ja" data-theme="dark"> --}}
 <head>
 <script>
-    var perfEntries = performance.getEntriesByType("navigation");
-    var type = null;
-    perfEntries.forEach(function(e){
-        type = e.type;
-    });
-    if (type == 'back_forward') {
+    transition = performance.getEntriesByType('navigation');
+    if (transition[0].type == 'back_forward') {
         location.reload();
     }
 </script>

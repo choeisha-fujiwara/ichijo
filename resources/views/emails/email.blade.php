@@ -67,7 +67,7 @@
                     <td style="width: 25%; height: 48px;"></td>
                     <td style="width: 25%; height: 48px; background: #fff"></td>
                     <td valign="middle" style="width: 100px; height: 24px; margin: 0 auto; background: #2965d9; text-align: center">
-                        <a href="https://www.yahoo.co.jp/" style="width: 100px; height: 24px; margin: 0 auto; padding: 0 64px; background: #2965d9; border-top: 12px solid #2965d9; border-bottom: 12px solid #2965d9; border-left: 24px solid #2965d9; border-right: 24px solid #2965d9; display: block; text-align: center; color: #fff; font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hira=gino Sans', 'Hiragino Kaku Gthic ProN', Meiryo, sans-serif; font-weight: 500; text-decoration: none; pointer-events: all">確認する</a>
+                        <a href="https://www.cs.kamukura-customer.com/dashboard/top" style="width: 100px; height: 24px; margin: 0 auto; padding: 0 64px; background: #2965d9; border-top: 12px solid #2965d9; border-bottom: 12px solid #2965d9; border-left: 24px solid #2965d9; border-right: 24px solid #2965d9; display: block; text-align: center; color: #fff; font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hira=gino Sans', 'Hiragino Kaku Gthic ProN', Meiryo, sans-serif; font-weight: 500; text-decoration: none; pointer-events: all">確認する</a>
                     </td>
                     <td style="width: 25%; height: 48px; background: #fff"></td>
                     <td style="width: 25%; height: 48px;"></td>

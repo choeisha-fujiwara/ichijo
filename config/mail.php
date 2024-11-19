@@ -114,10 +114,10 @@ return [
     |
     */
 
-    // 開発用ダミー
+    // 送信アドレス
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'info@choeisha.co.jp'),
-        'name' => env('MAIL_FROM_NAME', 'マーケティング本部'),
+        'address' => env('MAIL_FROM_ADDRESS', 'kamukura-customer@cs.kamukura-customer.com'),
+        'name' => env('MAIL_FROM_NAME', 'マネジメント本部'),
     ],
 
     /*

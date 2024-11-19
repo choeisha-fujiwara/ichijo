@@ -21,6 +21,7 @@
         <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon-180x180.png') }}" sizes="180x180">
             
         <!-- Scripts -->
+        {{-- <link rel="stylesheet" href="{{ asset('build/assets/guest-C3UbU42Z.css') }}"> --}}
         @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/sass/app.scss'])
     </head>
     <body>
