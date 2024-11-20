@@ -65,7 +65,11 @@ class GuestController extends Controller
             abort(404);
         }
 
-        return view('guest.index', compact('shop'));
+        return response()
+        ->view('guest.index', compact('shop'))
+        ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+        ->header('Pragma', 'no-cache')
+        ->header('Expires', 0);
     }
 
     /**

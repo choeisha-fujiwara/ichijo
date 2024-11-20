@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja">
     <script>
-        var perfEntries = performance.getEntriesByType("navigation");
-        var type = null;
-        perfEntries.forEach(function(pe){
-            type = pe.type;
-        });
-        if (type == 'back_forward') {
+        transition = performance.getEntriesByType('navigation');
+        if (transition[0].type == 'back_forward') {
             location.reload();
         }
     </script>
@@ -24,7 +20,7 @@
     <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
     {{-- <link rel="stylesheet" href="{{ asset('build/assets/guest-C3UbU42Z.css') }}"> --}}
     <!--開発環境用-->
-    {{-- @vite(['resources/css/app.css', 'resources/sass/guest.scss', 'resources/js/guest.js']) --}}
+    @vite(['resources/css/app.css', 'resources/sass/guest.scss', 'resources/js/guest.js'])
     <!---->
     <title>{{ config('app.name') }}</title>
 </head>
@@ -42,6 +38,6 @@
         </footer>    
     </div>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="{{ asset('build/assets/guest-DdtDbG1h.js') }}"></script>
+    {{-- <script src="{{ asset('build/assets/guest-DdtDbG1h.js') }}"></script> --}}
 </body>
 </html>

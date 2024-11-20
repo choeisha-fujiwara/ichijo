@@ -43,7 +43,11 @@ class AppService
         // 店舗
         } else {
             $shop = $user->shop_id;
-            $data = Post::where('shop_id', $shop)
+            $data = Post::with('state')
+            ->where('shop_id', $shop)
+            ->whereHas('state', function ($query) {
+                $query->where('post_ng', 'OK');
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(100)
             ->withQueryString();
@@ -100,9 +104,13 @@ class AppService
         // 店舗
         } else {
             $shop = $user->shop_id;
-            $data = Post::where('shop_id', $shop)
+            $data = Post::with('state')
+            ->where('shop_id', $shop)
             ->whereHas('user', function ($query) use ($keyword) {
                 $query->where('name', 'LIKE', "%{$keyword}%");
+            })
+            ->whereHas('state', function ($query) {
+                $query->where('post_ng', 'OK');
             })
             ->orWhere('q20', 'LIKE', "%{$keyword}%")
             ->orderBy('created_at', 'desc')
@@ -181,7 +189,7 @@ class AppService
                 ->where($column_2nd, $terms_1, null)
                 ->where($column_3rd, $terms_1, 'OK');
             })
-            ->where('shop_id', $terms_2, $shop)
+            ->where('shop_id', '=', $shop)
             ->orderBy('created_at', 'desc')
             ->paginate(100)
             ->appends(['state' => $state]);
@@ -260,7 +268,7 @@ class AppService
             ->whereHas('state', function ($query) {
                 $query->where('post_ng', 'OK');
             })
-            ->where('shop_id', $terms, $shop)
+            ->where('shop_id', '=', $shop)
             ->orderBy('created_at', 'desc')
             ->paginate(100)
             ->appends(['state' => $state]);
@@ -320,7 +328,7 @@ class AppService
                 $query->whereNull('post_read')
                 ->orWhereNull(['post_read->shop']);
             })
-            ->where('shop_id', $terms, $shop)
+            ->where('shop_id', '=', $shop)
             ->orderBy('created_at', 'desc')
             ->paginate(100)
             ->appends(['state' => $state]);
