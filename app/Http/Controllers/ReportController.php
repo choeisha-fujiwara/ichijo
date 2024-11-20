@@ -19,15 +19,6 @@ class ReportController extends Controller
      */
     public function index()
     {
-
-        $x = 300;
-        $y = 400;
-
-        $hypot = hypot($x, $y);
-
-        $e = atan2($y, $x);
-        $f = rad2deg($e);
-
         $user = Auth::user();
         $areas = Area::groupBy('area_name')->get(['area_name']);
         $blocks = Area::groupBy('block_name')->where('block_name', '!=', null)->get(['block_name']);
@@ -85,7 +76,7 @@ class ReportController extends Controller
         $data->isEmpty() ? $sources = 'none' : $sources = compositionRatio($data);
         $data->count = activeCount($user);
 
-        return view('dashboard.report.index', compact('f', 'hypot', 'user', 'sources', 'areas', 'blocks', 'users', 'data', 'requests'));
+        return view('dashboard.report.index', compact('user', 'sources', 'areas', 'blocks', 'users', 'data', 'requests'));
     }
 
     /**
