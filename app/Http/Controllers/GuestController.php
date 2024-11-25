@@ -33,7 +33,7 @@ class GuestController extends Controller
      */
     public function store(FormPostRequest $request)
     {
-        //$request->session()->regenerateToken();
+        $request->session()->regenerateToken();
 
         $user = User::where('shop_id', $request->shop_id)->first();
 

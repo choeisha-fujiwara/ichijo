@@ -249,6 +249,22 @@ if (! function_exists('questions')) {
     }
 }
 
+// q01結合
+if (! function_exists('textareaCheck')) {
+    function mergingResponses($data) {
+
+        for ($i = 1; $i < 6; $i++) {
+            $a = 'q01_a' . $i;
+            $q01[] = $data->$a;
+            $res = implode('・', array_filter($q01));
+        }
+
+        $data->q01 = $res;
+        $data->q01 = empty($data->q01) ? null : $data->q01;
+        
+        return $data;
+    }
+}
 // テキストエリア項目
 if (! function_exists('textareaCheck')) {
     function textareaCheck($value)
@@ -283,8 +299,13 @@ if (! function_exists('exportItems')) {
             'zipcode',
             'address',
             'email',
+            'q01_a1',
+            'q01_a2',
+            'q01_a3',
+            'q01_a4',
+            'q01_a5',
         ];
-        for ($i = 1; $i < 10; $i++) {
+        for ($i = 2; $i < 10; $i++) {
             $res[] = 'q0' . $i;
         }
         for ($i = 10; $i < 21; $i++) {
@@ -309,7 +330,11 @@ if (! function_exists('csvHeaders')) {
             '郵便番号',
             '住所',
             'メールアドレス',
-            '本日ご注文したメニューについて',
+            '本日ご注文したメニュー：ラーメン',
+            '本日ご注文したメニュー：餃子',
+            '本日ご注文したメニュー：からあげ',
+            '本日ご注文したメニュー：炒飯',
+            '本日ご注文したメニュー：季節のメニュー',
             'ラーメンの味について',
             'スープについて',
             'チャーシューの味について',
@@ -379,7 +404,7 @@ if (! function_exists('deletionPersonalFindData')) {
 
 // 回答構成比
 if (! function_exists('compositionRatio')) {
-    function compositionRatio($data)
+    function compositionRatio($data, $lines)
     {
         $cat1 = [
             '非常に満足した',
@@ -406,6 +431,8 @@ if (! function_exists('compositionRatio')) {
 
         $res[] = reportDataCreate($data, $sections, $cat1, 'top');
         $res[] = reportDataCreate($data, $sections, $cat2, 'sec');
+        // $res[] = reportDataCreate($lines, $sections, $cat1, 'top');
+        // $res[] = reportDataCreate($lines, $sections, $cat1, 'sec');
 
         return $res;
     }
@@ -435,7 +462,7 @@ if (! function_exists('reportDataCreate'))
                     }
                     $arrays[$section][$month][] = number_format(round($filtered
                     ->where('month', $month)->count() /
-                    $data->where('month', $month)->count() * 100, 1), 1);
+                    $data->where('month', $month)->whereNotNull($section)->count() * 100, 1), 1);
                     
                     $reals[$section][$month][] = $filtered->where('month', $month)->count();
                 }

@@ -5,24 +5,24 @@
             <span class="block">本日ご注文したメニューについて</span>
         </legend>
         <div class="checkbox-buttons flex flex-wrap justify-start items-center">
-            <label class="w-1/2 mr-2 checkbox-label {{ is_array(old('q01')) && in_array('ラーメン', old('q01')) ? 'checked' : '' }}">
-                <input type="checkbox" name="q01[]" value="ラーメン" {{ is_array(old('q01')) && in_array('ラーメン', old('q01')) ? 'checked' : '' }} />
-                <span class="">ラーメン</span>
+            <label class="w-1/2 mr-2 checkbox-label {{ old('q01_a1') ? 'checked' : null }}">
+                <input type="checkbox" name="q01_a1" value="{{ $shop->shop_category == '神座' ? 'ラーメン' : 'つけ麺' }}" {{ old('q01_a1') ? 'checked' : null }} />
+                <span class="">{{ $shop->shop_category == '神座' ? 'ラーメン' : 'つけ麺' }}</span>
             </label>
-            <label class="checkbox-label {{ is_array(old('q01')) && in_array('餃子', old('q01')) ? 'checked' : '' }}" data-options="option02">
-                <input type="checkbox" name="q01[]" value="餃子" {{ is_array(old('q01')) && in_array('餃子', old('q01')) ? 'checked' : '' }} />
+            <label class="checkbox-label {{ old('q01_a2') ? 'checked' : null; }}" data-options="option02">
+                <input type="checkbox" name="q01_a2" value="餃子" {{ old('q01_a2') ? 'checked' : null }} />
                 <span class="">餃子</span>
             </label>
-            <label class="w-1/2 mr-2 checkbox-label {{ is_array(old('q01')) && in_array('からあげ', old('q01')) ? 'checked' : '' }}">
-                <input type="checkbox" name="q01[]" value="からあげ" {{ is_array(old('q01')) && in_array('からあげ', old('q01')) ? 'checked' : '' }} />
+            <label class="w-1/2 mr-2 checkbox-label {{ old('q01_a3') ? 'checked' : null; }}">
+                <input type="checkbox" name="q01_a3" value="からあげ" {{ old('q01_a3') ? 'checked' : null }} />
                 <span class="">からあげ</span>
             </label>
-            <label class="checkbox-label {{ is_array(old('q01')) && in_array('炒飯', old('q01')) ? 'checked' : '' }}" data-options="option01">
-                <input type="checkbox" name="q01[]" value="炒飯" {{ is_array(old('q01')) && in_array('炒飯', old('q01')) ? 'checked' : '' }} />
+            <label class="checkbox-label {{ old('q01_a4') ? 'checked' : '' }}" data-options="option01">
+                <input type="checkbox" name="q01_a4" value="炒飯" {{ old('q01_a4') ? 'checked' : null }} />
                 <span class="">炒飯</span>
             </label>
-            <label class="w-1/2 mr-2 checkbox-label {{ is_array(old('q01')) && in_array('季節メニュー', old('q01')) ? 'checked' : '' }}">
-                <input type="checkbox" name="q01[]" value="季節メニュー" {{ is_array(old('q01')) && in_array('季節メニュー', old('q01')) ? 'checked' : '' }} />
+            <label class="w-1/2 mr-2 checkbox-label {{ old('q01_a5') ? 'checked' : null }}">
+                <input type="checkbox" name="q01_a5" value="季節メニュー" {{ old('q01_a5') ? 'checked' : null }} />
                 <span class="">季節メニュー</span>
             </label>
         </div>

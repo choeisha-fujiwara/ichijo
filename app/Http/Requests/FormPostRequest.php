@@ -26,14 +26,10 @@ class FormPostRequest extends FormRequest
             'age' => ['required'],
             'gender' => ['required'],
             'tel' => ['nullable', 'string', 'regex:/^0[0-9]{9,10}$/u'],
-            /*
-            'name' => ['string', 'max:255'],
-            'zipcode' => ['string', 'regex:/^(([0-9]{3}-[0-9]{4})|([0-9]{7}))$/'],
-            'address' => ['string', 'max:255', 'min:5'],
-            */
             'q02' => ['required'],
             'q03' => ['required'],
             'q04' => ['required'],
+            'q06' => ['required'],
             'q09' => ['required'],
             'q11' => ['required'],
             'q12' => ['required'],

@@ -14,7 +14,7 @@
             @if (count($errors) > 0) <p class="pt-6 text-center text-red-600 flashing">※入力内容をご確認ください</p> @endif
         </div>
         <div class="w-full">
-            <form action="/" method="POST" class="h-adr" novalidate>
+            <form action="/" method="POST" class="h-adr" onsubmit="return false;" novalidate>
             @csrf
                 <span class="p-country-name" style="display:none;">Japan</span>
                 <div class="px-6 pt-8 pb-6">
@@ -51,7 +51,7 @@
                     <div class="acceptance relative flex justify-start items-center flex-col pt-2">
                         <label class="acceptance-label relative cursor-pointer" for="acceptance">個人情報の取り扱いに同意</label>
                         <input class="acceptance hidden-object" type="checkbox" value="同意" id="acceptance" name="acceptance" {{ old('acceptance') == '同意' ? 'checked' : '' }} />
-                        <input class="submit-btn w-1/2 h-12 relative rounded bg-gray-400 text-white text-center transition pointer-events-none order-last" type="submit" value="送信" />
+                        <input class="submit-btn w-1/2 h-12 relative rounded bg-gray-400 text-white text-center transition pointer-events-none order-last" type="button" value="送信" onClick="submit();" />
                         <p class="pt-7 pb-8 text-center font-normal leading-relaxed">※<a href="https://rsj.co.jp/etc/privacy.php" class="underline" target="_blank">個人情報の取り扱い</a>に同意の上、送信<br/>いただきますようお願いいたします。</p>
                     </div>
                 </div>

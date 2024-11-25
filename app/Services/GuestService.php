@@ -11,8 +11,8 @@ class GuestService
 {
     public function requestConvert($request)
     {
-
-        $request['q01'] = !empty($request['q01']) ? implode('・', $request['q01']) : null;
+        // $request['q01'] = !empty($request['q01']) ? implode('・', $request['q01']) : null;
+        $request['q06'] = $request['q06'] !== '未選択' ? $request['q06'] : null;
         $request['q17'] = !empty($request['q17']) ? implode('・', $request['q17']) : null;
         $request['name'] = !empty($request['name']) ? preg_replace("/\s|　/", "", $request['name']) : null;
         $request['tel'] = !empty($request['tel']) ? hyphenConvert($request['tel']) : null;

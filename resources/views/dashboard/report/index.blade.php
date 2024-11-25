@@ -80,11 +80,6 @@
                 <x-chart section="接客について" />
             </div>
         </div>
-        {{-- <div class="line-box">
-            <div class="box1"></div>
-            <div class="line" style="width: {{ $hypot }}px;"></div>
-            <div class="box2"></div>
-        </div> --}}
     </div>
     <ul class="msg">
         @if(@$msg)
@@ -108,6 +103,7 @@
 
         $(window).on('load', function () {
             columnChart(data[0][0], data[0][1], 'q02', 'top', items1);
+            // columnChart(data[2][0], data[0][1], 'q02', 'top-line', items1);
             columnChart(data[1][0], data[1][1], 'q02', 'sec', items2);
         });
 
@@ -122,7 +118,6 @@
         });
 
         function columnChart(data, tooltips, section, cat, items) {
-            // var chartHeight = $('.chart-bg span').height() * 4 - (cat == 'top' ? 2 : 0);
             var chartHeight = $('.chart-bg span').height() * 4 + 3;
             var count = cat == 'top' ? 6 : 4;
             for (i = 0; i < data[section].length; i++) {
@@ -132,7 +127,6 @@
                     var annotation = data[section][i][ii];
                     var tooltip = tooltips[section][i][ii];
                     var before = data[section][i][ii - 1];
-                    console.log(annotation + before);
                     var height = annotation * chartHeight / 100;
                     var bar = '<div class="' + section + ' ' + cat + ' chart-bar bar' + ii + (annotation < 3 ? ' small' : '') + (before < 3 ? ' before-small' : '') + '"><p class="annotation">' + annotation + (ii !== 0 ? '%' : '') + '</p><p class="tooltip">' + items[ii] + '<br>' + (tooltip !== undefined ? tooltip : 0) + '件</p></div>';
                     $('.' + section + ' .' + cat + ' .bars' + i).append(bar);
@@ -144,21 +138,6 @@
                 $('.chart-bar').addClass('inactivity');
             }, 10000);
         };
-        // $(window).resize(function(){
-        //     const rad2deg = (rad) => rad * (180 / Math.PI);
-        //     var left = $('.box1').width() - 1 + 'px';
-        //     var bottom =  $('.box1').height() - 1 + 'px';
-        //     var width = $('.line-box').width() * 0.2;
-        //     var hypot = Math.hypot(width, 400) + 'px';
-        //     var atan = '-' + rad2deg(Math.atan(width, 400)) + 'deg';
-        //     console.log(atan);
-        //     $('.line').css({
-        //         left: left,
-        //         bottom: bottom,
-        //         width: hypot,
-        //         transform: "rotate(" + atan + ")",
-        //     });
-        // });
     </script>
     <script>
         var requests = @json($requests->return);

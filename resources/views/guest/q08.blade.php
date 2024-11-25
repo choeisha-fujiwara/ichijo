@@ -1,4 +1,4 @@
-<div class="option02 hidden-items">
+<div class="option02 hidden-items {{ old('q01_a2') ? 'active' : null }}">
     <fieldset>
         <legend class="pb-6 flex">
             <span class="flex justify-center items-center mr-2 pb-0.5 px-2 text-xs text-white bg-gray-400 rounded">任意</span>

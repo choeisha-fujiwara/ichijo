@@ -196,6 +196,12 @@
     }
     .report-content {
         padding: 0 0 16px;
+        &.top-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            border: 1px solid #000;
+        }
         .chart-title {
             width: 100%;
             padding: 16px 0 18px;
@@ -384,6 +390,11 @@
                                         border-top: none;
                                         background: var(--color-chart-bottom1);
                                         transition: .6s .6s cubic-bezier(0.17,0.84,0.44,1);
+                                    }
+                                }
+                                &.top-line {
+                                    &.bar1 {
+                                        background: var(--color-chart-top1);
                                     }
                                 }
                             }

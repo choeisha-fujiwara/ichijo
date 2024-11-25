@@ -63,6 +63,8 @@ class AppController extends Controller
             $data = deletionPersonalFindData($data);
         }
 
+        $data = mergingResponses($data);
+
         $data = alreadyRead($user, $data);
         $data->count = activeCount($user);
 

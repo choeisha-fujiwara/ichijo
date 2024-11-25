@@ -35,7 +35,8 @@ class ReportController extends Controller
         $requests->return = null;
 
         if ($user->role == 'admin') {
-            $data = Post::whereBetween('created_at', [$from, $to])->get(); 
+            $data = Post::whereBetween('created_at', [$from, $to])->get();
+            $lines = $data;
         }
 
         if ($user->role == 'area_manager') {
@@ -48,6 +49,7 @@ class ReportController extends Controller
             ->get();
             $requests->area = $area;
             $requests->return = 'area';
+            $lines = Post::whereBetween('created_at', [$from, $to])->get();
         }
 
         if ($user->role == 'manager') {
@@ -63,6 +65,7 @@ class ReportController extends Controller
             $requests->area = $area;
             $requests->block = $block;
             $users = $users->where('area_id', $user->area_id);
+            $lines = Post::whereBetween('created_at', [$from, $to])->get();
         }
 
         if ($user->role == 'shop') {
@@ -71,9 +74,10 @@ class ReportController extends Controller
             ->get();
             $requests->shop = $user->shop_id;
             $requests->shop_name = $user->name;
+            $lines = Post::whereBetween('created_at', [$from, $to])->get();
         }
 
-        $data->isEmpty() ? $sources = 'none' : $sources = compositionRatio($data);
+        $data->isEmpty() ? $sources = 'none' : $sources = compositionRatio($data, $lines);
         $data->count = activeCount($user);
 
         return view('dashboard.report.index', compact('user', 'sources', 'areas', 'blocks', 'users', 'data', 'requests'));
