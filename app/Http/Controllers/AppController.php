@@ -150,4 +150,18 @@ class AppController extends Controller
 
         return Excel::download(new PostExport($from, $to), $file);
     }
+    public function loggedIn()
+    {   
+        $user = Auth::user();
+        $service = new AppService;
+        $data = $service->dataExtraction($user);
+        $data->count = activeCount($user);
+        $data->tilde = hasTildeCheck($data);
+
+        return response()
+            ->view('dashboard.top.index', compact('user', 'data'))
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 0);
+    }
 }

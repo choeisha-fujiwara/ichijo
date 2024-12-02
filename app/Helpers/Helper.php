@@ -290,6 +290,7 @@ if (! function_exists('exportItems')) {
     function exportItems()
     {
         $res = [
+            'id',
             'created_at',
             'shop_id',
             'age',
@@ -321,6 +322,7 @@ if (! function_exists('csvHeaders')) {
     function csvHeaders()
     {
         $res = [
+            '対応状況',
             '日付',
             '店名',
             '年代',

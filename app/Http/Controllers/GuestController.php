@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Post;
 use App\Services\GuestService;
 use App\Mail\SendMail;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
 class GuestController extends Controller
@@ -17,7 +18,11 @@ class GuestController extends Controller
      */
     public function index()
     {
-        abort(404);
+        if (Auth::check()) {
+            return redirect('dashboard/top');
+        } else {
+            abort(404);
+        }
     }
 
     /**

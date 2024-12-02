@@ -1,3 +1,4 @@
+// 炒飯選択挙動
 $('.checkbox-label input').on('click', function() {
     var options = '.' + $(this).parent().data('options');
     $(options).toggleClass('active');
@@ -11,6 +12,9 @@ $('.checkbox-label input').on('click', function() {
         $('input.fried-rice').val('未選択');
         $('input.fried-rice').prop('checked', true);
         $('textarea.fried-rice').val('');
+    }
+    if (!$('.select-gyoza').hasClass('active')) {
+        $('.gyoza input:first-of-type').prop('checked', false);
     }
     $(this).parent().toggleClass('checked');
 });

@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\Post;
 use App\Models\User;
+use App\Models\State;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -40,10 +41,12 @@ class PostExport implements FromCollection, WithCustomCsvSettings, WithHeadings,
         foreach ($data as $datum)
         {
             $datum->shop_id = $datum->user->name;
+            $state = $datum->state->post_state == 'negative' ? '注意' : null;
+            $state = $datum->state->post_active == 'active' ? '要対応' : $state;
+            $state = $datum->state->post_ng == 'NG' ? '非公開' : $state;
+            $datum->state = $state;
         }
-
         return $data;
-    
     }
 
     public function getCsvSettings(): array
@@ -64,10 +67,11 @@ class PostExport implements FromCollection, WithCustomCsvSettings, WithHeadings,
     {
         $date[] = Date::dateTimeToExcel($row->created_at);
         $items = exportItems();
+        $res[] = $row->state;
         foreach ($items as $item) {
             $res[] = $row->$item;
         }
-
+        array_splice($res, 1, 1);
         return $res;
     }
     

@@ -2,7 +2,7 @@
     <fieldset>
         <legend class="pb-6 flex">
             <span class="flex justify-center items-center mr-2 pb-0.5 px-2 text-xs text-white bg-red-600 rounded">必須</span>
-            <span class="block">ラーメンの味について</span>
+            <span class="block">{{ $shop->shop_category == '麺屋道頓' ? 'つけ麺' : 'ラーメン' }}の味について</span>
         </legend>
         <div class="radio-buttons">
             <label class="">

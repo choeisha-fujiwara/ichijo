@@ -6,10 +6,10 @@
         </legend>
         <div class="checkbox-buttons flex flex-wrap justify-start items-center">
             <label class="w-1/2 mr-2 checkbox-label {{ old('q01_a1') ? 'checked' : null }}">
-                <input type="checkbox" name="q01_a1" value="{{ $shop->shop_category == '神座' ? 'ラーメン' : 'つけ麺' }}" {{ old('q01_a1') ? 'checked' : null }} />
-                <span class="">{{ $shop->shop_category == '神座' ? 'ラーメン' : 'つけ麺' }}</span>
+                <input type="checkbox" name="q01_a1" value="{{ $shop->shop_category == '麺屋道頓' ? 'つけ麺' : 'ラーメン' }}" {{ old('q01_a1') ? 'checked' : null }} />
+                <span class="">{{ $shop->shop_category == '麺屋道頓' ? 'つけ麺' : 'ラーメン' }}</span>
             </label>
-            <label class="checkbox-label {{ old('q01_a2') ? 'checked' : null; }}" data-options="option02">
+            <label class="checkbox-label select-gyoza {{ old('q01_a2') ? 'checked' : null; }}" data-options="option02">
                 <input type="checkbox" name="q01_a2" value="餃子" {{ old('q01_a2') ? 'checked' : null }} />
                 <span class="">餃子</span>
             </label>

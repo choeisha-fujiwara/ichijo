@@ -55,7 +55,7 @@
                     <div class="tr {{ $datum->read }}">
                         <div class="td read-icon {{ $datum->readby }} {{ $datum->state->post_state }} {{ $datum->state->post_active }} {{ $datum->state->post_ng == 'NG' ? 'ng' : null }}"><span class="material-symbols-outlined">circle</span></div>
                         <div class="td shop-name"><span>{{ $datum->user->name }}</span></div>
-                        <div class="td age {{ tildeCheck($datum->age) }}">{{ $datum->age }}</div>
+                        <div class="td age {{ tildeCheck($datum->age) }}">{{ $datum->age == '答えたくない' ? '不明' : $datum->age }}</div>
                         <div class="td gender">{{ $datum->gender == '答えたくない' ? '不明' : $datum->gender }}</div>
                         <div class="td long-long {{ wordCheck($datum->q12) }}"><span>{{ $datum->q20 }}</span></div>
                         <div class="td date">{{ dateChange($datum->created_at) }}</div>

@@ -28,7 +28,6 @@ class FormPostRequest extends FormRequest
             'tel' => ['nullable', 'string', 'regex:/^0[0-9]{9,10}$/u'],
             'q02' => ['required'],
             'q03' => ['required'],
-            'q04' => ['required'],
             'q06' => ['required'],
             'q09' => ['required'],
             'q11' => ['required'],
