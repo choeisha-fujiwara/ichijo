@@ -33,10 +33,17 @@ class PostExport implements FromCollection, WithCustomCsvSettings, WithHeadings,
     {   
         $items = exportItems();
         
-        $data = Post::whereBetween('created_at', [$this->from, $this->to])
-        ->select($items)
-        ->oldest()
-        ->get();
+        if ($this->from == $this->to) {
+            $data = Post::where('created_at', 'LIKE', "%{$this->from}%")
+                ->select($items)
+                ->oldest()
+                ->get();    
+        } else {
+            $data = Post::whereBetween('created_at', [$this->from, $this->to])
+                ->select($items)
+                ->oldest()
+                ->get();
+        }
         
         foreach ($data as $datum)
         {
@@ -59,7 +66,7 @@ class PostExport implements FromCollection, WithCustomCsvSettings, WithHeadings,
     public function columnFormats(): array
     {
         return [
-            'A' => NumberFormat::FORMAT_DATE_YYYYMMDD2,
+            // 'C' => NumberFormat::FORMAT_DATE_YYYYMMDD2,
         ];
     }
 
@@ -67,11 +74,12 @@ class PostExport implements FromCollection, WithCustomCsvSettings, WithHeadings,
     {
         $date[] = Date::dateTimeToExcel($row->created_at);
         $items = exportItems();
+        $res[] = $row->id;
         $res[] = $row->state;
         foreach ($items as $item) {
-            $res[] = $row->$item;
+            $res[] = str_replace(["\r\n", "\r", "\n"], '', $row->$item);
         }
-        array_splice($res, 1, 1);
+        array_splice($res, 2, 1);
         return $res;
     }
     

@@ -69,6 +69,7 @@ class AppService
                 $query->where('name', 'LIKE', "%{$keyword}%");
             })
             ->orWhere('q20', 'LIKE', "%{$keyword}%")
+            ->orWhere('email', 'LIKE', "%{$keyword}%")
             ->paginate(100)
             ->appends(['keyword' => $keyword]);
 
@@ -82,6 +83,7 @@ class AppService
                 return $query->where('name', 'LIKE', "%{$keyword}%");
             })
             ->orWhere('q20', 'LIKE', "%{$keyword}%")
+            ->orWhere('email', 'LIKE', "%{$keyword}%")
             ->orderBy('created_at', 'desc')
             ->paginate(100)
             ->appends(['keyword' => $keyword]);
@@ -97,6 +99,7 @@ class AppService
                 $query->where('name', 'LIKE', "%{$keyword}%");
             })
             ->orWhere('q20', 'LIKE', "%{$keyword}%")
+            ->orWhere('email', 'LIKE', "%{$keyword}%")
             ->orderBy('created_at', 'desc')
             ->paginate(100)
             ->appends(['keyword' => $keyword]);

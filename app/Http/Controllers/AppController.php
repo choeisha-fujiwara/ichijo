@@ -14,6 +14,8 @@ use Carbon\Carbon;
 use App\Exports\PostExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use App\Mail\SendMail;
+use Illuminate\Support\Facades\Mail;
 
 class AppController extends Controller
 {
@@ -148,8 +150,9 @@ class AppController extends Controller
         $to = date('Ymd', strtotime($request->to));
         $file = '神座お客様アンケート' . $from . '_' . $to . '.csv';
 
-        return Excel::download(new PostExport($from, $to), $file);
+        return Excel::download(new PostExport($request->from, $request->to), $file);
     }
+
     public function loggedIn()
     {   
         $user = Auth::user();
@@ -163,5 +166,17 @@ class AppController extends Controller
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
             ->header('Pragma', 'no-cache')
             ->header('Expires', 0);
+    }
+
+    public function distribution(Request $request)
+    {
+        State::where('post_id', $request->id)
+            ->update(['post_ng' => 'OK']);
+        
+        $shop = User::where('shop_id', $request->shop_id)->first();
+
+        Mail::to($shop->email)->send(new SendMail($shop, $shop->name));
+    
+        return redirect()->back()->with('dst_msg', '配信しました');
     }
 }

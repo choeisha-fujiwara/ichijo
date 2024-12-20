@@ -322,6 +322,7 @@ if (! function_exists('csvHeaders')) {
     function csvHeaders()
     {
         $res = [
+            'ID',
             '対応状況',
             '日付',
             '店名',

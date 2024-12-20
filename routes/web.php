@@ -16,6 +16,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/dashboard/top/comment', [CommentController::class, 'comment']);
     Route::post('/dashboard/top/approval', [CommentController::class, 'approval'])->name('approval');
     Route::get('/dashboard/top/destroy{id}', [CommentController::class, 'destroy'])->name('comment.destroy');
+    Route::post('/dashboard/top/distribution', [AppController::class, 'distribution'])->name('dashboard.distribution');
     Route::post('/dashboard/search', [AppController::class, 'search'])->name('dashboard.search');
     Route::get('/dashboard/search', [AppController::class, 'search'])->name('dashboard.search');
     Route::post('/dashboard/shop-search', [ShopController::class, 'shopSearch'])->name('dashboard.shop-search');
@@ -23,6 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/filter', [AppController::class, 'filter'])->name('dashboard.filter');
     Route::post('/dashboard/export', [AppController::class, 'export'])->name('dashboard.export');
     Route::post('/dashboard/report', [ReportController::class, 'report'])->name('dashboard.report');
+
     Route::resource('/dashboard/report', ReportController::class)->only([
         'index', 'show',
     ]);

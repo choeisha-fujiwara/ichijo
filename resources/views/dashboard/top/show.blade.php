@@ -17,18 +17,17 @@
                     {!! json_decode($data->state->post_read, true)['shop'] !== '' ? '<span class="material-symbols-outlined read">circle</span><span class="state-msg reading">既読</span>' : '<span class="material-symbols-outlined unread">circle</span><span class="state-msg reading">未読</span>' !!}
                 </div>
                 <div class="show-date">{{ $data->created_at->isoFormat('M月D日（ddd） H:mm') }}</div>
-                {{-- <div class="read-data">
-                    @if ($user->role == 'admin')
-                    <p>{!! json_decode($data->state->post_read, true)['area_manager'] !== '' ? '<span class="material-symbols-outlined read-icon read">circle</span><span>AMG</span>' : '<span class="material-symbols-outlined read-icon unread">circle</span><span>AMG</span>' !!}</p>
-                    @endif
-                    @if ($user->role == 'admin' || $user->role == 'area_manager')
-                    <p>{!! json_decode($data->state->post_read, true)['manager'] !== '' ? '<span class="material-symbols-outlined read-icon read">circle</span><span>MG</span>' : '<span class="material-symbols-outlined read-icon unread">circle</span><span>MG</span>' !!}</p>
-                    @endif
-                    @if ($user->role == 'admin' || $user->role == 'area_manager' || $user->role == 'manager')
-                    <p>{!! json_decode($data->state->post_read, true)['shop'] !== '' ? '<span class="material-symbols-outlined read-icon read">circle</span><span>店舗</span>' : '<span class="material-symbols-outlined read-icon unread">circle</span><span>店舗</span>' !!}</p>
-                    @endif
-                </div> --}}
                 <div class="shop-name">{{ $data->user->name }}</div>
+                @if ($user->role == 'admin' && $data->state->post_ng == 'NG')
+                <div class="distribution-btn">
+                    <form action="distribution" method="POST">
+                    @csrf
+                        <label for="distribution">配信</label>
+                        <input type="hidden" name="shop_id" value="{{ $data->shop_id }}" />
+                        <input type="submit" id="distribution" class="hidden-obj" name="id" value="{{ $data->id }}" />
+                    </form>
+                </div>
+                @endif
                 <div class="attribute-data {{ $user->role == 'shop' ? 'shop' : null }}">
                     <p class="icon"><span class="material-symbols-outlined">person</span></p>
                     <p>{{ $data->age }}</p>
@@ -113,9 +112,12 @@
             </div>
         </div>
     </div>
-    <ul class="msg scroll">
+    <ul class="msg {{ session('msg') ? 'scroll' : null }}">
         @if(session('msg'))
             <li>{{ session('msg') }}</li>
+        @endif
+        @if(session('dst_msg'))
+            <li>{{ session('dst_msg') }}</li>
         @endif
     </ul>
     <div class="hidden-obj page" data-page="show"></div>
