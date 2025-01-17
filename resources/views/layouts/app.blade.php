@@ -24,8 +24,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/overcast/jquery-ui.min.css">
 <link rel="icon" href="{{ asset('images/favicon.ico') }}">
 <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon-180x180.png') }}" sizes="180x180">
-{{-- <link rel="stylesheet" href="{{ asset('build/assets/app-AmVkkLD7.css') }}"> --}}
-@vite(['resources/sass/app.scss', 'resources/js/app.js'])
+<link rel="stylesheet" href="{{ asset('build/assets/app-xkQi1IUC.css') }}">
+{{-- @vite(['resources/sass/app.scss', 'resources/js/app.js']) --}}
 <title>{{ $title }}｜神座 Customer Survey</title>
 </head>
 <body class="{{ $role }}">
@@ -101,7 +101,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/i18n/jquery.ui.datepicker-ja.min.js"></script>
     @endif
-    {{-- <script src="{{ asset('build/assets/app-BsyobvQB.js') }}"></script> --}}
+    <script src="{{ asset('build/assets/app-C1vQWtqv.js') }}"></script>
     <script>
         $(function() {
             if (window.matchMedia("(max-width: 576px)").matches) {
