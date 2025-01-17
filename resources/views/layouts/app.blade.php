@@ -24,8 +24,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/overcast/jquery-ui.min.css">
 <link rel="icon" href="{{ asset('images/favicon.ico') }}">
 <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon-180x180.png') }}" sizes="180x180">
-<link rel="stylesheet" href="{{ asset('build/assets/app-AmVkkLD7.css') }}">
-{{-- @vite(['resources/sass/app.scss', 'resources/js/app.js']) --}}
+{{-- <link rel="stylesheet" href="{{ asset('build/assets/app-AmVkkLD7.css') }}"> --}}
+@vite(['resources/sass/app.scss', 'resources/js/app.js'])
 <title>{{ $title }}｜神座 Customer Survey</title>
 </head>
 <body class="{{ $role }}">
@@ -34,7 +34,7 @@
         <header>
             <div id="header" class="header">
                 <div class="header-logo">
-                    <h1><a href="/dashboard/top"><x-application-logo/><span>KAMUKURA Customer Survey<span></a></h1>
+                    <h1><a href="/dashboard/top"><x-application-logo/><span>KAMUKURA <span class="cs">Customer Survey</span><span></a></h1>
                 </div>
                 <div class="user-name">
                     <h2>{{ $name }}</h2>
@@ -72,6 +72,11 @@
                 <li class="logout"><p><span class="material-symbols-outlined icon">logout</span><span class="menu-text">ログアウト</span></p></li>
                 </ul>
                 {!! $count != '0' ? '<p class="badge">'.$count.'</p>' : null !!}
+                <div class="menu-btn">
+                    <span class="bar-top"></span>
+                    <span class="bar-center"></span>
+                    <span class="bar-bottom"></span>
+                </div>   
             </div>           
             {{ $slot }}
         </div>
@@ -81,6 +86,7 @@
             </div>
         </footer>
     </div>
+    <div class="menu-modal"></div>
     <div class="logout-modal modal">
         <div class="logout-box modal-contents">
             <p>ログアウトしますか？</p>
@@ -95,27 +101,48 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/i18n/jquery.ui.datepicker-ja.min.js"></script>
     @endif
-    <script src="{{ asset('build/assets/app-BsyobvQB.js') }}"></script>
+    {{-- <script src="{{ asset('build/assets/app-BsyobvQB.js') }}"></script> --}}
     <script>
         $(function() {
-            $("#from").datepicker({
-                defaultDate: "-1m",
-                changeMonth: true,
-                numberOfMonths: 2,
-                dateFormat: "yy-mm-dd",
-                onClose: function(selectedDate) {
-                    $("#to").datepicker("option", "minDate", selectedDate);
-                }
-            });
-            $("#to").datepicker({
-                defaultDate: "-1m",
-                changeMonth: true,
-                numberOfMonths: 2,
-                dateFormat: "yy-mm-dd",
-                onClose: function(selectedDate) {
-                    $("#from").datepicker("option", "maxDate", selectedDate);
-                }
-            });
+            if (window.matchMedia("(max-width: 576px)").matches) {
+                $("#from").datepicker({
+                    defaultDate: "-1m",
+                    changeMonth: true,
+                    numberOfMonths: 1,
+                    dateFormat: "yy-mm-dd",
+                    onClose: function(selectedDate) {
+                        $("#to").datepicker("option", "minDate", selectedDate);
+                    }
+                });
+                $("#to").datepicker({
+                    defaultDate: "-1m",
+                    changeMonth: true,
+                    numberOfMonths: 1,
+                    dateFormat: "yy-mm-dd",
+                    onClose: function(selectedDate) {
+                        $("#from").datepicker("option", "maxDate", selectedDate);
+                    }
+                });
+            } else {
+                $("#from").datepicker({
+                    defaultDate: "-1m",
+                    changeMonth: true,
+                    numberOfMonths: 2,
+                    dateFormat: "yy-mm-dd",
+                    onClose: function(selectedDate) {
+                        $("#to").datepicker("option", "minDate", selectedDate);
+                    }
+                });
+                $("#to").datepicker({
+                    defaultDate: "-1m",
+                    changeMonth: true,
+                    numberOfMonths: 2,
+                    dateFormat: "yy-mm-dd",
+                    onClose: function(selectedDate) {
+                        $("#from").datepicker("option", "maxDate", selectedDate);
+                    }
+                });
+            };
         });
     </script>
 </body>

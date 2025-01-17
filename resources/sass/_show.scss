@@ -9,6 +9,14 @@
     padding: 48px 0 48px 24px;
     transition: .3s ease-out;
     @include m.flexCenterCenter;
+    @include m.mq(sp) {
+        width: 100vw;
+        height: 100%;
+        position: fixed;
+        top: 64px;
+        left: 0;
+        padding: 0 0 80px;    
+    }
     &.active {
         opacity: 1;
         visibility: visible;
@@ -27,6 +35,12 @@
         border-radius: 4px;
         border: 1px solid var(--color-line);
         background: var(--color-table);
+        @include m.mq(sp) {
+            width: 100%;
+            height: auto;
+            padding: 0;
+            border-radius: 0;
+        }
     }
 }
 .show {
@@ -38,7 +52,7 @@
         scrollbar-width: none;
         &::-webkit-scrollbar {
             display:none;
-        }    
+        }
     }
     .show-contents {
         @include m.flexBetweenCenter;
@@ -48,6 +62,9 @@
         overflow-y: scroll;
         position: relative;
         text-align: justify;
+        @include m.mq(sp) {
+            padding: 32px 24px 24px;
+        }
         .show-date {
             width: 100%;
         }
@@ -75,7 +92,7 @@
             font-size: 20px;
             width: 100%;
             margin: 16px 0 0;
-            padding: 0 0 26px;
+            padding: 0 0 24px;
             border-bottom: 1px solid var(--color-line);
         }
         .attribute-data {
@@ -116,11 +133,13 @@
             flex-wrap: wrap;
             .flex {
                 padding-right: 24px;
-                margin-bottom: 8px; 
+                margin-top: -4px;
+                margin-bottom: 12px;
                 @include m.flexStartEnd;
                 .item {
                     padding-right: 4px;
                     font-size: 11px;
+                    padding-bottom: 2px;
                 }
                 .none {
                     margin-bottom: -1px;
@@ -139,11 +158,26 @@
                 @include m.flexStartCenter;
                 flex-wrap: wrap;
                 margin: 0 0 24px;
+                padding: 0 12px 2px 4px;
+                @include m.mq(sp) {
+                    width: 100%;
+                    margin: 0 0 8px;
+                }
                 .reply {
                     font-weight: 400;
                 }
                 &.textarea {
                     width: 100%;
+                    p {
+                        @include m.mq(sp) {
+                            @include m.flexStartStart;
+                        }
+                        .question-icon {
+                            @include m.mq(sp) {
+                                padding-top: 7px;
+                            }
+                        }  
+                    }
                     p:last-of-type {
                         @include m.flexStartStart;
                         .question-icon {
@@ -300,6 +334,9 @@
         top: 24px;
         right: 36px;
         @include m.flexStartCenter;
+        @include m.mq(sp) {
+            right: 12px;
+        }    
         .state-icon {
             font-size: 13px;
             display: none;

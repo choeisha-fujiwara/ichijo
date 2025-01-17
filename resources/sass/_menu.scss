@@ -10,6 +10,23 @@
     transition: width .3s ease-out, box-shadow .2s .2s ease-out;
     position: absolute;
     z-index: 999;
+    @include m.mq(sp) {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 9999;
+        width: 64vw;
+        height: 100vh;
+        padding: 20vw 16vw;
+        transform: translateX(72vw);
+        transition: .3s ease-out;
+    }
+    &.sp-active {
+        @include m.mq(sp) {
+            transition: .3s ease-out;
+            transform: translateX(0);
+        }
+    }
     &.active {
         width: 232px;
         box-shadow: 4px 0px 12px -4px rgba(0,0,0,0.1);
@@ -27,6 +44,11 @@
         position: fixed;
         top: 96px;
         left: 2px;
+        @include m.mq(sp) {
+            position: relative;
+            top: auto;
+            left: auto;
+        }
     }
     li {
         width: 40px;
@@ -38,16 +60,36 @@
         overflow: hidden;
         white-space: nowrap;
         background: var(--color-blue-light);
+        @include m.mq(sp) {
+            width: 100%;
+            height: auto;
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            font-size: 14px;
+        }
         &.active {
             background: var(--color-active);
+            @include m.mq(sp) {
+                background: transparent;
+            }
             a {
                 color: var(--color-em);
+                @include m.mq(sp) {
+                    color: var(--color-primary);
+                }    
             }
             &:hover {
                 background: var(--color-active);
+                @include m.mq(sp) {
+                    background: transparent;
+                }
                 a {
                     transition: .1s ease-out;
                     color: var(--color-em);
+                    @include m.mq(sp) {
+                        color: var(--color-primary);
+                    }    
                 }
             }
         }
@@ -57,15 +99,25 @@
                 padding-bottom: 2px;
                 opacity: 0;
                 transition: .1s ease-out;
+                @include m.mq(sp) {
+                    opacity: 1;
+                    padding: 1px 0 0;
+                }
             }
         }
         &:hover {
             background: var(--color-active);
             transition: .1s ease-out;
             cursor: pointer;
+            @include m.mq(sp) {
+                background: transparent;
+            }
             a {
                 color: var(--color-em);
                 font-weight: 500;
+                @include m.mq(sp) {
+                    color: var(--color-primary);
+                }    
             }
         }
     }
@@ -102,8 +154,63 @@
         z-index: 99;
         animation: badge .3s ease-out 0s both;
         transform-origin: center;
+        @include m.mq(sp) {
+            width: 24px;
+            height: 24px;
+            position: absolute;
+            top: calc(20vw + 2px);
+            left: 4vw;
+            animation: none;   
+        }
         &.active {
             animation: move .3s ease-out 0s both;
+            @include m.mq(sp) {
+                animation: none;   
+            }
+        }
+    }
+    .menu-btn {
+        display: none;
+        @include m.mq(sp) {
+            display: block;
+            position: fixed;
+            top: 24px;
+            right: 16px;
+            transition: .3s ease-out;
+            transform: translateX(-72vw);
+        }
+        span {
+            @include m.mq(sp) {
+                display: block;
+                width: 32px;
+                height: 2px;
+                margin: 0 0 8px;
+                background: var(--color-primary);
+                transition: .3s ease-out;
+            }
+        }
+        &.active {
+            transform: translateX(0);
+            span {
+                transition: .3s ease-out;
+                &.bar-top {
+                    @include m.mq(sp) {
+                        transform-origin: top left;
+                        transform: rotate(45deg) translate(-0.25px, 0);    
+                    }
+                } 
+                &.bar-center {
+                    @include m.mq(sp) {
+                        opacity: 0;
+                    }
+                }  
+                &.bar-bottom {
+                    @include m.mq(sp) {
+                        transform-origin: bottom left;
+                        transform: rotate(-45deg) translate(-1.5px, 1px);    
+                    }
+                } 
+            }
         }
     }
 }
@@ -119,6 +226,30 @@
         font-weight: 500;
     }
 }
+
+.menu-modal {
+    @include m.mq(sp) {
+        content: '';
+        width: 100vw;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        background: rgba(0,0,0,.7);
+        transition: .3s ease-out;
+        visibility: hidden;
+        z-index: 999;
+    }
+    &.sp-active {
+        @include m.mq(sp) {
+            opacity: 1;
+            visibility: visible;
+            transition: .3s ease-out;
+        }
+    }
+}
+
 @keyframes badge {
 	0% {
         transform: scale(0);

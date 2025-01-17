@@ -23,7 +23,7 @@ class ReportController extends Controller
         $areas = Area::groupBy('area_name')->get(['area_name']);
         $blocks = Area::groupBy('block_name')->where('block_name', '!=', null)->get(['block_name']);
         $users = User::where('role', 'shop')->get();
-        $from = Carbon::now()->subMonthNoOverflow(6);
+        $from = Carbon::now()->subMonthNoOverflow(1);
         $to = Carbon::now();
 
         $requests = collect();

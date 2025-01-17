@@ -7,6 +7,9 @@
     <x-slot:old>{{ @$old }}</x-slot:old>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"></script>
     <div class="content report">
+        <div class="sp-select-btn">
+            <span class="material-symbols-outlined">settings</span>
+        </div>
         <div class="report-header">
             <form action="report" method="POST">
                 @csrf
@@ -103,7 +106,6 @@
 
         $(window).on('load', function () {
             columnChart(data[0][0], data[0][1], 'q02', 'top', items1);
-            // columnChart(data[2][0], data[0][1], 'q02', 'top-line', items1);
             columnChart(data[1][0], data[1][1], 'q02', 'sec', items2);
         });
 
@@ -120,7 +122,12 @@
         function columnChart(data, tooltips, section, cat, items) {
             var chartHeight = $('.chart-bg span').height() * 4 + 3;
             var count = cat == 'top' ? 6 : 4;
-            for (i = 0; i < data[section].length; i++) {
+            if (window.matchMedia("(max-width: 576px)").matches) {
+                var chartCount = 4;
+            } else {
+                var chartCount = data[section].length;
+            }
+            for (i = 0; i < chartCount; i++) {
                 var bars = '<div class="chart-bars bars' + i + '"></div>';
                 $('.' + section + ' .report-content.' + cat + ' .chart-inner').append(bars);
                 for (ii = 0; ii < count; ii++) {

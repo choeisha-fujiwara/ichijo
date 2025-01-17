@@ -19,6 +19,13 @@ $('.menu ul').hover (
     }
 );
 
+// SPメニュー
+$('.menu-btn').on('click', function() {
+    $(this).toggleClass('active');
+    $('.menu').toggleClass('sp-active');
+    $('.menu-modal').toggleClass('sp-active');
+});
+
 // スクロールでtheadにシャドウ
 $('.table-box').on('scroll',function() {
     if($('.table-box').scrollTop() > 0) {
@@ -107,6 +114,11 @@ $(document).click(function(event) {
     if(!$(event.target).closest('.select-title').length) {
         $('.select-buttons').removeClass('active');
     }
+});
+
+// SPのヘッダー表示
+$('.sp-select-btn').on('click', function() {
+    $('.report-header').toggleClass('active')
 });
 
 // レポートのエリア絞込み

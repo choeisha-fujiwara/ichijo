@@ -407,7 +407,7 @@ if (! function_exists('deletionPersonalFindData')) {
 
 // 回答構成比
 if (! function_exists('compositionRatio')) {
-    function compositionRatio($data, $lines)
+    function compositionRatio($data)
     {
         $cat1 = [
             '非常に満足した',

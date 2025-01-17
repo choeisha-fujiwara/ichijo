@@ -4,15 +4,28 @@
     &.shop {
         min-width: 960px;
         padding-top: 64px;
+        @include m.mq(sp) {
+            min-width: 100vw;
+            padding-top: 0;
+        }    
     }
 }
 .shop-table {
     width: 100%;
     margin: 0 auto;
     padding: 12px 0 32px;
+    @include m.mq(sp) {
+        width: 100vw;
+        padding: 0 0 32px;
+    }    
     .tr {
         background: var(--color-table);
         @include m.flexBetweenCenter;
+        @include m.mq(sp) {
+            @include m.flexStartCenter;
+            width: 100vw;
+            flex-wrap: wrap;
+        }        
     }
     .thead {
         width: calc(100% - 120px);
@@ -20,6 +33,9 @@
         position: fixed;
         top: 98px;
         left: 84px;
+        @include m.mq(sp) {
+            display: none;
+        }    
         .tr {
             white-space: nowrap;
             padding: 10px 0 10px 24px;
@@ -41,6 +57,11 @@
             white-space: nowrap;
             padding: 8px 0 8px 24px;
             border-bottom: 1px solid var(--color-line);
+            @include m.mq(sp) {
+                width: 100vw;
+                padding: 8px 12px 9px;
+                position: relative;
+            }        
         }
     }
     .th, .td {
@@ -48,7 +69,10 @@
         text-align: center;
         @include m.flexCenterCenter;
         transition: .3s ease-out;
-        span {
+        @include m.mq(sp) {
+            padding: 8px 0;
+        }        
+    span {
             padding-right: 8px;
         }
         a {
@@ -67,22 +91,60 @@
         text-overflow: ellipsis;
         font-weight: 500;
         @include m.flexStartCenter;
+        @include m.mq(sp) {
+            width: 100%;
+            padding-top: 8px;
+        }    
         .icon {
             padding: 0 16px 0 0;
+            @include m.mq(sp) {
+                display: none;
+            }        
         }
     }
-    .shop-area, .shop-group {
+    .shop-area, .shop-block {
         min-width: 48px;
+        @include m.mq(sp) {
+            min-width: calc(20vw - 12px);
+            width: calc(20vw - 12px);
+            @include m.flexStartCenter;
+        }    
+    }
+    .shop-block {
+        @include m.mq(sp) {
+            min-width: calc(80vw - 12px);
+            width: calc(80vw - 12px);
+        }    
     }
     .unread {
         color: var(--color-safety);
         transition: .3s ease-out;
+        @include m.mq(sp) {
+            padding-right: 5.6rem;
+            @include m.flexStartCenter;
+        }
+        &::before {
+            @include m.mq(sp) {
+                content: '未読：';
+                color: var(--color-primary);
+            }
+        } 
         &:hover {
             transition: .3s ease-out;
             color: var(--color-safety-deep);
         }
     }
     .read {
+        @include m.mq(sp) {
+            padding-right: 5.6rem;
+            @include m.flexStartCenter;
+        }
+        &::before {
+            @include m.mq(sp) {
+                content: '未読：';
+                color: var(--color-primary);
+            }
+        }     
         label {
             pointer-events: none;
             cursor: text;
@@ -91,12 +153,32 @@
     .active {
         color: var(--color-error);
         transition: .3s ease-out;
+        @include m.mq(sp) {
+            padding-right: 5.6rem;
+            @include m.flexStartCenter;
+        }
+        &::before {
+            @include m.mq(sp) {
+                content: '未承認：';
+                color: var(--color-primary);
+            }
+        }     
         &:hover {
             transition: .3s ease-out;
             color: var(--color-error-deep);
         } 
     }
     .inactive {
+        @include m.mq(sp) {
+            padding-right: 5.6rem;
+            @include m.flexStartCenter;
+        }
+        &::before {
+            @include m.mq(sp) {
+                content: '未承認：';
+                color: var(--color-primary);
+            }
+        }     
         label {
             pointer-events: none;
             cursor: text;
@@ -104,12 +186,32 @@
     }
     .approval {
         transition: .3s ease-out;
+        @include m.mq(sp) {
+            padding-right: 5.6rem;
+            @include m.flexStartCenter;
+        }
+        &::before {
+            @include m.mq(sp) {
+                content: '承認済：';
+                color: var(--color-primary);
+            }
+        }     
         &:hover {
             transition: .3s ease-out;
             color: var(--color-error-dark);
         }
     }
     .unapproved {
+        @include m.mq(sp) {
+            padding-right: 5.6rem;
+            @include m.flexStartCenter;
+        }
+        &::before {
+            @include m.mq(sp) {
+                content: '承認済：';
+                color: var(--color-primary);
+            }
+        }     
         label {
             pointer-events: none;
             cursor: text;
@@ -117,9 +219,25 @@
     }
     .login-at {
         width: 32%;
+        @include m.mq(sp) {
+            width: 100%;
+            @include m.flexStartCenter;
+        }
+        &::before {
+            @include m.mq(sp) {
+                content: '最終ログイン：';
+            }
+        } 
     }
     .shop-search {
         margin-right: -8px;
+        @include m.mq(sp) {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            margin: 0;
+            @include m.flexEndStart;
+        }
         input {
             display: none;
         }
@@ -127,6 +245,9 @@
             padding: 4px 4px 0 0;
             font-size: 21px;
             transition: .3s ease-out;
+            @include m.mq(sp) {
+                padding: 0;
+            }
             &:hover {
                 color: var(--color-active);
                 transition: .3s ease-out;

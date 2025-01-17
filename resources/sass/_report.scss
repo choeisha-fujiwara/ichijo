@@ -1,5 +1,14 @@
 @use "mixin" as m;
 
+.sp-select-btn {
+    display: none;
+    @include m.mq(sp) {
+        display: block;
+        position: absolute;
+        top: 80px;
+        right: 16px;;
+    }
+}
 .report-header {
     width: calc(100% - 114px);
     min-width: 890px;
@@ -8,13 +17,39 @@
     position: absolute;
     top: 80px;
     left: 80px;
+    @include m.mq(sp) {
+        width: calc(100vw - 32px);
+        min-width: calc(100vw - 32px);
+        padding: 0;
+        top: 112px;
+        left: 16px;
+        opacity: 0;
+        visibility: hidden;
+        transition: .3s ease-out;
+        background: var(--color-base-deep);
+        padding: 16px 16px 0;
+    }
+    &.active {
+        @include m.mq(sp) {
+            opacity: 1;
+            transition: .3s ease-out;
+            visibility: visible;
+        }
+    }
     .report-selects {
         width: 100%;
         @include m.flexStartStart;
+        @include m.mq(sp) {
+            @include m.flexBetweenStart;
+            flex-wrap: wrap;    
+        }
         .select {
             padding: 0 16px 0 0;
             position: relative;
             display: none;
+            @include m.mq(sp) {
+                padding: 0;
+            }    
             &.active {
                 display: block;
             }
@@ -26,6 +61,10 @@
                 transition: .2s ease-out;
                 background: var(--color-em);
                 @include m.flexCenterCenter;
+                @include m.mq(sp) {
+                    width: calc(50vw - 40px);
+                    margin-bottom: 16px;
+                }        
                 &:hover {
                     cursor: pointer;
                 }
@@ -42,6 +81,9 @@
                     width: auto;
                     min-width: 128px;
                     padding: 3px 16px;
+                    @include m.mq(sp) {
+                        min-width: calc(50vw - 40px);
+                    }            
                 }
             }
         }
@@ -65,6 +107,11 @@
             scrollbar-width: none;
             &::-webkit-scrollbar {
                 display:none;
+            }
+            &.area {
+                @include m.mq(sp) {
+                    z-index: 999;
+                }            
             }
             &.shop {
                 width: auto;
@@ -104,6 +151,10 @@
         .datepickers {
             margin-left: auto;
             @include m.flexStartCenter;
+            @include m.mq(sp) {
+                margin-left: 0;
+                padding-right: 0;
+            }
             &.active {
                 .datepicker {
                     input[type="text"] {
@@ -119,6 +170,7 @@
             .datepicker {
                 background: var(--color-em);
                 @include m.flexStartCenter;
+                border-radius: 4px;
                 input[type="text"] {
                     width: 108px;
                     height: 32px;
@@ -129,6 +181,10 @@
                     text-align: center;
                     pointer-events: none;
                     transition: .2s all;
+                    @include m.mq(sp) {
+                        width: calc(50vw - 40px);
+                        padding: 2px 0 4px;
+                    }
                     &:hover {
                         cursor: pointer;
                     }
@@ -145,10 +201,18 @@
             .icon {
                 color: var(--color-line-deep-more);
                 padding-left: 2px;
+                @include m.mq(sp) {
+                    padding: 0;
+                    margin: 0 -4px;
+                }
             }
         }
         .report-submit {
             margin-left: 16px;
+            @include m.mq(sp) {
+                margin: 16px 0 0;
+                margin-left: auto;
+            }
             .submit-label {
                 @include m.flexCenterCenter;
                 width: 128px;
@@ -159,6 +223,9 @@
                 border-radius: 4px;
                 transition: .2s ease-in;
                 pointer-events: none;
+                @include m.mq(sp) {
+                    width: calc(50vw - 40px);
+                }
                 &.active {
                     background: var(--color-active);
                     pointer-events: all;
@@ -188,11 +255,29 @@
     position: absolute;
     top: 152px;
     left: 80px;
+    @include m.mq(sp) {
+        width: 100%;
+        min-width: 100%;
+        padding: 0 0 140px 0;
+        overflow-x: hidden;
+        top: 112px;
+        left: 0;
+        @include m.flexStartStart;
+        flex-direction: column;
+    }
     &.table-box {
         margin: 0;
     }
     &.no-data {
         display: none;
+    }
+    .report-wrapper {
+        @include m.mq(sp) {
+            width: 100%;
+            @include m.flexStartStart;
+            flex-direction: column;
+            padding: 0 16px;  
+        }    
     }
     .report-content {
         padding: 0 0 16px;
@@ -206,6 +291,11 @@
             width: 100%;
             padding: 16px 0 18px;
             @include m.flexBetweenCenter;
+            @include m.mq(sp) {
+                @include m.flexStartStart;
+                flex-direction: column;
+                padding: 0 0 8px;  
+            }        
             p {
                 width: 100%;
                 @include m.flexStartCenter;
@@ -215,9 +305,16 @@
                     font-size: 12px;
                     white-space: nowrap;
                     @include m.flexEndCenter;
+                    @include m.mq(sp) {
+                        padding: 12px 0 10px;
+                        @include m.flexStartCenter;
+                    }
                     .legend {
                         font-size: 15px;
                         padding: 1px 4px 0 12px;
+                        @include m.mq(sp) {
+                            padding: 0 4px 0 0;
+                        }    
                         &.legend1 {
                             color: var(--color-chart-top1);
                         }
@@ -251,6 +348,9 @@
             border: 1px solid var(--color-line-deep);
             border-radius: 4px;
             background: var(--color-em);
+            @include m.mq(sp) {
+                width: calc(100vw - 32px);
+            }        
             .chart-wrapper {
                 width: 100%;
                 height: 100%;
@@ -265,12 +365,19 @@
                         color: var(--color-line-deep-more);
                         @include m.flexBetweenEnd;
                         flex-direction: column;
+                        @include m.mq(sp) {
+                            width: 24px;
+                            padding: 0;
+                        }                    
                     }
                     .chart-line {
                         width: calc(100% - 40px - 4px);
                         border-bottom: 1px solid var(--color-line);
                         border-left: 1px solid var(--color-line);
                         border-right: 1px solid var(--color-line);
+                        @include m.mq(sp) {
+                            width: calc(100% - 24px - 8px);
+                        }                    
                         span {
                             width: 100%;
                             height: 88px;
@@ -456,6 +563,10 @@
                         width: calc(100% - 44px - 4%);
                         left: calc(44px + 2%);
                         @include m.flexAroundEnd;
+                        @include m.mq(sp) {
+                            width: calc(100% - 32px - 4%);
+                            left: calc(32px + 2%);
+                        }                        
                         .chart-bars {
                             padding: 0 2%;
                         }

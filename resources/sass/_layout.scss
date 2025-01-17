@@ -10,11 +10,18 @@
     position: fixed;
     z-index: 9999;
     @include m.flexBetweenCenter;
+    @include m.mq(sp) {
+        min-width: 100%;
+        height: auto;
+        padding: 12px;
+        flex-wrap: wrap;
+        z-index: 999;
+    } 
     .header-logo {
         @include m.flexStartCenter;
     }
     h1 {
-        font-size: 22px;
+        font-size: 21px;
         letter-spacing: .02em;
         text-rendering: optimizeLegibility;
         height: 32px;
@@ -22,6 +29,19 @@
         padding-right: 16px;
         padding-top: 1px;
         line-height: 1;
+        white-space: nowrap;
+        @include m.mq(sp) {
+            font-size: 17px;
+            height: auto;
+            line-height: 1;
+            padding: 0 12px 0 0;
+        }
+        .cs {
+            @include m.mq(sp) {
+                font-size: 11px;
+                display: block;
+            }
+        }
         a {
             @include m.flexStartCenter;
             img {
@@ -29,6 +49,9 @@
                 padding: 4px 8px 0 0;
                 margin-right: 4px;
                 margin-bottom: 1px;
+                @include m.mq(sp) {
+                    width: 48px;
+                }
             }
             span {
                 color: var(--color-primary);
@@ -45,6 +68,11 @@
         margin-left: 16px;
         font-size: 16px;
         font-weight: 500;
+        @include m.mq(sp) {
+            width: 38%;
+            font-size: 12px;
+            margin-left: 12px;
+        }
     }
     .page-name {
         margin-right: auto;
@@ -61,7 +89,10 @@
         }
     }
     .header-contents {
-        @include m.flexBetweenCenter; 
+        @include m.flexBetweenCenter;
+        @include m.mq(sp) {
+            flex-direction: column;
+        }
     }
     .download-btn {
         height: 40px;
@@ -72,6 +103,10 @@
         background: var(--color-secondary);
         transition: .3s .3s ease-out;
         color: var(--color-em);
+        white-space: nowrap;
+        @include m.mq(sp) {
+            display: none;
+        }
         span {
             margin: 0 8px 0 -4px;
             color: var(--color-em);

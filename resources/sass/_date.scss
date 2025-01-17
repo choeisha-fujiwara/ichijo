@@ -46,3 +46,10 @@
 .ui-datepicker-next .ui-icon {
     background: url(../images/icon-arrow-right.svg) center center no-repeat;
 }
+@include m.mq(sp) {
+    #ui-datepicker-div {
+        left: 0 !important;
+        right: 0 !important;
+        margin: 24px auto !important;
+    }
+}

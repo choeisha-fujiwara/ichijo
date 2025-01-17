@@ -51,13 +51,18 @@ a[href^="tel:"] {
 .contents {
 	min-width: 800px;
 	max-height: calc(100vh - 24px);
-	display: flex;
 	@include m.flexStartStretch;
 	width: 100%;
 	-ms-overflow-style: none;
 	scrollbar-width: none;
     &-webkit-scrollbar {
         display:none;
+    }
+	@include m.mq(sp) {
+		width: 100%;
+		min-width: 100%;
+		max-height: 100vh;
+		flex-direction: column;
     }
 }
 .content {
@@ -69,9 +74,15 @@ a[href^="tel:"] {
     @include m.flexStartCenter;
     flex-wrap: nowrap;
 	flex-direction: column;
+	@include m.mq(sp) {
+		padding: 0;
+	}
 	&.modal-mode {
 		height: calc(100vh - 88px);
 		overflow: hidden;
+		@include m.mq(sp) {
+			height: 100vh;
+		}
 	}
 }
 .content-header {

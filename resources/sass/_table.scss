@@ -11,42 +11,11 @@
     &::-webkit-scrollbar {
         display:none;
     }
+    @include m.mq(sp) {
+        width: 100vw;
+        margin: 134px 0 0;
+    }
 }
-// .table-flags {
-//     position: fixed;
-//     top: 84px;
-//     right: 36px;
-//     @include m.flexEndCenter;
-//     .table-flag {
-//         font-size: 12px;
-//         padding-left: 16px;
-//         @include m.flexStartCenter;
-//         .icon {
-//             font-size: 11px;
-//             padding: 1px 4px 0;
-//         }
-//         &:nth-of-type(1) {
-//             .icon {
-//                 color: var(--color-error);
-//             }
-//         }
-//         &:nth-of-type(2) {
-//             .icon {
-//                 color: var(--color-warning);
-//             }
-//         }
-//         &:nth-of-type(3) {
-//             .icon {
-//                 color: var(--color-safety);
-//             }
-//         }
-//         &:nth-of-type(4) {
-//             .icon {
-//                 color: var(--color-line);
-//             }
-//         }
-//     }
-// }
 .table-head {
     ul {
         width: calc(100% - 120px);
@@ -61,6 +30,9 @@
         z-index: 99;
         white-space: nowrap;
         @include m.flexCenterCenter;
+        @include m.mq(sp) {
+            display: none;
+        }
         li {
             height: 48px;
             padding: 17px 16px 0;
@@ -125,9 +97,6 @@
         &.fixed {
             transition: .2s ease-out;
             border-radius: 16px 16px 0 0;
-            // --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            // --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
-            // box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
             box-shadow: 0px 6px 24px 0px rgba(0, 0, 0, 0.1);
         }
     }
@@ -140,8 +109,6 @@
         background: var(--color-em);
         transition: .2s ease-out;
         border-radius: 4px;
-        // --tw-shadow: 2px 4px 16px -2px rgb(0 0 0 / 0.05);
-        // --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
         box-shadow :0px 6px 24px 0px rgba(0, 0, 0, 0.1);
         opacity: .5;
         transform-origin: top;
@@ -208,10 +175,19 @@
             border-top-right-radius: 16px;
             height: 44px;
             @include m.flexBetweenCenter;
+            @include m.mq(sp) {
+                width: 100vw;
+                height: auto;
+                padding: 16px 12px 8px;
+                border-bottom: 1px solid var(--color-line);
+                @include m.flexBetweenCenter;
+                flex-wrap: wrap;
+                border-top-left-radius: 0;
+                border-top-right-radius: 0;
+                background: var(--color-em);   
+            }        
             &:hover {
                 cursor: pointer;
-                // --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-                // --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
                 box-shadow: 0px 6px 24px 0px rgba(0, 0, 0, 0.1);
                 transition: .2s ease-in;
                 z-index: 1;
@@ -223,6 +199,10 @@
             &:last-of-type {
                 border-bottom-left-radius: 16px;
                 border-bottom-right-radius: 16px;
+                @include m.mq(sp) {
+                    border-bottom-left-radius: 0;
+                    border-bottom-right-radius: 0;    
+                }
                 .td {
                     &:first-of-type {
                         border-bottom-left-radius: 16px;
@@ -233,6 +213,9 @@
                 }
             }
             &.read {
+                @include m.mq(sp) {
+                    background: var(--color-base);
+                }
                 .td {
                     background: var(--color-base);
                 }
@@ -249,10 +232,19 @@
         text-overflow: ellipsis;
         border-bottom: 1px solid var(--color-line);
         background: var(--color-em);
+        @include m.mq(sp) {
+            height: auto;
+            border-bottom: none;
+            padding: 0 0 8px;
+        }
         &.long-long {
             width: calc(100% - 128px);
             text-align: left;
             padding-left: 16px;
+            @include m.mq(sp) {
+                width: 100%;
+                order: 6;
+            }
         }
         &.shop-name {
             width: 20%;
@@ -260,21 +252,53 @@
             max-width: 240px;
             padding: 14px 0 14px 8px;
             text-align: left;
+            @include m.mq(sp) {
+                width: calc(80vw - 40px);
+                min-width: calc(80vw - 40px);
+                max-width: calc(80vw - 40px);
+                padding: 0;
+                order: 2;
+            }
         }
         &.age {
             min-width: 56px;
             max-width: 56px;
             padding-right: 4px;
+            @include m.mq(sp) {
+                min-width: auto;
+                max-width: auto;
+                width: auto;
+                padding: 8px 0 8px 16px;
+                margin-right: auto;
+                order: 4;
+                @include m.flexStartCenter;
+            }
         }
         &.gender {
             min-width: 56px;
             max-width: 56px;
+            @include m.mq(sp) {
+                min-width: calc(80vw - 12px);
+                max-width:calc(80vw - 12px);
+                width: calc(80vw - 12px);
+                padding: 8px;
+                margin-right: auto;
+                order: 5;
+                @include m.flexStartCenter;
+            }
         }
         &.date {
             width: 128px;
             padding-right: 0;
             margin-right: -2px;
             font-size: .75rem;
+            @include m.mq(sp) {
+                width: 20%;
+                order: 3;
+                margin: 0;
+                padding: 1px 0 0;
+                text-align: right;
+            }
         }
         &.tilde {
             padding-left: 14px;
@@ -298,10 +322,22 @@
         &.read-icon {
             max-width: 32px;
             min-width: 32px;
+            @include m.mq(sp) {
+                max-width: auto;
+                min-width: auto;
+                width: 16px;
+                padding: 1px 0 0;
+                margin-left: -8px;
+                @include m.flexStartCenter;   
+                order: 1;
+            }
             span {
                 font-size: 10px;
                 text-align: center;
                 color: var(--color-safety);
+                @include m.mq(sp) {
+                    text-align: left;
+                }
             }
             &.shop {
                 span {

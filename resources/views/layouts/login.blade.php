@@ -20,9 +20,9 @@
         <link rel="icon" href="{{ asset('images/favicon.ico') }}">
         <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon-180x180.png') }}" sizes="180x180">
             
-        <link rel="stylesheet" href="{{ asset('build/assets/app-DqXz8-54.css') }}">
-        <link rel="stylesheet" href="{{ asset('build/assets/app-AmVkkLD7.css') }}">
-        {{-- @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/sass/app.scss']) --}}
+        {{-- <link rel="stylesheet" href="{{ asset('build/assets/app-DqXz8-54.css') }}">
+        <link rel="stylesheet" href="{{ asset('build/assets/app-AmVkkLD7.css') }}"> --}}
+        @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/sass/app.scss'])
     </head>
     <body>
         <div id="loading" class="loading"></div>
