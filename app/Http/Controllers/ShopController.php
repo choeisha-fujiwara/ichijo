@@ -21,13 +21,12 @@ class ShopController extends Controller
         $data = User::where('role', 'shop')
             ->orderBy('shop_id', 'asc')
             ->get();
-        
         $service = new ShopService;
         $data = $service->shopsData($data);
     
         $data->count = activeCount($user);
 
-        return view('dashboard.shop.index', compact('user', 'data'));
+        return view('dashboard.shop.index', compact('user','data'));
     }
 
     /**

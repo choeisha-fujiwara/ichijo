@@ -35,7 +35,7 @@ class ShopService
             ->selectRaw('COUNT(shop_id) as count_approval')
             ->groupBy('shop_id')
             ->get();
-            
+        
         foreach ($data as $datum) {
             foreach ($posts as $post) {
                 $datum->unread = $datum->shop_id == $post->shop_id ? $post->count_shop : $datum->unread;
@@ -47,6 +47,7 @@ class ShopService
                 $datum->approval = $datum->shop_id == $approval->shop_id ? $approval->count_approval : $datum->approval;
             }
             $area = $datum->area->area_name;
+            
             $amg = Area::where('area_name', $area)
                 ->whereNull('block_name')
                 ->first();

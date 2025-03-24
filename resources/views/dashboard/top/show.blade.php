@@ -89,7 +89,7 @@
                     @endforeach
                 </div>
                 <div class="comment-form">
-                    @if (count($data->comments) > 0 && $user->role == 'admin' && $data->state->post_active !== 'approval')
+                    @if (count($data->comments) > 0 && $user->role !== 'shop' && $data->state->post_active !== 'approval')
                     <form action="approval" method="POST">
                     @csrf
                         <input type="hidden" name="post_id" value="{{ $data->id }}" />

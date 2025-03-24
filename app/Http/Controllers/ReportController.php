@@ -17,13 +17,18 @@ class ReportController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    public $timeout = 120;
+
     public function index()
     {
+        set_time_limit(0);
+
         $user = Auth::user();
-        $areas = Area::groupBy('area_name')->get(['area_name']);
-        $blocks = Area::groupBy('block_name')->where('block_name', '!=', null)->get(['block_name']);
+        $areas = Area::groupBy('area_name')->where('id', '<>', 21)->where('id', '<>', 22)->get(['area_name']);
+        $blocks = Area::groupBy('block_name')->where('block_name', '!=', null)->where('id', '<>', 22)->get(['block_name']);
         $users = User::where('role', 'shop')->get();
-        $from = Carbon::now()->subMonthNoOverflow(1);
+        $from = Carbon::now()->subMonthNoOverflow(2);
         $to = Carbon::now();
 
         $requests = collect();

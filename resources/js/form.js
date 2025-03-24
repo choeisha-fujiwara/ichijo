@@ -13,8 +13,18 @@ $('.checkbox-label input').on('click', function() {
         $('input.fried-rice').prop('checked', true);
         $('textarea.fried-rice').val('');
     }
-    if (!$('.select-gyoza').hasClass('active')) {
-        $('.gyoza input:first-of-type').prop('checked', false);
+    // if (!$('.select-gyoza').hasClass('active')) {
+    //     $('.gyoza input:first-of-type').prop('checked', false);
+    // }
+    if ($('.option02').hasClass('active')) {
+        $('.option02.required input:first-of-type').attr('required', true);
+        $('input.gyoza').val('');
+        $('input.gyoza').prop('checked', false);
+    } else {
+        $('.option02.required input:first-of-type').attr('required', false);
+        $('.option02.required input:first-of-type').prop('checked', false);
+        $('input.gyoza').val('未選択');
+        $('input.gyoza').prop('checked', true);
     }
     $(this).parent().toggleClass('checked');
 });

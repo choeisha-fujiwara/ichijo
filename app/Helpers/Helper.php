@@ -333,11 +333,7 @@ if (! function_exists('csvHeaders')) {
             '郵便番号',
             '住所',
             'メールアドレス',
-            '本日ご注文したメニュー：ラーメン',
-            '本日ご注文したメニュー：餃子',
-            '本日ご注文したメニュー：からあげ',
-            '本日ご注文したメニュー：炒飯',
-            '本日ご注文したメニュー：季節のメニュー',
+            '本日ご注文したメニュー',
             'ラーメンの味について',
             'スープについて',
             'チャーシューの味について',
@@ -452,7 +448,6 @@ if (! function_exists('reportDataCreate'))
         foreach ($data as $datum) {
             $datum->month = $datum->created_at->format('Y.m');
         }
-
         foreach ($sections as $section) {
             foreach ($months as $month) {
                 foreach ($cats as $cat) {
@@ -463,17 +458,20 @@ if (! function_exists('reportDataCreate'))
                             return strpos($record[$section], $cat) !== false;
                         });
                     }
-                    $arrays[$section][$month][] = number_format(round($filtered
-                    ->where('month', $month)->count() /
-                    $data->where('month', $month)->whereNotNull($section)->count() * 100, 1), 1);
-                    
+                    if ($filtered->where('month', $month)->count() == 0) {
+                        $arrays[$section][$month][] = 0;
+                    } else {
+                        $arrays[$section][$month][] = number_format(round($filtered
+                        ->where('month', $month)->count() /
+                        $data->where('month', $month)->whereNotNull($section)->count() * 100, 1), 1);
+                    }                    
                     $reals[$section][$month][] = $filtered->where('month', $month)->count();
                 }
                 $arrays[$section][$month][] = number_format(round(100 - array_sum($arrays[$section][$month]), 1), 1);
                 array_unshift($arrays[$section][$month], $month);
 
-                // $reals[$section][$month][] = $data->where($section, 'どちらでもない')->where('month', $month)->count();
-                // array_unshift($reals[$section][$month], $month);
+                $reals[$section][$month][] = $data->where($section, 'どちらでもない')->where('month', $month)->count();
+                array_unshift($reals[$section][$month], $month);
             }
             foreach ($arrays as $array) {
                 $chart[$section] = array_values($array);

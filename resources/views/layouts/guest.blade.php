@@ -36,6 +36,6 @@
         </footer>    
     </div>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="{{ asset('build/assets/guest-7U8r2HR5.js') }}"></script>
+    <script src="{{ asset('build/assets/guest-C-Fp7bQH.js') }}"></script>
 </body>
 </html>

@@ -11,8 +11,6 @@ use App\Models\Comment;
 use App\Services\AppService;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use App\Exports\PostExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Mail\SendMail;
 use Illuminate\Support\Facades\Mail;
@@ -148,9 +146,74 @@ class AppController extends Controller
     {
         $from = date('Ymd', strtotime($request->from));
         $to = date('Ymd', strtotime($request->to));
-        $file = '神座お客様アンケート' . $from . '_' . $to . '.csv';
+        $csv = '神座お客様アンケート' . $from . '_' . $to . '.csv';
+        foreach (csvHeaders() as $str) {
+            $header[] = mb_convert_encoding($str, 'SJIS-WIN', 'UTF-8');
+        }
 
-        return Excel::download(new PostExport($request->from, $request->to), $file);
+        if ($from == $to) {
+            $data = Post::with('user')->with('state')->where('created_at', 'LIKE', "%{$from}%")->oldest()->get();    
+        } else {
+            $data = Post::with('user')->with('state')->whereBetween('created_at', [$from, $to])->oldest()->get();
+        }
+
+        foreach ($data as $datum) {
+            mergingResponses($datum);
+            $state = $datum->state->post_state == 'negative' ? '注意' : null;
+            $state = $datum->state->post_active == 'active' ? '要対応' : $state;
+            $state = $datum->state->post_ng == 'NG' ? '非公開' : $state;
+            $datum->state = $state;
+            $row[] = $datum->id;
+            $row[] = $datum->state;
+            $row[] = Carbon::parse($datum->created_at)->format('Y/m/d H:i');
+            $row[] = $datum->user->name;
+            $row[] = $datum->age;
+            $row[] = $datum->gender;
+            $row[] = $datum->name;
+            $row[] = $datum->tel;
+            $row[] = $datum->zipcode;
+            $row[] = $datum->address;
+            $row[] = $datum->email;
+            $row[] = $datum->q01;
+            $row[] = $datum->q02;
+            $row[] = $datum->q03;
+            $row[] = $datum->q04;
+            $row[] = str_replace(["\r\n", "\r", "\n"], '', $datum->q05);
+            $row[] = $datum->q06;
+            $row[] = str_replace(["\r\n", "\r", "\n"], '', $datum->q07);
+            $row[] = $datum->q08;
+            $row[] = $datum->q09;
+            $row[] = $datum->q10;
+            $row[] = $datum->q11;
+            $row[] = $datum->q12;
+            $row[] = $datum->q13;
+            $row[] = $datum->q14;
+            $row[] = $datum->q15;
+            $row[] = $datum->q16;
+            $row[] = $datum->q17;
+            $row[] = $datum->q18;
+            $row[] = $datum->q19;
+            $row[] = str_replace(["\r\n", "\r", "\n"], '', $datum->q20);
+            $rows[] = $row;
+            $row = null;
+        }
+
+        $res = fopen($csv, 'w');
+        fputcsv($res, $header);
+
+        foreach($rows as $row) {
+            mb_convert_variables('SJIS', 'UTF-8', $row);
+            fputcsv($res, $row);
+        }
+
+        fclose($res);
+
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename=' . $csv); 
+        header('Content-Transfer-Encoding: binary');
+
+        readfile($csv);
+        unlink($csv);
     }
 
     public function loggedIn()
