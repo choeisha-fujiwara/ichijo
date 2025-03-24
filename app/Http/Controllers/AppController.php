@@ -174,7 +174,11 @@ class AppController extends Controller
             $row[] = $datum->zipcode;
             $row[] = $datum->address;
             $row[] = $datum->email;
-            $row[] = $datum->q01;
+            $row[] = $datum->q01_a1;
+            $row[] = $datum->q01_a2;
+            $row[] = $datum->q01_a3;
+            $row[] = $datum->q01_a4;
+            $row[] = $datum->q01_a5;
             $row[] = $datum->q02;
             $row[] = $datum->q03;
             $row[] = $datum->q04;

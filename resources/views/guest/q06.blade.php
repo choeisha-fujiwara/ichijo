@@ -5,6 +5,7 @@
             <span class="block">炒飯について</span>
         </legend>
         <div class="radio-buttons">
+            <input type="radio" name="q06" value="未選択" class="fried-rice @error('q06') err @enderror" checked {{ old('q06') == '未選択' ? 'checked' : '' }} />
             <label class="">
                 <input type="radio" name="q06" value="非常に満足した" {{ old('q06') == '非常に満足した' ? 'checked' : '' }} />
                 <span class="radio-label">非常に満足した</span>
@@ -25,7 +26,6 @@
                 <input type="radio" name="q06" value="まったく満足できなかった" {{ old('q06') == 'まったく満足できなかった' ? 'checked' : '' }} />
                 <span class="radio-label">まったく満足できなかった</span>
             </label>
-            <input type="radio" name="q06" value="未選択" class="fried-rice" checked {{ old('q06') == '未選択' ? 'checked' : '' }} />
         </div>
     </fieldset>
     <p class="text-red-600 flashing @error('q06') mb-2 @enderror">@error('q06') ※選択肢の中から1つお選びください @enderror</p>

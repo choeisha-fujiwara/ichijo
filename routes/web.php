@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\NewReportController;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -25,6 +26,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/dashboard/export', [AppController::class, 'export'])->name('dashboard.export');
     Route::post('/dashboard/report', [ReportController::class, 'report'])->name('dashboard.report');
 
+    Route::resource('/dashboard/report_new', NewReportController::class)->only([
+        'index', 'show',
+    ]);
     Route::resource('/dashboard/report', ReportController::class)->only([
         'index', 'show',
     ]);

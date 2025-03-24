@@ -5,6 +5,7 @@
             <span class="block">餃子の味について</span>
         </legend>
         <div class="radio-buttons gyoza">
+            <input type="radio" name="q08" value="未選択" class="gyoza @error('q08') err @enderror" checked {{ old('q08') == '未選択' ? 'checked' : '' }} />
             <label class="">
                 <input type="radio" name="q08" value="非常に満足した" {{ old('q08') == '非常に満足した' ? 'checked' : '' }} />
                 <span class="radio-label">非常に満足した</span>
@@ -25,7 +26,6 @@
                 <input type="radio" name="q08" value="まったく満足できなかった" {{ old('q08') == 'まったく満足できなかった' ? 'checked' : '' }} />
                 <span class="radio-label">まったく満足できなかった</span>
             </label>
-            <input type="radio" name="q08" value="未選択" class="gyoza" checked {{ old('q08') == '未選択' ? 'checked' : '' }} />
         </div>
     </fieldset>
     <p class="text-red-600 flashing @error('q08') mb-2 @enderror">@error('q08') ※選択肢の中から1つお選びください @enderror</p>

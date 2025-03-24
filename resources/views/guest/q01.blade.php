@@ -9,7 +9,7 @@
                 <input type="checkbox" name="q01_a1" value="{{ $shop->shop_category == '麺屋道頓' ? 'つけ麺' : 'ラーメン' }}" {{ old('q01_a1') ? 'checked' : null }} />
                 <span class="">{{ $shop->shop_category == '麺屋道頓' ? 'つけ麺' : 'ラーメン' }}</span>
             </label>
-            <label class="checkbox-label {{ old('q01_a2') ? 'checked' : ''; }}" data-options="option02">
+            <label class="checkbox-label gyoza {{ old('q01_a2') ? 'checked' : ''; }}" data-options="option02">
                 <input type="checkbox" name="q01_a2" value="餃子" {{ old('q01_a2') ? 'checked' : null }} />
                 <span class="">餃子</span>
             </label>
@@ -17,7 +17,7 @@
                 <input type="checkbox" name="q01_a3" value="からあげ" {{ old('q01_a3') ? 'checked' : null }} />
                 <span class="">からあげ</span>
             </label>
-            <label class="checkbox-label {{ old('q01_a4') ? 'checked' : '' }}" data-options="option01">
+            <label class="checkbox-label fried-rice {{ old('q01_a4') ? 'checked' : '' }}" data-options="option01">
                 <input type="checkbox" name="q01_a4" value="炒飯" {{ old('q01_a4') ? 'checked' : null }} />
                 <span class="">炒飯</span>
             </label>
