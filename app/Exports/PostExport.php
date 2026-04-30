@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Post;
+use App\Models\Reservation;
 use App\Models\User;
 use App\Models\State;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -34,12 +34,12 @@ class PostExport implements FromCollection, WithCustomCsvSettings, WithHeadings,
         $items = exportItems();
         
         if ($this->from == $this->to) {
-            $data = Post::where('created_at', 'LIKE', "%{$this->from}%")
+            $data = Reservation::where('created_at', 'LIKE', "%{$this->from}%")
                 ->select($items)
                 ->oldest()
                 ->get();    
         } else {
-            $data = Post::whereBetween('created_at', [$this->from, $this->to])
+            $data = Reservation::whereBetween('created_at', [$this->from, $this->to])
                 ->select($items)
                 ->oldest()
                 ->get();

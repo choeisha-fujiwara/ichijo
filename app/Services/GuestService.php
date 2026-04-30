@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Models\Post;
+use App\Models\Reservation;
 use App\Models\Area;
 use App\Models\State;
 
@@ -41,7 +41,7 @@ class GuestService
         $ng = $ng == 1 ? 'NG' : 'OK';
         
         $state = new State();
-        $state->post_id = $data->id;
+        $state->reservation_id = $data->id;
         $state->post_state = $status;
         $state->post_ng = $ng;
         $state->save();

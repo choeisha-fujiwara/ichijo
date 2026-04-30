@@ -1,124 +1,196 @@
 <x-app-layout>
-    <x-slot:title>投稿詳細</x-slot:title>
-    <x-slot:page>show</x-slot:page>
-    <x-slot:name>{{ @$user->name }}</x-slot:name>
-    <x-slot:role>{{ @$user->role }}</x-slot:role>
-    <x-slot:count>{{ $data->count }}</x-slot:count>
+    <x-slot:title>記事詳細</x-slot:title>
+    <x-slot:page>index</x-slot:page>
+    <x-slot:name>{{ $user->name }}</x-slot:name>
+    <x-slot:role>{{ $user->role }}</x-slot:role>
     <x-slot:old>{{ @$old }}</x-slot:old>
-    <div class="show">
-        <div class="show-inner inner">
-            <div class="show-contents">
-                <div class="show-state {{ $data->state->post_state }} {{ $data->state->post_active }} {{ $data->state->post_ng == 'NG' ? 'ng' : null }}">
-                    <span class="material-symbols-outlined state-icon">circle</span>
-                    {!! $data->state->post_state == 'negative' ? '<span class="state-msg negative">注意！</span>' : null !!}
-                    {!! $data->state->post_active == 'active' ? '<span class="state-msg active">要対応</span>' : null !!}
-                    {!! $data->state->post_active == 'approval' ? '<span class="state-msg approval">承認済み</span>' : null !!}
-                    {!! $data->state->post_ng == 'NG' ? '<span class="state-msg ng">非公開</span>' : null !!}
-                    {!! json_decode($data->state->post_read, true)['shop'] !== '' ? '<span class="material-symbols-outlined read">circle</span><span class="state-msg reading">既読</span>' : '<span class="material-symbols-outlined unread">circle</span><span class="state-msg reading">未読</span>' !!}
+
+    @php
+        $headerImage = $article->images->firstWhere('path', $article->header_image)
+            ?? $article->images->first(fn ($image) => str_contains((string) $image->path, '/header/'));
+
+        $bodyImageCaptions = collect($article->body_image_captions ?? []);
+        $bodyImages = collect($article->body_image ?? [])
+            ->map(function ($path, $index) use ($article, $bodyImageCaptions) {
+                $image = $article->images->firstWhere('path', $path);
+
+                if (!$image) {
+                    return null;
+                }
+
+                return [
+                    'image' => $image,
+                    'caption' => (string) ($bodyImageCaptions->get($index) ?? ''),
+                ];
+            })
+            ->filter();
+
+            $rawEmails = $article->emails;
+            $notificationEmails = collect(is_array($rawEmails) ? $rawEmails : preg_split('/[,\r\n]+/', (string) $rawEmails))
+                ->map(fn ($email) => trim((string) $email))
+                ->filter();
+
+            $guestPageUrl = route('show.public', ['token' => $article->public_token]);
+            $today = now()->startOfDay();
+            $publishedDate = $article->published_at?->copy()->startOfDay();
+            $unpublishedDate = $article->unpublished_at?->copy()->startOfDay();
+            $isEnded = $unpublishedDate && $today->gt($unpublishedDate);
+
+            $publishBtnLabel = '公開未設定';
+            $publishBtnHoverLabel = null;
+            $publishBtnClass = 'is-disabled';
+            $publishBtnAction = null;
+
+            if ($publishedDate) {
+                if ($isEnded) {
+                    $publishBtnLabel = '公開終了';
+                    $publishBtnClass = 'is-disabled';
+                } elseif ($article->status === 'draft') {
+                    $publishBtnLabel = '公開する';
+                    $publishBtnClass = 'is-ready';
+                    $publishBtnAction = 'publish';
+                } elseif ($article->status === 'publish' && $today->lt($publishedDate)) {
+                    $publishBtnLabel = '公開予約中';
+                    $publishBtnHoverLabel = '公開中止';
+                    $publishBtnClass = 'is-scheduled';
+                    $publishBtnAction = 'draft';
+                } elseif ($article->status === 'publish') {
+                    $publishBtnLabel = '公開中';
+                    $publishBtnHoverLabel = '公開中止';
+                    $publishBtnClass = 'is-live';
+                    $publishBtnAction = 'draft';
+                }
+            }
+    @endphp
+
+    <div class="content top-detail-page">
+        <div class="top-detail-shell">
+            <div class="top-detail-head">
+                <div>
+                    <p class="top-detail-date">{{ optional($article->published_at)->format('Y.m.d') ?: '未設定' }} - {{ optional($article->unpublished_at)->format('Y.m.d') ?: '未設定' }}</p>
+                    <h2>{{ $article->title }}</h2>
                 </div>
-                <div class="show-date">{{ $data->created_at->isoFormat('M月D日（ddd） H:mm') }}</div>
-                <div class="shop-name">{{ $data->user->name }}</div>
-                @if ($user->role == 'admin' && $data->state->post_ng == 'NG')
-                <div class="distribution-btn">
-                    <form action="distribution" method="POST">
-                    @csrf
-                        <label for="distribution">配信</label>
-                        <input type="hidden" name="shop_id" value="{{ $data->shop_id }}" />
-                        <input type="submit" id="distribution" class="hidden-obj" name="id" value="{{ $data->id }}" />
-                    </form>
+                <div class="top-detail-actions">
+                    <a href="{{ route('article.edit', $article) }}" class="top-detail-edit">編集する</a>
+                    <a href="{{ route('top.index') }}" class="top-detail-back">一覧へ戻る</a>
                 </div>
-                @endif
-                <div class="attribute-data {{ $user->role == 'shop' ? 'shop' : null }}">
-                    <p class="icon"><span class="material-symbols-outlined">person</span></p>
-                    <p>{{ $data->age }}</p>
-                    <p>{{ $data->gender }}</p>
+            </div>
+
+            <div class="top-detail-summary">
+                <span class="summary">会場：{{ $article->venue?->venue_name ?: '会場未設定' }}</span>
+                <span class="summary">公開日：{{ optional($article->published_at)->format('Y.m.d') ?: '公開日未設定' }}</span>
+                <span class="summary">終了日：{{ optional($article->unpublished_at)->format('Y.m.d') ?: '終了日未設定' }}</span>
+                <span class="summary">担当者：{{ $article->manager ?: '担当者未設定' }}</span>
+                <span class="preview-btn">
+                    <a href="{{ $guestPageUrl }}" target="_blank" rel="noopener noreferrer">プレビュー</a>
+                </span>
+                <span class="publish-btn {{ $publishBtnClass }}">
+                    @if ($publishBtnAction)
+                        <form action="{{ route('article.status.update', $article) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="next_status" value="{{ $publishBtnAction }}">
+                            <button type="submit" class="publish-btn-control">
+                                <span class="default-label">{{ $publishBtnLabel }}</span>
+                                @if ($publishBtnHoverLabel)
+                                    <span class="hover-label">{{ $publishBtnHoverLabel }}</span>
+                                @endif
+                            </button>
+                        </form>
+                    @else
+                        <span class="publish-btn-control is-disabled">{{ $publishBtnLabel }}</span>
+                    @endif
+                </span>
+            </div>
+
+            @if ($headerImage)
+                <div class="top-detail-header-image">
+                    <img src="{{ route('article.image', $headerImage) }}" alt="{{ $article->title }}">
                 </div>
-                @if ($user->role !== 'shop')
-                <div class="personal-data">
-                    <div class="flex">
-                        <p class="item">Name:</p>
-                        <p class="{{ $data->name !== null ? null : 'none' }}">{{ $data->name !== null ? $data->name : 'None' }}</p>
-                    </div>
-                    <div class="flex">
-                        <p class="item">Address:</p>
-                        <p class="{{ $data->zipcode !== null ? null : 'none' }}">
-                            <span class="{{ $data->zipcode !== null ? null : 'none' }}">{{ $data->zipcode !== null ? '〒' . $data->zipcode : '〒' }}</span>
-                            <span class="{{ $data->address !== null ? null : 'none' }}">{{ $data->address !== null ? $data->address : 'None' }}</span>
-                        </p>
-                    </div>
-                    <div class="flex">
-                        <p class="item">Tel:</p>
-                        <p class="{{ $data->tel !== null ? null : 'none' }}">{{ $data->tel !== null ? $data->tel : 'None' }}</p>
-                    </div>
-                    <div class="flex">
-                        <p class="item">Email:</p>
-                        <p class="{{ $data->email !== null ? null : 'none' }}">{{ $data->email !== null ? $data->email : 'None' }}</p>
-                    </div>
-                </div>
-                @endif
-                <div class="questions-data">
-                    @php
-                    $count = count(questions());
-                    @endphp
-                    @for ($i = 1; $i < $count; $i ++)
-                    @php
-                    $num = $i < 10 ? 'q0' . $i : 'q' . $i;
-                    @endphp
-                    <div class="questions-datum {{ textareaCheck(questions()[$i]) }}">
-                        <p>
-                            <span class="material-symbols-outlined question-icon">circle</span>
-                            <span>{{ questions()[$i] }}</span>
-                        </p>
-                        <p class="reply {{ negativeCheck($data->$num) }} {{ wordCheck($data->$num) }}">
-                            <span class="material-symbols-outlined question-icon">arrow_right_alt</span>
-                            <span class="{{ $data->$num !== null ? null : 'none'}}">{{ $data->$num !== null ? $data->$num : '無回答' }}</span>
-                        </p>
-                    </div>
-                    @endfor
-                </div>
-                <div class="comment-data">
-                    @foreach ($data->comments as $comment)
-                    <div class="comment-card">
-                        <p class="comment-user"><span class="material-symbols-outlined icon">account_circle</span><span>{{ $comment->user->name }}</span></p>
-                        <p class="comment-date">{{ $comment->created_at->isoFormat('M月D日（ddd） H:mm') }}</p>
-                        <p class="comment">{{ $comment->comment }}</p>
-                        @if ($user->role == 'admin' || $user->id == $comment->user_id)
-                        <p class="destroy"><a href="{{ route('comment.destroy', ['id' => $comment->id]) }}"><span class="material-symbols-outlined icon">delete</span></a></p>
+            @endif
+
+            <div class="top-detail-card">
+                <h3>本文</h3>
+                <div class="top-detail-body">{!! $article->body !!}</div>
+            </div>
+
+            @if ($article->freeword_1 || $article->freeword_2)
+                <div class="top-detail-card">
+                    <div class="top-detail-freewords">
+                        @if ($article->freeword_1)
+                            <p><span>日程</span><strong>{{ $article->freeword_1 }}</strong></p>
+                        @endif
+                        @if ($article->freeword_2)
+                            <p><span>時間</span><strong>{{ $article->freeword_2 }}</strong></p>
                         @endif
                     </div>
-                    @endforeach
                 </div>
-                <div class="comment-form">
-                    @if (count($data->comments) > 0 && $user->role !== 'shop' && $data->state->post_active !== 'approval')
-                    <form action="approval" method="POST">
-                    @csrf
-                        <input type="hidden" name="post_id" value="{{ $data->id }}" />
-                        <input type="submit" class="approval-btn" value="承認する" />
-                    </form>
+            @endif
+
+            @if ($bodyImages->isNotEmpty())
+                <div class="top-detail-card">
+                    <h3>本文画像</h3>
+                    <div class="top-detail-gallery">
+                        @foreach ($bodyImages as $bodyImage)
+                            <figure>
+                                <img src="{{ route('article.image', $bodyImage['image']) }}" alt="{{ $article->title }} 本文画像">
+                                @if (!empty($bodyImage['caption']))
+                                    <figcaption>{{ $bodyImage['caption'] }}</figcaption>
+                                @endif
+                            </figure>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+            <div class="top-detail-grid">
+                <div class="top-detail-card">
+                    <h3>配信設定</h3>
+                    <dl class="top-detail-definition">
+                        <div>
+                            <dt>作成者</dt>
+                            <dd>{{ $article->user?->name ?: '未設定' }}</dd>
+                        </div>
+                        <div>
+                            <dt>通知メールアドレス</dt>
+                            <dd>{{ $notificationEmails->isNotEmpty() ? $notificationEmails->implode(' / ') : '未設定' }}</dd>
+                        </div>
+                        <div>
+                            <dt>ステータス</dt>
+                            <dd>{{ $article->topListStatusLabel }}</dd>
+                        </div>
+                        <div>
+                            <dt>公開開始日</dt>
+                            <dd>{{ $article->published_at?->format('Y.m.d') ?: '未設定' }}</dd>
+                        </div>
+                        <div>
+                            <dt>公開終了日</dt>
+                            <dd>{{ $article->unpublished_at?->format('Y.m.d') ?: '未設定' }}</dd>
+                        </div>
+                        <div>
+                            <dt>公開URL</dt>
+                            <dd><a href="{{ $guestPageUrl }}" target="_blank" rel="noopener noreferrer">{{ $guestPageUrl }}</a></dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="top-detail-card">
+                    <h3>予約枠</h3>
+                    @if ($article->reservationSlots->isNotEmpty())
+                        <div class="top-detail-slots">
+                            @foreach ($article->reservationSlots as $slot)
+                                <div class="top-detail-slot">
+                                    <p>{{ $slot->date?->format('Y.m.d') }}</p>
+                                    <p>{{ \Carbon\Carbon::parse((string) $slot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse((string) $slot->end_time)->format('H:i') }}</p>
+                                    <p>予約枠： {{ $slot->capacity }} </p>
+                                    <p class="{{ $slot->reservations_count > 0 ? 'active' : '' }}">予約 {{ $slot->reservations_count ?? 0 }} 件</p>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="top-detail-empty">予約枠は未設定です。</p>
                     @endif
-                    {!! count($data->comments) == 0 ? '<p class="no-comment">まだコメントはありません</p>' : null !!}
-                    <form action="comment" method="POST" class="comment-form comment-write">
-                    @csrf
-                        <p class="comment-guide"><span>コメントを書く</span><span class="material-symbols-outlined icon">edit</span></p>
-                        <textarea name="comment" class="active-text">{{ old('comment') }}</textarea>
-                        <input type="hidden" name="post_id" value="{{ $data->id }}" />
-                        <input type="hidden" name="user_id" value="{{ $user->id }}" />
-                        <input type="submit" class="comment-btn" value="送信" />
-                    </form>
-                </div>
-                <div class="close-btn">
-                    <p data-updated="{{ session('updated') }}">戻る</p>
                 </div>
             </div>
         </div>
     </div>
-    <ul class="msg {{ session('msg') ? 'scroll' : null }}">
-        @if(session('msg'))
-            <li>{{ session('msg') }}</li>
-        @endif
-        @if(session('dst_msg'))
-            <li>{{ session('dst_msg') }}</li>
-        @endif
-    </ul>
-    <div class="hidden-obj page" data-page="show"></div>
 </x-app-layout>

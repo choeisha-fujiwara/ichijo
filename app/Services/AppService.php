@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Models\Post;
+use App\Models\Reservation;
 use App\Models\Area;
 use App\Models\State;
 use App\Models\Comment;
@@ -15,13 +15,13 @@ class AppService
     {
         // 管理者
         if ($user->role == 'admin') {
-            $data = Post::orderBy('created_at', 'desc')
+            $data = Reservation::orderBy('created_at', 'desc')
             ->paginate(100)
             ->withQueryString();
         
         // エリアマネージャー
         } elseif ($user->role == 'area_manager') {
-            $data = Post::with('user.area')
+            $data = Reservation::with('user.area')
             ->whereHas('user.area', function ($query) use ($user) {
                 $query->where('area_name', $user->area->area_name);
             })
@@ -31,7 +31,7 @@ class AppService
         
         // マネージャー
         } elseif ($user->role == 'manager') {
-            $data = Post::with('user.area')
+            $data = Reservation::with('user.area')
             ->whereHas('user.area', function ($query) use ($user) {
                 $query->where('area_name', $user->area->area_name)
             ->where('block_name', $user->area->block_name);
@@ -43,7 +43,7 @@ class AppService
         // 店舗
         } else {
             $shop = $user->shop_id;
-            $data = Post::with('state')
+            $data = Reservation::with('state')
             ->where('shop_id', $shop)
             ->whereHas('state', function ($query) {
                 $query->where('post_ng', 'OK');
@@ -64,7 +64,7 @@ class AppService
     {
         // 管理者
         if ($user->role == 'admin') {
-            $data = Post::orderBy('created_at', 'desc')
+            $data = Reservation::orderBy('created_at', 'desc')
             ->whereHas('user', function ($query) use ($keyword) {
                 $query->where('name', 'LIKE', "%{$keyword}%");
             })
@@ -75,7 +75,7 @@ class AppService
 
         // エリアマネージャー
         } elseif ($user->role == 'area_manager') {
-            $data = Post::with('user.area')
+            $data = Reservation::with('user.area')
             ->whereHas('user.area', function ($query) use ($user) {
                 $query->where('area_name', $user->area->area_name);
             })
@@ -90,7 +90,7 @@ class AppService
             
         // マネージャー
         } elseif ($user->role == 'manager') {
-            $data = Post::with('user.area')
+            $data = Reservation::with('user.area')
             ->whereHas('user.area', function ($query) use ($user) {
                 $query->where('area_name', $user->area->area_name)
             ->where('block_name', $user->area->block_name);
@@ -107,7 +107,7 @@ class AppService
         // 店舗
         } else {
             $shop = $user->shop_id;
-            $data = Post::with('state')
+            $data = Reservation::with('state')
             ->where('shop_id', $shop)
             ->whereHas('user', function ($query) use ($keyword) {
                 $query->where('name', 'LIKE', "%{$keyword}%");
@@ -140,7 +140,7 @@ class AppService
 
         // 管理者
         if ($user->role == 'admin') {
-            $data = Post::orderBy('created_at', 'desc')
+            $data = Reservation::orderBy('created_at', 'desc')
             ->whereHas('state', function ($query) use ($column_1st, $column_2nd, $column_3rd, $terms_1, $state) {
                 $query->where($column_1st, $state)
                 ->where($column_2nd, $terms_1, null)
@@ -152,7 +152,7 @@ class AppService
 
         // エリアマネージャー
         } elseif ($user->role == 'area_manager') {
-            $data = Post::with('user.area')
+            $data = Reservation::with('user.area')
             ->whereHas('user.area', function ($query) use ($user) {
                 $query->where('area_name', $user->area->area_name);
             })
@@ -168,7 +168,7 @@ class AppService
             
         // マネージャー
         } elseif ($user->role == 'manager') {
-            $data = Post::with('user.area')
+            $data = Reservation::with('user.area')
             ->whereHas('user.area', function ($query) use ($user) {
                 $query->where('area_name', $user->area->area_name)
             ->where('block_name', $user->area->block_name);
@@ -186,7 +186,7 @@ class AppService
         // 店舗
         } else {
             $shop = $user->shop_id;
-            $data = Post::where('shop_id', $shop)
+            $data = Reservation::where('shop_id', $shop)
             ->whereHas('state', function ($query) use ($column_1st, $column_2nd, $column_3rd, $terms_1, $state) {
                 $query->where($column_1st, $state)
                 ->where($column_2nd, $terms_1, null)
@@ -211,7 +211,7 @@ class AppService
         $terms = $shop !== null ? '=' : '!=';
 
         if ($user->role == 'admin') {
-            $data = Post::orderBy('created_at', 'desc')
+            $data = Reservation::orderBy('created_at', 'desc')
             ->whereHas('state', function ($query) {
                 $query->where('post_read->shop', '=', '')
                     ->orWhereNull('post_read');
@@ -225,7 +225,7 @@ class AppService
 
         // エリアマネージャー
         } elseif ($user->role == 'area_manager') {
-            $data = Post::with('user.area')
+            $data = Reservation::with('user.area')
             ->whereHas('user.area', function ($query) use ($user) {
                 $query->where('area_name', $user->area->area_name);
             })
@@ -243,7 +243,7 @@ class AppService
             
         // マネージャー
         } elseif ($user->role == 'manager') {
-            $data = Post::with('user.area')
+            $data = Reservation::with('user.area')
             ->whereHas('user.area', function ($query) use ($user) {
                 $query->where('area_name', $user->area->area_name)
             ->where('block_name', $user->area->block_name);
@@ -263,7 +263,7 @@ class AppService
         // 店舗
         } else {
             $shop = $user->shop_id;
-            $data = Post::where('shop_id', $shop)
+            $data = Reservation::where('shop_id', $shop)
             ->whereHas('state', function ($query) {
                 $query->where('post_read->shop', '=', '')
                     ->orWhereNull('post_read');
@@ -290,7 +290,7 @@ class AppService
         $terms = $shop !== null ? '=' : '!=';
 
         if ($user->role == 'admin') {
-            $data = Post::orderBy('created_at', 'desc')
+            $data = Reservation::orderBy('created_at', 'desc')
             ->whereHas('state', function ($query) {
                 $query->whereNull('post_read')
                 ->orWhereNull(['post_read->admin']);
@@ -301,7 +301,7 @@ class AppService
 
         // エリアマネージャー
         } elseif ($user->role == 'area_manager') {
-            $data = Post::with('user.area')
+            $data = Reservation::with('user.area')
             ->whereHas('state', function ($query) {
                 $query->whereNull('post_read')
                 ->orWhereNull(['post_read->area_manager']);
@@ -313,7 +313,7 @@ class AppService
             
         // マネージャー
         } elseif ($user->role == 'manager') {
-            $data = Post::with('user.area')
+            $data = Reservation::with('user.area')
             ->whereHas('state', function ($query) {
                 $query->whereNull('post_read')
                 ->orWhereNull(['post_read->manager']);
@@ -326,7 +326,7 @@ class AppService
         // 店舗
         } else {
             $shop = $user->shop_id;
-            $data = Post::where('shop_id', $shop)
+            $data = Reservation::where('shop_id', $shop)
             ->whereHas('state', function ($query) {
                 $query->whereNull('post_read')
                 ->orWhereNull(['post_read->shop']);

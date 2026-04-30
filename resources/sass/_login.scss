@@ -26,7 +26,7 @@
         }
         &::after {
             @include m.mq(sp) {
-                content: 'RISOUJITSUGYO Co., Ltd.';
+                content: 'ICHIJO Co.,Ltd.';
                 position: absolute;
                 bottom: 4%;
                 font-size: 12px;
@@ -35,9 +35,12 @@
         }
     }    
     .login-logo {
-        width: 240px;
-        padding: 0 0 32px;
+        width: 100%;
+        padding: 0 0 24px;
         margin: 0 auto;
+        font-size: 22px;
+        font-weight: 600;
+        line-height: 1.2;
         @include m.flexCenterCenter;
         @include m.mq(sp) {
             width: 80%;

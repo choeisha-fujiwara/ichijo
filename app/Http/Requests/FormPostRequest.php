@@ -22,17 +22,26 @@ class FormPostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email:strict,dns,spoof', 'max:255'],
-            'age' => ['required'],
-            'gender' => ['required'],
-            'tel' => ['nullable', 'string', 'regex:/^0[0-9]{9,10}$/u'],
-            'q02' => ['required'],
-            'q03' => ['required'],
-            'q06' => ['required'],
-            'q08' => ['required'],
-            'q09' => ['required'],
-            'q11' => ['required'],
-            'q12' => ['required'],
+            'article_id' => ['required', 'integer', 'exists:articles,id'],
+            'reservation_slot_id' => ['required', 'integer', 'exists:reservation_slots,id'],
+            'reservation_datetime' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'first_name_kana' => ['required', 'string', 'max:255'],
+            'last_name_kana' => ['required', 'string', 'max:255'],
+            'postal_code_1' => ['required', 'digits:3'],
+            'postal_code_2' => ['required', 'digits:4'],
+            'address_prefectures' => ['required', 'string', 'max:255'],
+            'address_municipalities' => ['required', 'string', 'max:255'],
+            'address_detail' => ['required', 'string', 'max:255'],
+            'address_building' => ['nullable', 'string', 'max:255'],
+            'phone-1' => ['required', 'digits_between:2,5'],
+            'phone-2' => ['required', 'digits_between:1,5'],
+            'phone-3' => ['required', 'digits_between:3,5'],
+            'email' => ['required', 'string', 'email:rfc', 'max:255', 'confirmed'],
+            'email_confirmation' => ['required', 'string', 'email:rfc', 'max:255'],
+            'memo' => ['nullable', 'string', 'max:1000'],
+            'privacy_policy' => ['accepted'],
         ];
     }
 }

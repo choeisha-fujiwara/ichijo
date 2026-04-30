@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-login-layout>
     <x-slot:page>Login</x-slot:page>  
     <div class="mb-4 text-sm text-gray-600 forgot-text">
         {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
@@ -20,5 +20,5 @@
         </div>
     </form>
     <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-</x-guest-layout>
+    <x-auth-session-status class="mt-4 text-center" :status="session('status')" />
+</x-login-layout>

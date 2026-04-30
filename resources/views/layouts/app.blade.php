@@ -24,23 +24,22 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/overcast/jquery-ui.min.css">
 <link rel="icon" href="{{ asset('images/favicon.ico') }}">
 <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon-180x180.png') }}" sizes="180x180">
-<link rel="stylesheet" href="{{ asset('build/assets/app-xkQi1IUC.css') }}">
-{{-- @vite(['resources/sass/app.scss', 'resources/js/app.js']) --}}
-<title>{{ $title }}｜神座 Customer Survey</title>
+{{-- <link rel="stylesheet" href="{{ asset('build/assets/app-xkQi1IUC.css') }}"> --}}
+@vite(['resources/sass/app.scss', 'resources/js/app.js'])
+<title>{{ $title }}｜一条工務店</title>
 </head>
 <body class="{{ $role }}">
     <div class="container">
-        <div id="loading" class="loading"><img src="{{ asset('images/logo-landscape.png') }}" alt="KAMUKURA"></div>
+        <div id="loading" class="loading"><img src="{{ asset('images/logo.svg') }}" alt="一条工務店"></div>
         <header>
             <div id="header" class="header">
                 <div class="header-logo">
-                    <h1><a href="/dashboard/top"><x-application-logo/><span>KAMUKURA <span class="cs">Customer Survey</span><span></a></h1>
+                    <h1><span>ICHIJO EVENT MANAGEMENT</span></a></h1>
                 </div>
                 <div class="user-name">
                     <h2>{{ $name }}</h2>
                 </div>
                 <div class="header-contents">
-                    @if ($page == 'index' || $page == 'shop')
                     <div class="search-box">
                         <form action="{{ $page == 'index' ? 'search' : 'shop-search' }}" method="POST" class="search-form">
                             @csrf
@@ -52,26 +51,19 @@
                             </div>
                         </form>
                     </div>
-                    @endif
-                    @if ($role == 'admin' && $page == 'index')
-                        <div class="download-btn active">
-                            <span class="material-symbols-outlined thin">download</span><span>CSVダウンロード</span>
-                        </div>
-                    @endif
                 </div>    
             </div>
         </header>
         <div class="contents">
             <div class="menu">
                 <ul>
-                <li class="{{ $page == 'index' || $page == 'show' ? 'active' : null }}"><a href="{{ route('top.index') }}"><span class="material-icons">list</span><span class="menu-text">投稿一覧</span></a></li>
-                @if ($role == 'admin')
-                <li class="{{ $page == 'shop' ? 'active' : null }}"><a href="{{ route('shop.index') }}"><span class="material-symbols-outlined">store</span><span class="menu-text">店舗一覧</span></a></li>
-                @endif
-                <li class="{{ $page == 'report' ? 'active' : null }}"><a href="{{ route('report.index') }}"><span class="material-symbols-outlined">grouped_bar_chart</span><span class="menu-text">レポート</span></a></li>
+                <li class="{{ $page == 'index' || $page == 'show' || $page == 'create' || $page == 'edit' ? 'active' : null }}"><a href="{{ route('top.index') }}"><span class="material-icons">list</span><span class="menu-text">記事一覧</span></a></li>
+                {{-- <li class="{{ $page == 'article' ? 'active' : null }}"><a href="{{ route('article.index') }}"><span class="material-symbols-outlined">edit</span><span class="menu-text">記事作成</span></a></li> --}}
+                <li class="{{ $page == 'reservation' ? 'active' : null }}"><a href="{{ route('reservations.index') }}"><span class="material-symbols-outlined">event_available</span><span class="menu-text">予約一覧</span></a></li>
+                <li class="{{ $page == 'venue' ? 'active' : null }}"><a href="{{ route('venue.index') }}"><span class="material-symbols-outlined">deployed_code</span><span class="menu-text">会場管理</span></a></li>
+                {{-- <li class="{{ $page == 'report' ? 'active' : null }}"><a href="{{ route('report.index') }}"><span class="material-symbols-outlined">grouped_bar_chart</span><span class="menu-text">レポート</span></a></li> --}}
                 <li class="logout"><p><span class="material-symbols-outlined icon">logout</span><span class="menu-text">ログアウト</span></p></li>
                 </ul>
-                {!! $count != '0' ? '<p class="badge">'.$count.'</p>' : null !!}
                 <div class="menu-btn">
                     <span class="bar-top"></span>
                     <span class="bar-center"></span>
@@ -82,7 +74,7 @@
         </div>
         <footer>
             <div class="footer">
-                <p><small>RISOUJITSUGYO Co., Ltd.</small></p>
+                <p><small>ICHIJO Co., Ltd.</small></p>
             </div>
         </footer>
     </div>
@@ -101,12 +93,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/i18n/jquery.ui.datepicker-ja.min.js"></script>
     @endif
-    <script src="{{ asset('build/assets/app-C1vQWtqv.js') }}"></script>
     <script>
         $(function() {
             if (window.matchMedia("(max-width: 576px)").matches) {
                 $("#from").datepicker({
-                    defaultDate: "-1m",
+                    defaultDate: 0,
                     changeMonth: true,
                     numberOfMonths: 1,
                     dateFormat: "yy-mm-dd",
@@ -115,7 +106,7 @@
                     }
                 });
                 $("#to").datepicker({
-                    defaultDate: "-1m",
+                    defaultDate: 0,
                     changeMonth: true,
                     numberOfMonths: 1,
                     dateFormat: "yy-mm-dd",
@@ -125,7 +116,7 @@
                 });
             } else {
                 $("#from").datepicker({
-                    defaultDate: "-1m",
+                    defaultDate: 0,
                     changeMonth: true,
                     numberOfMonths: 2,
                     dateFormat: "yy-mm-dd",
@@ -134,7 +125,7 @@
                     }
                 });
                 $("#to").datepicker({
-                    defaultDate: "-1m",
+                    defaultDate: 0,
                     changeMonth: true,
                     numberOfMonths: 2,
                     dateFormat: "yy-mm-dd",

@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\User;
-use App\Models\Post;
+use App\Models\Reservation;
 use App\Models\State;
 use Carbon\Carbon;
 
@@ -12,7 +12,7 @@ function activeCount($user)
         $res = State::where('post_active', 'active')->count();
 
     } elseif ($user->role == 'area_manager') {
-        $res = Post::with('user.area')
+        $res = Reservation::with('user.area')
         ->whereHas('user.area', function ($query) use ($user) {
             $query->where('area_name', $user->area->area_name);
         })
@@ -21,7 +21,7 @@ function activeCount($user)
         })->count();
     
     } elseif ($user->role == 'manager') {
-        $res = Post::with('user.area')
+        $res = Reservation::with('user.area')
         ->whereHas('user.area', function ($query) use ($user) {
             $query->where('area_name', $user->area->area_name)
             ->where('block_name', $user->area->block_name);
@@ -32,7 +32,7 @@ function activeCount($user)
 
     } else {
         $shop = $user->shop_id;
-        $res = Post::where('shop_id', $shop)
+        $res = Reservation::where('shop_id', $shop)
         ->whereHas('state', function ($query) {
             $query->where('post_active', 'active');
         })->count();

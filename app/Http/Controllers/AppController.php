@@ -3,13 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Post;
+use Illuminate\Http\RedirectResponse;
+use App\Models\Reservation;
 use App\Models\User;
-use App\Models\Area;
-use App\Models\State;
-use App\Models\Comment;
-use App\Services\AppService;
+use App\Models\Article;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Mail\SendMail;
@@ -23,10 +22,12 @@ class AppController extends Controller
     public function index()
     {   
         $user = Auth::user();
-        $service = new AppService;
-        $data = $service->dataExtraction($user);
-        $data->count = activeCount($user);
-        $data->tilde = hasTildeCheck($data);
+        $data = Article::with(['venue:id,venue_name'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(100)
+            ->withQueryString();
+
+        $this->loadArticleReservationCounts($data);
 
         return response()
             ->view('dashboard.top.index', compact('user', 'data'))
@@ -46,9 +47,8 @@ class AppController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        //
     }
 
     /**
@@ -57,18 +57,15 @@ class AppController extends Controller
     public function show(string $id)
     {   
         $user = Auth::user();
-        $data = Post::findOrFail($id);
-        
-        if ($user->role == 'shop') {
-            $data = deletionPersonalFindData($data);
-        }
+        $article = Article::with([
+                'user',
+                'venue',
+                'images',
+                'reservationSlots' => fn ($query) => $query->orderBy('date')->orderBy('start_time'),
+            ])
+            ->findOrFail($id);
 
-        $data = mergingResponses($data);
-
-        $data = alreadyRead($user, $data);
-        $data->count = activeCount($user);
-
-        return view('dashboard.top.show', compact('user', 'data'));
+        return view('dashboard.top.show', compact('user', 'article'));
     }
 
 
@@ -99,11 +96,12 @@ class AppController extends Controller
     public function search(Request $request)
     {
         $user = Auth::user();
-        $service = new AppService;
         $keyword = $request->input('keyword');
         $state = $request->input('state');
 
-        $data = $service->search($user, $keyword);
+        $data = Article::orderBy('created_at', 'desc')
+            ->paginate(100)
+            ->withQueryString();
 
         if ($state !== null) {
             if ($state == 'unread') {
@@ -114,6 +112,8 @@ class AppController extends Controller
                 $data = $service->filter($user, $state, $keyword);
             }
         }
+
+        $this->loadArticleReservationCounts($data);
 
         $data->count = activeCount($user);
         $data->tilde = hasTildeCheck($data);
@@ -136,6 +136,8 @@ class AppController extends Controller
             $data = $service->filter($user, $state, $keyword);
         }
 
+        $this->loadArticleReservationCounts($data);
+
         $data->count = activeCount($user);
         $data->tilde = hasTildeCheck($data);
                 
@@ -152,9 +154,9 @@ class AppController extends Controller
         }
 
         if ($from == $to) {
-            $data = Post::with('user')->with('state')->where('created_at', 'LIKE', "%{$from}%")->oldest()->get();    
+            $data = Reservation::with('user')->with('state')->where('created_at', 'LIKE', "%{$from}%")->oldest()->get();    
         } else {
-            $data = Post::with('user')->with('state')->whereBetween('created_at', [$from, $to])->oldest()->get();
+            $data = Reservation::with('user')->with('state')->whereBetween('created_at', [$from, $to])->oldest()->get();
         }
 
         foreach ($data as $datum) {
@@ -225,6 +227,7 @@ class AppController extends Controller
         $user = Auth::user();
         $service = new AppService;
         $data = $service->dataExtraction($user);
+        $this->loadArticleReservationCounts($data);
         $data->count = activeCount($user);
         $data->tilde = hasTildeCheck($data);
 
@@ -237,7 +240,7 @@ class AppController extends Controller
 
     public function distribution(Request $request)
     {
-        State::where('post_id', $request->id)
+        State::where('reservation_id', $request->id)
             ->update(['post_ng' => 'OK']);
         
         $shop = User::where('shop_id', $request->shop_id)->first();
@@ -245,5 +248,27 @@ class AppController extends Controller
         Mail::to($shop->email)->send(new SendMail($shop, $shop->name));
     
         return redirect()->back()->with('dst_msg', '配信しました');
+    }
+
+    private function loadArticleReservationCounts($data): void
+    {
+        if (!is_object($data) || !method_exists($data, 'getCollection')) {
+            return;
+        }
+
+        $collection = $data->getCollection();
+        if (!$collection) {
+            return;
+        }
+
+        $articles = $collection->filter(fn ($item) => $item instanceof Article);
+        if ($articles->isEmpty()) {
+            return;
+        }
+
+        $articles->loadCount([
+            'reservationSlots as reservation_slots_count',
+            'reservations as reservations_count',
+        ]);
     }
 }

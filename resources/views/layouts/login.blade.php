@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ @$page }}｜神座 Customer Survey</title>
+        <title>{{ @$page }}｜一条工務店</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,9 +20,9 @@
         <link rel="icon" href="{{ asset('images/favicon.ico') }}">
         <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon-180x180.png') }}" sizes="180x180">
             
-        <link rel="stylesheet" href="{{ asset('build/assets/app-DqXz8-54.css') }}">
-        <link rel="stylesheet" href="{{ asset('build/assets/app-xkQi1IUC.css') }}">
-        {{-- @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/sass/app.scss']) --}}
+        {{-- <link rel="stylesheet" href="{{ asset('build/assets/app-DqXz8-54.css') }}">
+        <link rel="stylesheet" href="{{ asset('build/assets/app-xkQi1IUC.css') }}"> --}}
+        @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/sass/app.scss'])
     </head>
     <body>
         <div id="loading" class="loading"></div>
@@ -31,7 +31,8 @@
                 <div class="login-form">
                     <div class="login-logo">
                         <a href="{{ route('login') }}">
-                            <x-login-logo/>
+                            ICHIJO EVENT MANAGEMENT SYSTEM
+                            {{-- <img src="{{ asset('images/logo.svg') }}" alt="一条工務店" /> --}}
                         </a>
                     </div>
                     {{ $slot }}

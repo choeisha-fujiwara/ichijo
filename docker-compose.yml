@@ -19,6 +19,7 @@ services:
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:/var/www/html'
+            - './docker/8.1/php-upload.ini:/etc/php/8.2/cli/conf.d/100-upload.ini'
         networks:
             - sail
         depends_on:

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Post;
+use App\Models\Reservation;
 use App\Models\User;
 use App\Models\Area;
 use App\Models\State;
@@ -40,13 +40,13 @@ class NewReportController extends Controller
         $requests->return = null;
 
         if ($user->role == 'admin') {
-            $data = Post::whereBetween('created_at', [$from, $to])->get();
+            $data = Reservation::whereBetween('created_at', [$from, $to])->get();
             $lines = $data;
         }
 
         if ($user->role == 'area_manager') {
             $area = $user->area->area_name;
-            $data = Post::with('user.area')
+            $data = Reservation::with('user.area')
             ->whereHas('user.area', function ($query) use ($area) {
                 $query->where('area_name', $area);
             })
@@ -54,13 +54,13 @@ class NewReportController extends Controller
             ->get();
             $requests->area = $area;
             $requests->return = 'area';
-            $lines = Post::whereBetween('created_at', [$from, $to])->get();
+            $lines = Reservation::whereBetween('created_at', [$from, $to])->get();
         }
 
         if ($user->role == 'manager') {
             $area = $user->area->area_name;
             $block = $user->area->block_name;
-            $data = Post::with('user.area')
+            $data = Reservation::with('user.area')
             ->whereHas('user.area', function ($query) use ($area, $block) {
                 $query->where('area_name', $area)
                 ->where('block_name', $block);
@@ -70,16 +70,16 @@ class NewReportController extends Controller
             $requests->area = $area;
             $requests->block = $block;
             $users = $users->where('area_id', $user->area_id);
-            $lines = Post::whereBetween('created_at', [$from, $to])->get();
+            $lines = Reservation::whereBetween('created_at', [$from, $to])->get();
         }
 
         if ($user->role == 'shop') {
-            $data = Post::whereBetween('created_at', [$from, $to])
+            $data = Reservation::whereBetween('created_at', [$from, $to])
             ->where('shop_id', $user->shop_id)
             ->get();
             $requests->shop = $user->shop_id;
             $requests->shop_name = $user->name;
-            $lines = Post::whereBetween('created_at', [$from, $to])->get();
+            $lines = Reservation::whereBetween('created_at', [$from, $to])->get();
         }
 
         $data->isEmpty() ? $sources = 'none' : $sources = compositionRatio($data, $lines);
@@ -150,11 +150,11 @@ class NewReportController extends Controller
         $users = User::where('role', 'shop')->get();
 
         if ($shop) {
-            $data = Post::whereBetween('created_at', [$from, $to])
+            $data = Reservation::whereBetween('created_at', [$from, $to])
                 ->where('shop_id', $shop)
                 ->get();
         } elseif ($block) {
-            $data = Post::with('user.area')
+            $data = Reservation::with('user.area')
             ->whereHas('user.area', function ($query) use ($area, $block) {
                 $query->where('area_name', $area)
                 ->where('block_name', $block);
@@ -162,9 +162,9 @@ class NewReportController extends Controller
             ->whereBetween('created_at', [$from, $to])
             ->get();
         } elseif ($area == '全店') {
-            $data = Post::whereBetween('created_at', [$from, $to])->get();
+            $data = Reservation::whereBetween('created_at', [$from, $to])->get();
         } elseif ($area) {
-            $data = Post::with('user.area')
+            $data = Reservation::with('user.area')
             ->whereHas('user.area', function ($query) use ($area) {
                 $query->where('area_name', $area);
             })

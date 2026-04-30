@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests\FormPostRequest;
+use App\Mail\ReservationAutoReply;
+use App\Mail\ReservationPostedNotification;
 use App\Models\User;
-use App\Models\Post;
+use App\Models\Reservation;
+use App\Models\Article;
+use App\Models\ReservationSlot;
 use App\Services\GuestService;
 use App\Mail\SendMail;
 use Illuminate\Support\Facades\Auth;
@@ -40,21 +44,76 @@ class GuestController extends Controller
     {
         $request->session()->regenerateToken();
 
-        $user = User::where('shop_id', $request->shop_id)->first();
+        $validated = $request->validated();
 
-        $services = new GuestService;
-        $request = $services->requestConvert($request);   
-        $data = new Post();
-        $data->fill($request->all())->save();
+        $data = new Reservation();
+        $data->fill([
+            'article_id' => $validated['article_id'],
+            'reservation_slot_id' => $validated['reservation_slot_id'],
+            'reservation_datetime' => $validated['reservation_datetime'],
+            'firstname' => $validated['first_name'],
+            'lastname' => $validated['last_name'],
+            'firstname_kana' => $validated['first_name_kana'],
+            'lastname_kana' => $validated['last_name_kana'],
+            'zipcode' => $validated['postal_code_1'].'-'.$validated['postal_code_2'],
+            'prefecture' => $validated['address_prefectures'],
+            'city' => $validated['address_municipalities'],
+            'address' => $validated['address_detail'],
+            'building' => $validated['address_building'] ?? null,
+            'phone' => $validated['phone-1'].'-'.$validated['phone-2'].'-'.$validated['phone-3'],
+            'email' => $validated['email'],
+            'memo' => $validated['memo'] ?? null,
+        ])->save();
 
-        $state = $services->stateCheck($data);
+        $name = trim(($validated['last_name'] ?? '').' '.($validated['first_name'] ?? ''));
 
-        $emails = $services->mailList($data);
-        $name = $user->name;
+        $slot = ReservationSlot::where('id', $validated['reservation_slot_id'])->first();
+        $slot->reserved_count += 1;
+        $slot->save();
 
-        foreach ($emails as $email) {
-            Mail::to($email->email)->send(new SendMail($email, $name));
+        $article = Article::with('venue')->find($validated['article_id']);
+        $venueName = $article?->venue?->venue_name;
+
+        $reservationDateTime = null;
+        if (!empty($validated['reservation_datetime'])) {
+            $reservationDateTime = \Carbon\Carbon::parse($validated['reservation_datetime'])->format('Y年m月d日 H:i');
+        } elseif ($slot && $slot->date && $slot->start_time) {
+            $reservationDateTime = \Carbon\Carbon::parse($slot->date.' '.$slot->start_time)->format('Y年m月d日 H:i');
         }
+
+        $notificationPayload = [
+            'articleTitle' => (string) ($article?->title ?? ''),
+            'venueName' => (string) ($venueName ?? ''),
+            'reservationDateTime' => (string) ($reservationDateTime ?? ''),
+            'fullName' => trim(($validated['last_name'] ?? '').' '.($validated['first_name'] ?? '')),
+            'fullNameKana' => trim(($validated['last_name_kana'] ?? '').' '.($validated['first_name_kana'] ?? '')),
+            'phone' => (string) (($validated['phone-1'] ?? '').'-'.($validated['phone-2'] ?? '').'-'.($validated['phone-3'] ?? '')),
+            'email' => (string) ($validated['email'] ?? ''),
+            'address' => trim((string) (($validated['address_prefectures'] ?? '').($validated['address_municipalities'] ?? '').($validated['address_detail'] ?? '').(!empty($validated['address_building']) ? ' '.$validated['address_building'] : ''))),
+            'memo' => (string) ($validated['memo'] ?? ''),
+        ];
+
+        $destinationEmails = collect($article?->emails ?? [])
+            ->filter(fn ($email) => is_string($email) && filter_var($email, FILTER_VALIDATE_EMAIL))
+            ->map(fn ($email) => trim($email))
+            ->filter()
+            ->unique()
+            ->values();
+
+        foreach ($destinationEmails as $destinationEmail) {
+            try {
+                Mail::to($destinationEmail)->send(new ReservationPostedNotification($notificationPayload));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        try {
+            Mail::to($validated['email'])->send(new ReservationAutoReply($name, $venueName, $reservationDateTime));
+        } catch (\Throwable $e) {
+            report($e);
+        }
+        
         
         return view('guest.thanks', compact('name'));
     }
@@ -64,17 +123,26 @@ class GuestController extends Controller
      */
     public function show(string $id)
     {
-        $shop = User::where('shop_id', $id)->first();
+        $article = Article::with(['images', 'venue'])->where('id', $id)->first();
 
-        if (empty($shop)) {
+        if (empty($article)) {
             abort(404);
         }
 
-        return response()
-        ->view('guest.index', compact('shop'))
-        ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-        ->header('Pragma', 'no-cache')
-        ->header('Expires', 0);
+        return $this->renderGuestPage($article);
+    }
+
+    public function showByToken(string $token)
+    {
+        $article = Article::with(['images', 'venue'])
+            ->where('public_token', $token)
+            ->first();
+
+        if (empty($article)) {
+            abort(404);
+        }
+
+        return $this->renderGuestPage($article);
     }
 
     /**
@@ -99,5 +167,42 @@ class GuestController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    private function renderGuestPage(Article $article)
+    {
+        if (!Auth::check() && !$this->canGuestViewArticle($article)) {
+            abort(404);
+        }
+
+        $reservation = ReservationSlot::where('article_id', $article->id)
+            ->orderBy('date')
+            ->orderBy('start_time')
+            ->get();
+
+        return response()
+            ->view('guest.index', compact('article', 'reservation'))
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 0);
+    }
+
+    private function canGuestViewArticle(Article $article): bool
+    {
+        if ($article->status !== 'publish' || empty($article->published_at)) {
+            return false;
+        }
+
+        $now = now();
+
+        if ($now->lt($article->published_at)) {
+            return false;
+        }
+
+        if (!empty($article->unpublished_at) && $now->gt($article->unpublished_at)) {
+            return false;
+        }
+
+        return true;
     }
 }

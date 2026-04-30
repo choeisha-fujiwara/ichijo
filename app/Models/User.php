@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use App\Models\Article;
 
 class User extends Authenticatable
 {
@@ -49,30 +50,9 @@ class User extends Authenticatable
         ];
     }
 
-    public function comments(): HasMany
+    public function articles(): HasMany
     {
-        return $this->hasMany(Comment::class);
+        return $this->hasMany(Article::class);
     }
 
-    public function posts(): HasMany
-    {
-        return $this->hasMany(Post::class, 'shop_id', 'shop_id');
-    }
-
-    public function area(): HasOne
-    {
-        return $this->hasOne(Area::class, 'id', 'area_id');
-    }
-
-    public function states(): HasManyThrough
-    {
-        return $this->hasManyThrough(
-            State::class,
-            Post::class,
-            'shop_id',
-            'post_id',
-            'id',
-            'id'
-        );
-    }
 }

@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Models\Post;
+use App\Models\Reservation;
 use App\Models\Area;
 use App\Models\State;
 
@@ -11,7 +11,7 @@ class ShopService
 {
     public function shopsData($data)
     {
-        $posts = Post::whereHas('state', function ($query) {
+        $posts = Reservation::whereHas('state', function ($query) {
             $query->where('post_read->shop', '')
             ->orWhereNull('post_read');
             })
@@ -20,7 +20,7 @@ class ShopService
             ->groupBy('shop_id')
             ->get();
 
-        $actives = Post::whereHas('state', function ($query) {
+        $actives = Reservation::whereHas('state', function ($query) {
             $query->where('post_active', 'active');
             })
             ->select('shop_id')
@@ -28,7 +28,7 @@ class ShopService
             ->groupBy('shop_id')
             ->get();
         
-        $approvals = Post::whereHas('state', function ($query) {
+        $approvals = Reservation::whereHas('state', function ($query) {
             $query->where('post_active', 'approval');
             })
             ->select('shop_id')

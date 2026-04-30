@@ -19,9 +19,9 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken()->nullable();
             $table->string('role');
-            $table->integer('area_id')->nullable();
-            $table->integer('shop_id')->nullable();
+            $table->string('affiliation')->nullable();
             $table->timestamp('last_login_at')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

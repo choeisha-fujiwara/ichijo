@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-login-layout>
     <x-slot:page>パスワード再設定</x-slot:page>
     <div class="msg err">
         <x-input-error :messages="$errors->get('email')" class="mt-2" />
@@ -36,4 +36,4 @@
             </x-primary-button>
         </div>
     </form>
-</x-guest-layout>
+</x-login-layout>

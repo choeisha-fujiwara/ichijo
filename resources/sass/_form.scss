@@ -7,12 +7,11 @@ body {
     overflow-x: hidden;
 }
 .content {
-    background: url("../images/bg-w.png") center center repeat-y;
-    background-size: 100% auto;
-    min-height: calc(100vh - 64px - 56px);
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
 }
 .preface {
-    background: url("../images/bg-b.png") center center repeat-y;
     background-size: 100% auto;
 }
 .loading-end {
