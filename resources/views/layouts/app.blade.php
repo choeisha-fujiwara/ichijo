@@ -15,7 +15,7 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <meta name="robots" content="noindex, nofollow, noarchive" />
-<style>body{margin:0;padding:0;background:#fff;}.loading{width:100vw;height:100vh;background:#fff;position:fixed;top:0;left:0;z-index:99999999;display:flex;justify-content:center;align-items:center;}.loading img{width: 240px;height:auto}</style>
+<style>body{margin:0;padding:0;background:#fff;}.loading{width:100vw;height:100vh;background:#fff;position:fixed;top:0;left:0;z-index:99999999;display:flex;justify-content:center;align-items:center;padding-bottom:8vh;}.loading img{width: 240px;height:auto}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600&family=Poppins:wght@500&display=swap">
@@ -24,7 +24,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/overcast/jquery-ui.min.css">
 <link rel="icon" href="{{ asset('images/favicon.ico') }}">
 <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon-180x180.png') }}" sizes="180x180">
-{{-- <link rel="stylesheet" href="{{ asset('build/assets/app-Dw1RvjNX.css') }}"> --}}
 @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 <title>{{ $title }}｜一条工務店</title>
 </head>

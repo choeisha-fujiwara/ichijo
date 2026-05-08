@@ -35,10 +35,19 @@ class ArticleController extends Controller
             ->withQueryString();
         $images = Image::orderBy('created_at', 'desc')->get();
         $venues = $this->availableVenues();
+        $currentRole = Auth::user()->role;
+        $excludeRoles = match ($currentRole) {
+            'developer' => [],
+            'system'    => ['developer'],
+            'admin'     => ['developer', 'system'],
+            'manager'   => ['developer', 'system', 'admin'],
+            default     => ['developer', 'system', 'admin', 'manager'],
+        };
         $userEmails = User::query()
+            ->when(!empty($excludeRoles), fn($q) => $q->whereNotIn('role', $excludeRoles))
             ->whereNotNull('email')
             ->where('email', '!=', '')
-            ->orderBy('name')
+            ->orderBy('id')
             ->pluck('email')
             ->unique()
             ->values();
@@ -76,10 +85,19 @@ class ArticleController extends Controller
         $article->load(['images', 'reservationSlots']);
         $images = Image::orderBy('created_at', 'desc')->get();
         $venues = $this->availableVenues($article);
+        $currentRole = Auth::user()->role;
+        $excludeRoles = match ($currentRole) {
+            'developer' => [],
+            'system'    => ['developer'],
+            'admin'     => ['developer', 'system'],
+            'manager'   => ['developer', 'system', 'admin'],
+            default     => ['developer', 'system', 'admin', 'manager'],
+        };
         $userEmails = User::query()
+            ->when(!empty($excludeRoles), fn($q) => $q->whereNotIn('role', $excludeRoles))
             ->whereNotNull('email')
             ->where('email', '!=', '')
-            ->orderBy('name')
+            ->orderBy('id')
             ->pluck('email')
             ->unique()
             ->values();
