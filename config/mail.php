@@ -116,8 +116,8 @@ return [
 
     // 送信アドレス
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'kamukura-customer@cs.kamukura-customer.com'),
-        'name' => env('MAIL_FROM_NAME', 'マネジメント本部'),
+        'address' => env('MAIL_FROM_ADDRESS', 'admin@niigata-ichijo.com'),
+        'name' => env('MAIL_FROM_NAME', '一条工務店'),
     ],
 
     /*

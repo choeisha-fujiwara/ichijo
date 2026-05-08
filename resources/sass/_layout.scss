@@ -64,11 +64,13 @@
             }
         }
     }
-    .user-name {
-        margin-right: auto;
-        margin-left: 16px;
-        font-size: 16px;
-        font-weight: 500;
+    .user-state {
+        margin-left: auto;
+        margin-right: 16px;
+        font-size: 13px;
+        font-weight: 400;
+        display: flex;
+        gap: 16px;
         @include m.mq(sp) {
             width: 38%;
             font-size: 12px;

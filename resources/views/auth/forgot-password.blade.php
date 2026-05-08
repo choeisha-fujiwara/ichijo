@@ -1,5 +1,5 @@
 <x-login-layout>
-    <x-slot:page>Login</x-slot:page>  
+    <x-slot:page>パスワード再設定</x-slot:page>  
     <div class="mb-4 text-sm text-gray-600 forgot-text">
         {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
     </div>        

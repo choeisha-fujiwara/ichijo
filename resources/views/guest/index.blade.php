@@ -83,8 +83,8 @@
                 </div>
             @endif
             @if ($article->venue)
-                <section class="article-venue" aria-label="会場情報">
-                    <h2>イベント会場</h2>
+                <section class="article-venue" aria-label="お問い合わせ先">
+                    <h2>お問い合わせ先</h2>
                     @if (!empty($article->venue->image))
                         <div class="article-venue-image">
                             <img src="{{ route('venue.image', $article->venue) }}" alt="{{ $article->venue->venue_name }} の画像">
@@ -175,18 +175,22 @@
                             @if ($isReservable)
                                 <button type="button" class="calendar-day is-clickable {{ $isCurrentMonth ? '' : 'is-outside' }}" data-date="{{ $dateKey }}">
                                     <span class="calendar-day-number">{{ $day->day }}</span>
-                                    <span class="calendar-day-capacity">
-                                        <span class="material-symbols-outlined icon">circle</span>
-                                        <span>残{{ $dayCapacity }}枠</span>
-                                    </span>
+                                    @if ($day >= \Carbon\Carbon::today())
+                                        <span class="calendar-day-capacity">
+                                            <span class="material-symbols-outlined icon">circle</span>
+                                            <span>残{{ $dayCapacity }}枠</span>
+                                        </span>
+                                    @endif
                                 </button>
                             @elseif ($hasReservation)
                                 <div class="calendar-day is-disabled {{ $isCurrentMonth ? '' : 'is-outside' }}" aria-disabled="true">
                                     <span class="calendar-day-number">{{ $day->day }}</span>
-                                    <span class="calendar-day-capacity is-disabled">
-                                        <span class="material-symbols-outlined icon">circle</span>
-                                        <span>残0枠</span>
-                                    </span>
+                                    @if ($day >= \Carbon\Carbon::today())
+                                        <span class="calendar-day-capacity is-disabled">
+                                            <span class="material-symbols-outlined icon">circle</span>
+                                            <span>残0枠</span>
+                                        </span>
+                                    @endif
                                 </div>
                             @else
                                 <div class="calendar-day {{ $isCurrentMonth ? '' : 'is-outside' }}">
@@ -401,12 +405,12 @@
                     />
                 </div>
                 <div class="input-item memo">
-                    <label for="memo" class="single-item"><span class="any">任意</span><span>ご要望・ご質問</span></label>
+                    <label for="memo" class="single-item"><span class="any">任意</span><span>{{ $article->memo ? $article->memo : 'ご要望・ご質問' }}</span></label>
                     <textarea
                         name="memo"
                         id="memo"
                         rows="4"
-                        placeholder="ご要望やご質問がある場合はご記入ください"
+                        placeholder="{{ $article->memo ? '任意' : 'ご要望やご質問がある場合はご記入ください' }}"
                     ></textarea>
                 </div>
                 <div class="input-item privacy-policy">
@@ -620,6 +624,8 @@
 
                 const start = getCalendarStart(activeMonth);
                 const end = getCalendarEnd(activeMonth);
+                const todayDate = new Date();
+                todayDate.setHours(0, 0, 0, 0);
 
                 for (let day = new Date(start); day <= end; day.setDate(day.getDate() + 1)) {
                     const currentDay = new Date(day);
@@ -629,6 +635,7 @@
                     const hasReservation = !!dayData && Array.isArray(dayData.slots) && dayData.slots.length > 0;
                     const totalCapacity = hasReservation ? Number(dayData.total_capacity || 0) : 0;
                     const isReservable = hasReservation && totalCapacity > 0;
+                    const isAfterToday = currentDay >= todayDate;
 
                     if (isReservable) {
                         const button = document.createElement('button');
@@ -637,10 +644,12 @@
                         button.dataset.date = dateKey;
                         button.innerHTML = `
                             <span class="calendar-day-number">${currentDay.getDate()}</span>
-                            <span class="calendar-day-capacity">
-                                <span class="material-symbols-outlined icon">circle</span>
-                                <span>残${totalCapacity}枠</span>
-                            </span>
+                            ${isAfterToday ? `
+                                <span class="calendar-day-capacity">
+                                    <span class="material-symbols-outlined icon">circle</span>
+                                    <span>残${totalCapacity}枠</span>
+                                </span>
+                            ` : ''}
                         `;
                         button.addEventListener('click', () => openModal(dateKey));
                         calendarGrid.appendChild(button);
@@ -650,10 +659,12 @@
                         div.setAttribute('aria-disabled', 'true');
                         div.innerHTML = `
                             <span class="calendar-day-number">${currentDay.getDate()}</span>
-                            <span class="calendar-day-capacity is-disabled">
-                                <span class="material-symbols-outlined icon">circle</span>
-                                <span>残0枠</span>
-                            </span>
+                            ${isAfterToday ? `
+                                <span class="calendar-day-capacity is-disabled">
+                                    <span class="material-symbols-outlined icon">circle</span>
+                                    <span>残0枠</span>
+                                </span>
+                            ` : ''}
                         `;
                         calendarGrid.appendChild(div);
                     } else {
@@ -687,7 +698,7 @@
                     const button = document.createElement('button');
                     button.type = 'button';
                     button.className = 'reservation-slot-option';
-                    button.textContent = formatSlotLabel(slot);
+                    button.innerHTML = `<span class="reservation-slot-option__label">${formatSlotLabel(slot)}</span><span class="reservation-slot-option__capacity">残${slot.capacity}枠</span>`;
                     button.dataset.slotId = String(slot.id);
                     button.dataset.datetime = `${slot.date} ${slot.start_time}`;
 

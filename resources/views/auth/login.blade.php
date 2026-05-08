@@ -1,5 +1,5 @@
 <x-login-layout>
-    <x-slot:page>Login</x-slot:page>
+    <x-slot:page>ログイン</x-slot:page>
     <div class="msg err">
         <x-input-error :messages="$errors->get('email')" class="mt-2" />
         <x-input-error :messages="$errors->get('password')" class="mt-2" />

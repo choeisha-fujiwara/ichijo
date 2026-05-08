@@ -3,8 +3,7 @@
     <x-slot:page>venue</x-slot:page>
     <x-slot:name>{{ $user->name }}</x-slot:name>
     <x-slot:role>{{ $user->role }}</x-slot:role>
-    <x-slot:keyword>{{ @$keyword }}</x-slot:keyword>
-    <x-slot:state>{{ @$state }}</x-slot:state>
+    <x-slot:login>{{ $user->last_login_at?->format('Y.m.d H:i') }}</x-slot:login>
     <x-slot:old>{{ @$old }}</x-slot:old>
 
     <div class="content venue-page">

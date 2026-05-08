@@ -7,6 +7,8 @@ use Illuminate\Http\RedirectResponse;
 use App\Models\Reservation;
 use App\Models\User;
 use App\Models\Article;
+use App\Models\ArticleVenue;
+use App\Models\Image;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -19,18 +21,56 @@ class AppController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {   
+    public function index(Request $request)
+    {
         $user = Auth::user();
-        $data = Article::with(['venue:id,venue_name'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(100)
-            ->withQueryString();
+        $validated = $request->validate([
+            'venue_id' => ['nullable', 'integer', 'exists:article_venues,id'],
+            'publish_from' => ['nullable', 'date'],
+            'publish_to' => ['nullable', 'date', 'after_or_equal:publish_from'],
+        ]);
+
+        $venueId = $validated['venue_id'] ?? null;
+        $publishFrom = $validated['publish_from'] ?? null;
+        $publishTo = $validated['publish_to'] ?? null;
+
+        $query = Article::with(['venue:id,venue_name', 'images'])
+            ->orderBy('created_at', 'desc');
+
+        if (!empty($venueId)) {
+            $query->where('venue_id', $venueId);
+        }
+
+        if (!empty($publishFrom) || !empty($publishTo)) {
+            $query->whereNotNull('published_at');
+
+            if (!empty($publishTo)) {
+                $query->whereDate('published_at', '<=', $publishTo);
+            }
+
+            if (!empty($publishFrom)) {
+                $query->where(function ($periodQuery) use ($publishFrom) {
+                    $periodQuery->whereNull('unpublished_at')
+                        ->orWhereDate('unpublished_at', '>=', $publishFrom);
+                });
+            }
+        }
+
+        $data = $query->paginate(100)->withQueryString();
+        $venues = ArticleVenue::query()
+            ->orderBy('venue_name')
+            ->get(['id', 'venue_name']);
+
+        $filters = [
+            'venue_id' => $venueId,
+            'publish_from' => $publishFrom,
+            'publish_to' => $publishTo,
+        ];
 
         $this->loadArticleReservationCounts($data);
 
         return response()
-            ->view('dashboard.top.index', compact('user', 'data'))
+            ->view('dashboard.top.index', compact('user', 'data', 'venues', 'filters'))
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
             ->header('Pragma', 'no-cache')
             ->header('Expires', 0);
@@ -66,6 +106,46 @@ class AppController extends Controller
             ->findOrFail($id);
 
         return view('dashboard.top.show', compact('user', 'article'));
+    }
+
+    public function copy(Article $article): RedirectResponse
+    {
+        $user = Auth::user();
+
+        $newArticle = DB::transaction(function () use ($article, $user) {
+            $copy = Article::create([
+                'user_id'              => $user->id,
+                'title'                => $article->title . '【コピー】',
+                'body'                 => $article->body,
+                'freeword_1'           => $article->freeword_1,
+                'freeword_2'           => $article->freeword_2,
+                'header_image'         => $article->header_image,
+                'body_image'           => $article->body_image,
+                'body_image_captions'  => $article->body_image_captions,
+                'memo'                 => $article->memo,
+                'manager'              => $article->manager,
+                'venue_id'             => $article->venue_id,
+                'emails'               => $article->emails,
+                'published_at'         => $article->published_at,
+                'unpublished_at'       => $article->unpublished_at,
+                'status'               => 'draft',
+            ]);
+
+            foreach ($article->images as $image) {
+                Image::create([
+                    'article_id'    => $copy->id,
+                    'path'          => $image->path,
+                    'original_name' => $image->original_name,
+                    'size'          => $image->size,
+                    'mime_type'     => $image->mime_type,
+                    'sort_order'    => $image->sort_order,
+                ]);
+            }
+
+            return $copy;
+        });
+
+        return redirect()->route('top.show', $newArticle)->with('msg', '記事をコピーしました');
     }
 
 
@@ -270,5 +350,6 @@ class AppController extends Controller
             'reservationSlots as reservation_slots_count',
             'reservations as reservations_count',
         ]);
+        $articles->loadSum('reservationSlots as reservation_slots_capacity_sum', 'capacity');
     }
 }

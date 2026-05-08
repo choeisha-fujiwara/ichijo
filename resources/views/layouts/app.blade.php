@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/overcast/jquery-ui.min.css">
 <link rel="icon" href="{{ asset('images/favicon.ico') }}">
 <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon-180x180.png') }}" sizes="180x180">
-{{-- <link rel="stylesheet" href="{{ asset('build/assets/app-xkQi1IUC.css') }}"> --}}
+{{-- <link rel="stylesheet" href="{{ asset('build/assets/app-Dw1RvjNX.css') }}"> --}}
 @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 <title>{{ $title }}｜一条工務店</title>
 </head>
@@ -34,34 +34,24 @@
         <header>
             <div id="header" class="header">
                 <div class="header-logo">
-                    <h1><span>ICHIJO EVENT MANAGEMENT</span></a></h1>
+                    <h1><span>ICHIJO EVENT MANAGEMENT</span></h1>
                 </div>
-                <div class="user-name">
-                    <h2>{{ $name }}</h2>
+                <div class="user-state">
+                    <p>ログイン日時：{{ $login }}</p>
+                    <p>ユーザー名：{{ $name }}</p>
                 </div>
-                <div class="header-contents">
-                    <div class="search-box">
-                        <form action="{{ $page == 'index' ? 'search' : 'shop-search' }}" method="POST" class="search-form">
-                            @csrf
-                            <div class="search">
-                                <input type="hidden" name="state" value="{{ @$state }}" />
-                                <input type="text" class="search-box" name="keyword" value="{{ @$keyword }}" placeholder="{{ $page == 'index' ? 'キーワード検索' : '店舗検索' }}">
-                                <label class="search-btn" for="search-btn"><span class="material-symbols-outlined">search</span></label>
-                                <input type="submit" id="search-btn" value="">
-                            </div>
-                        </form>
-                    </div>
-                </div>    
             </div>
         </header>
         <div class="contents">
             <div class="menu">
                 <ul>
                 <li class="{{ $page == 'index' || $page == 'show' || $page == 'create' || $page == 'edit' ? 'active' : null }}"><a href="{{ route('top.index') }}"><span class="material-icons">list</span><span class="menu-text">記事一覧</span></a></li>
-                {{-- <li class="{{ $page == 'article' ? 'active' : null }}"><a href="{{ route('article.index') }}"><span class="material-symbols-outlined">edit</span><span class="menu-text">記事作成</span></a></li> --}}
                 <li class="{{ $page == 'reservation' ? 'active' : null }}"><a href="{{ route('reservations.index') }}"><span class="material-symbols-outlined">event_available</span><span class="menu-text">予約一覧</span></a></li>
                 <li class="{{ $page == 'venue' ? 'active' : null }}"><a href="{{ route('venue.index') }}"><span class="material-symbols-outlined">deployed_code</span><span class="menu-text">会場管理</span></a></li>
-                {{-- <li class="{{ $page == 'report' ? 'active' : null }}"><a href="{{ route('report.index') }}"><span class="material-symbols-outlined">grouped_bar_chart</span><span class="menu-text">レポート</span></a></li> --}}
+                <li class="{{ $page == 'images' ? 'active' : null }}"><a href="{{ route('images.index') }}"><span class="material-symbols-outlined">photo_library</span><span class="menu-text">画像管理</span></a></li>
+                 {{-- --- To be released later ---
+                <li class="{{ $page == 'users' ? 'active' : null }}"><a href="{{ route('users.index') }}"><span class="material-symbols-outlined">person</span><span class="menu-text">ユーザー管理</span></a></li>
+                <li class="{{ $page == 'report' ? 'active' : null }}"><a href="{{ route('report.index') }}"><span class="material-symbols-outlined">grouped_bar_chart</span><span class="menu-text">レポート</span></a></li> --}}
                 <li class="logout"><p><span class="material-symbols-outlined icon">logout</span><span class="menu-text">ログアウト</span></p></li>
                 </ul>
                 <div class="menu-btn">
@@ -92,6 +82,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/i18n/jquery.ui.datepicker-ja.min.js"></script>
+    <script type="text/javascript" defer>window.onload=function(){$(function(){$(".loading").fadeOut()})};</script>
     @endif
     <script>
         $(function() {
@@ -136,5 +127,7 @@
             };
         });
     </script>
+    {{-- <script src="{{ asset('build/assets/app-C1vQWtqv.js') }}"></script> --}}
+    @stack('scripts')
 </body>
 </html>

@@ -64,6 +64,10 @@ body {
     line-height: 1.8;
     color: #1e293b;
     text-align: justify;
+    a {
+        color: #2563eb;
+        text-decoration: underline;
+    }
 }
 
 .article-header img {
@@ -458,6 +462,23 @@ body {
         line-height: 1.8;
         color: #334155;
     }
+
+    .reservation-thanks-back {
+        display: inline-block;
+        margin-top: 24px;
+        padding: 12px 32px;
+        border-radius: 8px;
+        background: #1d4ed8;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s ease;
+
+        &:hover {
+            background: #1e40af;
+        }
+    }
 }
 
 .reservation-calendar-block {
@@ -664,6 +685,10 @@ button.calendar-day {
 
 .reservation-slot-option {
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
     border: 1px solid #bae6fd;
     background: #f0f9ff;
     color: #0c4a6e;
@@ -677,6 +702,20 @@ button.calendar-day {
 
     &:hover {
         background: #e0f2fe;
+    }
+
+    &__label {
+        flex: 1 1 auto;
+    }
+
+    &__capacity {
+        flex: 0 0 auto;
+        font-size: 12px;
+        font-weight: 500;
+        color: #0369a1;
+        background: #e0f2fe;
+        border-radius: 4px;
+        padding: 2px 8px;
     }
 }
 

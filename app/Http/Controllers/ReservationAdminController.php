@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ArticleVenue;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -13,11 +14,33 @@ class ReservationAdminController extends Controller
         $user = auth()->user();
         $sort = (string) $request->query('sort', 'created_desc');
 
+        $validated = $request->validate([
+            'venue_id'      => ['nullable', 'integer', 'exists:article_venues,id'],
+            'reserved_from' => ['nullable', 'date'],
+            'reserved_to'   => ['nullable', 'date', 'after_or_equal:reserved_from'],
+        ]);
+
+        $venueId      = $validated['venue_id'] ?? null;
+        $reservedFrom = $validated['reserved_from'] ?? null;
+        $reservedTo   = $validated['reserved_to'] ?? null;
+
         $query = Reservation::query()->with([
             'article:id,title,venue_id',
             'article.venue:id,venue_name',
             'reservationSlot:id,article_id,date,start_time,end_time',
         ]);
+
+        if (!empty($venueId)) {
+            $query->whereHas('article', fn ($q) => $q->where('venue_id', $venueId));
+        }
+
+        if (!empty($reservedFrom)) {
+            $query->whereDate('reservation_datetime', '>=', $reservedFrom);
+        }
+
+        if (!empty($reservedTo)) {
+            $query->whereDate('reservation_datetime', '<=', $reservedTo);
+        }
 
         $this->applySort($query, $sort);
 
@@ -25,7 +48,15 @@ class ReservationAdminController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return view('dashboard.reservations.index', compact('user', 'reservations', 'sort'));
+        $venues = ArticleVenue::orderBy('venue_name')->get(['id', 'venue_name']);
+
+        $filters = [
+            'venue_id'      => $venueId,
+            'reserved_from' => $reservedFrom,
+            'reserved_to'   => $reservedTo,
+        ];
+
+        return view('dashboard.reservations.index', compact('user', 'reservations', 'sort', 'venues', 'filters'));
     }
 
     public function show(Reservation $reservation)
@@ -42,14 +73,48 @@ class ReservationAdminController extends Controller
         return view('dashboard.reservations.show', compact('user', 'reservation', 'statusLabel', 'statusClass'));
     }
 
+    public function updateStaff(Request $request, Reservation $reservation)
+    {
+        $validated = $request->validate([
+            'staff' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $reservation->update(['staff' => $validated['staff'] ?? null]);
+
+        return redirect()->route('reservations.show', $reservation)
+            ->with('msg', '担当者を保存しました。');
+    }
+
     public function export(Request $request): StreamedResponse
     {
         $sort = (string) $request->query('sort', 'created_desc');
+
+        $validated = $request->validate([
+            'venue_id'      => ['nullable', 'integer', 'exists:article_venues,id'],
+            'reserved_from' => ['nullable', 'date'],
+            'reserved_to'   => ['nullable', 'date', 'after_or_equal:reserved_from'],
+        ]);
+
+        $venueId      = $validated['venue_id'] ?? null;
+        $reservedFrom = $validated['reserved_from'] ?? null;
+        $reservedTo   = $validated['reserved_to'] ?? null;
 
         $query = Reservation::query()->with([
             'article:id,title',
             'reservationSlot:id,article_id,date,start_time,end_time',
         ]);
+
+        if (!empty($venueId)) {
+            $query->whereHas('article', fn ($q) => $q->where('venue_id', $venueId));
+        }
+
+        if (!empty($reservedFrom)) {
+            $query->whereDate('reservation_datetime', '>=', $reservedFrom);
+        }
+
+        if (!empty($reservedTo)) {
+            $query->whereDate('reservation_datetime', '<=', $reservedTo);
+        }
 
         $this->applySort($query, $sort);
 
@@ -72,7 +137,7 @@ class ReservationAdminController extends Controller
                 '電話番号',
                 '住所',
                 '備考',
-            ], true);
+            ]);
 
             foreach ($reservations as $reservation) {
                 [$statusLabel] = $this->resolveStatus($reservation);
@@ -94,7 +159,7 @@ class ReservationAdminController extends Controller
 
             fclose($stream);
         }, $fileName, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Type' => 'text/csv; charset=Shift_JIS',
         ]);
     }
 
@@ -171,7 +236,7 @@ class ReservationAdminController extends Controller
         return $dateTime->format('Y-m-d H:i');
     }
 
-    private function writeCsvRow($stream, array $row, bool $stripUtf8Bom = false): void
+    private function writeCsvRow($stream, array $row): void
     {
         $temp = fopen('php://temp', 'r+');
 
@@ -184,10 +249,6 @@ class ReservationAdminController extends Controller
         $line = (string) stream_get_contents($temp);
         fclose($temp);
 
-        if ($stripUtf8Bom) {
-            $line = preg_replace('/^\xEF\xBB\xBF/', '', $line) ?? $line;
-        }
-
-        fwrite($stream, $line);
+        fwrite($stream, mb_convert_encoding($line, 'SJIS-win', 'UTF-8'));
     }
 }

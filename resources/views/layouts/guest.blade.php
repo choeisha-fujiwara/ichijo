@@ -20,7 +20,6 @@
     <link rel="icon" href="{{ asset('images/favicon.ico') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon-180x180.png') }}" sizes="180x180">
     <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
-    {{-- <link rel="stylesheet" href="{{ asset('build/assets/guest-C9RI55J8.css') }}"> --}}
     @vite(['resources/sass/guest.scss', 'resources/js/guest.js'])
     <title></title>
 </head>
@@ -31,6 +30,6 @@
             {{ $slot }}
         </div>
     </div>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </body>
 </html>

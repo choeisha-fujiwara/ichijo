@@ -3,6 +3,7 @@
     <x-slot:page>index</x-slot:page>
     <x-slot:name>{{ $user->name }}</x-slot:name>
     <x-slot:role>{{ $user->role }}</x-slot:role>
+    <x-slot:login>{{ $user->last_login_at?->format('Y.m.d H:i') }}</x-slot:login>
     <x-slot:old>{{ @$old }}</x-slot:old>
 
     @php
@@ -72,6 +73,10 @@
                 </div>
                 <div class="top-detail-actions">
                     <a href="{{ route('article.edit', $article) }}" class="top-detail-edit">編集する</a>
+                    <form method="POST" action="{{ route('top.copy', $article) }}">
+                        @csrf
+                        <button type="submit" class="top-detail-copy">コピーする</button>
+                    </form>
                     <a href="{{ route('top.index') }}" class="top-detail-back">一覧へ戻る</a>
                 </div>
             </div>
@@ -168,7 +173,18 @@
                         </div>
                         <div>
                             <dt>公開URL</dt>
-                            <dd><a href="{{ $guestPageUrl }}" target="_blank" rel="noopener noreferrer">{{ $guestPageUrl }}</a></dd>
+                            <dd class="top-detail-url-row">
+                                <a href="{{ $guestPageUrl }}" target="_blank" rel="noopener noreferrer">{{ $guestPageUrl }}</a>
+                                <button type="button" class="top-detail-copy-url-btn"
+                                    x-data="{ copied: false }"
+                                    x-on:click="navigator.clipboard.writeText('{{ $guestPageUrl }}').then(() => { copied = true; setTimeout(() => copied = false, 2000); })"
+                                    x-bind:class="copied ? 'is-copied' : ''"
+                                    aria-label="URLをコピー"
+                                >
+                                    <span class="material-symbols-outlined" x-show="!copied">content_copy</span>
+                                    <span class="material-symbols-outlined" x-show="copied">check</span>
+                                </button>
+                            </dd>
                         </div>
                     </dl>
                 </div>
@@ -182,7 +198,7 @@
                                     <p>{{ $slot->date?->format('Y.m.d') }}</p>
                                     <p>{{ \Carbon\Carbon::parse((string) $slot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse((string) $slot->end_time)->format('H:i') }}</p>
                                     <p>予約枠： {{ $slot->capacity }} </p>
-                                    <p class="{{ $slot->reservations_count > 0 ? 'active' : '' }}">予約 {{ $slot->reservations_count ?? 0 }} 件</p>
+                                    <p class="{{ $slot->reserved_count > 0 ? 'active' : '' }}">予約 {{ $slot->reserved_count ?? 0 }} 件</p>
                                 </div>
                             @endforeach
                         </div>

@@ -1,10 +1,24 @@
 @php
     $isEdit = $article !== null;
+    $prefillHeaderImage = !$isEdit ? ($prefillHeaderImage ?? null) : null;
+    $prefillBodyImages = !$isEdit ? collect($prefillBodyImages ?? [])->values() : collect();
+    $prefillHeaderSelectedId = $prefillHeaderImage['id'] ?? null;
+    $prefillHeaderPreviewUrl = $prefillHeaderImage['url'] ?? null;
+    $prefillBodySelections = $prefillBodyImages
+        ->map(fn ($image) => [
+            'id' => $image['id'] ?? null,
+            'url' => $image['url'] ?? null,
+            'caption' => '',
+        ])
+        ->filter(fn ($image) => !empty($image['id']) && !empty($image['url']))
+        ->values()
+        ->all();
     $currentExistingBodyCaptions = old('existing_body_image_captions', $isEdit ? ($article->body_image_captions ?? []) : []);
     $currentHeaderImage = $isEdit
         ? ($article->images->firstWhere('path', $article->header_image)
             ?? $article->images->first(fn ($image) => str_contains((string) $image->path, '/header/')))
         : null;
+    $initialHeaderPreviewUrl = $currentHeaderImage ? route('article.image', $currentHeaderImage) : ($prefillHeaderPreviewUrl ?: null);
     $currentBodyImageItems = $isEdit
         ? collect($article->body_image ?? [])
             ->map(function ($path, $index) use ($article, $currentExistingBodyCaptions) {
@@ -53,15 +67,17 @@
         $initialSlots = old('slots', []);
     }
     $initialEmails = old('emails', $isEdit ? ($article->emails ?? []) : []);
-    $currentBodyImageUrls = $currentBodyImageItems
-        ->pluck('url')
-        ->values()
-        ->all();
-    $currentBodyCaptions = $currentBodyImageItems
-        ->pluck('caption')
-        ->map(fn ($caption) => (string) ($caption ?? ''))
-        ->values()
-        ->all();
+    $emailOptions = collect($userEmails ?? [])->filter()->unique()->values();
+    $currentBodyImageUrls = $isEdit
+        ? $currentBodyImageItems->pluck('url')->values()->all()
+        : $prefillBodyImages->pluck('url')->values()->all();
+    $currentBodyCaptions = $isEdit
+        ? $currentBodyImageItems
+            ->pluck('caption')
+            ->map(fn ($caption) => (string) ($caption ?? ''))
+            ->values()
+            ->all()
+        : array_fill(0, count($currentBodyImageUrls), '');
     $venuesPayload = collect($venues)
         ->map(fn ($venue) => [
             'id' => $venue->id,
@@ -86,7 +102,7 @@
         manager: @js(old('manager', $article->manager ?? '')),
         venueId: @js((string) old('venue_id', $article->venue_id ?? '')),
         venues: @js($venuesPayload),
-        headerImageUrl: @js($currentHeaderImage ? route('article.image', $currentHeaderImage) : null),
+        headerImageUrl: @js($initialHeaderPreviewUrl),
         bodyImageUrls: @js($currentBodyImageUrls),
         bodyCaptions: @js($currentBodyCaptions),
         removeHeaderImage: @js((bool) old('remove_header_image', false)),
@@ -148,6 +164,8 @@
                         :saved-images="$images"
                         saved-type="header"
                         selected-name="header_selected_image_id"
+                        :initial-selected-id="$prefillHeaderSelectedId"
+                        :initial-preview-url="$prefillHeaderPreviewUrl"
                     />
                 </div>
                 <div class="input-item title-text edit-title">
@@ -171,7 +189,7 @@
                 <div class="input-row">
                     <div class="input-item">
                         <label>担当者</label>
-                        <input type="text" name="manager" value="{{ old('manager', $article->manager ?? '') }}" x-model="preview.manager" required>
+                        <input type="text" name="manager" value="{{ old('manager', $article->manager ?? '') }}" x-model="preview.manager" placeholder="任意入力">
                     </div>
                     <div class="input-item">
                         <label>会場</label>
@@ -230,6 +248,7 @@
                         :saved-images="$images"
                         saved-type="body"
                         selected-name="body_selected_image_ids"
+                        :initial-selections="$prefillBodySelections"
                     />
                 </div>
                 <div class="input-item reservation-slot">
@@ -242,7 +261,7 @@
                 </div>
                 <div class="input-item emails">
                     <label>送信先メールアドレス</label>
-                    <x-email-list-input name="emails" :old-values="$initialEmails" />
+                    <x-email-list-input name="emails" :old-values="$initialEmails" :options="$emailOptions" />
                 </div>
                 <div class="input-item publish-date">
                     <label>公開期間</label>
@@ -398,6 +417,10 @@ function articleFormPreview(initialState = {}) {
                 : [];
 
             if (name === 'header_image') {
+                if (previews.length === 0) {
+                    return;
+                }
+
                 this.preview.headerImageUrl = previews[0] || '';
                 return;
             }

@@ -49,7 +49,26 @@ function richTextEditor(config = {}) {
 
         sync() {
             const normalizedValue = this.normalizeHtml(this.$refs.editor.innerHTML);
-            this.$refs.editor.innerHTML = normalizedValue;
+            // HTML が実際に変わった場合のみ更新してカーソル位置をリセットするのを防ぐ
+            if (this.$refs.editor.innerHTML !== normalizedValue) {
+                // カーソル位置を保存
+                const selection = window.getSelection();
+                const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+                
+                // innerHTML を更新
+                this.$refs.editor.innerHTML = normalizedValue;
+                
+                // カーソル位置を復元
+                if (range) {
+                    try {
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    } catch (e) {
+                        // 範囲が無効な場合はフォーカスのみ
+                        this.$refs.editor.focus();
+                    }
+                }
+            }
             this.$refs.textarea.value = normalizedValue;
             this.dispatchChange();
         },

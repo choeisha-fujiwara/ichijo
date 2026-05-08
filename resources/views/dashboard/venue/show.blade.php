@@ -2,9 +2,9 @@
     <x-slot:title>会場詳細</x-slot:title>
     <x-slot:page>venue</x-slot:page>
     <x-slot:name>{{ $user->name }}</x-slot:name>
+    <x-slot:name>{{ $user->name }}</x-slot:name>
     <x-slot:role>{{ $user->role }}</x-slot:role>
-    <x-slot:keyword>{{ @$keyword }}</x-slot:keyword>
-    <x-slot:state>{{ @$state }}</x-slot:state>
+    <x-slot:login>{{ $user->last_login_at?->format('Y.m.d H:i') }}</x-slot:login>
     <x-slot:old>{{ @$old }}</x-slot:old>
 
     <div class="content venue-page">
@@ -16,7 +16,8 @@
                 @if (!empty($venue->image))
                     <img src="{{ route('venue.image', $venue) }}" alt="{{ $venue->venue_name }}" style="max-width: 320px; margin-bottom: 8px;">
                 @endif
-                <input type="file" name="image" accept="image/*">
+                <label for="venue-image-input" class="venue-file-trigger">画像を変更する</label>
+                <input id="venue-image-input" class="venue-file-input" type="file" name="image" accept="image/*">
             </div>
             <div class="input-item">
                 <label>会場名</label>

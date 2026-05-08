@@ -10,9 +10,11 @@ use App\Models\User;
 use App\Models\Reservation;
 use App\Models\Article;
 use App\Models\ReservationSlot;
+use App\Models\PageView;
 use App\Services\GuestService;
 use App\Mail\SendMail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class GuestController extends Controller
@@ -65,7 +67,7 @@ class GuestController extends Controller
             'memo' => $validated['memo'] ?? null,
         ])->save();
 
-        $name = trim(($validated['last_name'] ?? '').' '.($validated['first_name'] ?? ''));
+        $name = trim(($validated['first_name'] ?? '').' '.($validated['last_name'] ?? ''));
 
         $slot = ReservationSlot::where('id', $validated['reservation_slot_id'])->first();
         $slot->reserved_count += 1;
@@ -85,8 +87,8 @@ class GuestController extends Controller
             'articleTitle' => (string) ($article?->title ?? ''),
             'venueName' => (string) ($venueName ?? ''),
             'reservationDateTime' => (string) ($reservationDateTime ?? ''),
-            'fullName' => trim(($validated['last_name'] ?? '').' '.($validated['first_name'] ?? '')),
-            'fullNameKana' => trim(($validated['last_name_kana'] ?? '').' '.($validated['first_name_kana'] ?? '')),
+            'fullName' => trim(($validated['first_name'] ?? '').' '.($validated['last_name'] ?? '')),
+            'fullNameKana' => trim(($validated['first_name_kana'] ?? '').' '.($validated['last_name_kana'] ?? '')),
             'phone' => (string) (($validated['phone-1'] ?? '').'-'.($validated['phone-2'] ?? '').'-'.($validated['phone-3'] ?? '')),
             'email' => (string) ($validated['email'] ?? ''),
             'address' => trim((string) (($validated['address_prefectures'] ?? '').($validated['address_municipalities'] ?? '').($validated['address_detail'] ?? '').(!empty($validated['address_building']) ? ' '.$validated['address_building'] : ''))),
@@ -100,22 +102,44 @@ class GuestController extends Controller
             ->unique()
             ->values();
 
+        if ($destinationEmails->isEmpty()) {
+            Log::warning('Reservation notification destination is empty.', [
+                'article_id' => $article?->id,
+                'reservation_email' => $validated['email'] ?? null,
+            ]);
+        }
+
         foreach ($destinationEmails as $destinationEmail) {
             try {
                 Mail::to($destinationEmail)->send(new ReservationPostedNotification($notificationPayload));
             } catch (\Throwable $e) {
+                Log::error('Failed to send reservation notification email.', [
+                    'article_id' => $article?->id,
+                    'reservation_email' => $validated['email'] ?? null,
+                    'destination_email' => $destinationEmail,
+                    'error' => $e->getMessage(),
+                ]);
                 report($e);
             }
         }
 
+        $autoReplySent = true;
         try {
             Mail::to($validated['email'])->send(new ReservationAutoReply($name, $venueName, $reservationDateTime));
         } catch (\Throwable $e) {
+            $autoReplySent = false;
+            Log::error('Failed to send reservation auto-reply email.', [
+                'article_id' => $article?->id,
+                'reservation_email' => $validated['email'] ?? null,
+                'error' => $e->getMessage(),
+            ]);
             report($e);
         }
         
         
-        return view('guest.thanks', compact('name'));
+        $backUrl = $article ? route('show.public', $article->public_token) : null;
+
+        return view('guest.thanks', compact('name', 'autoReplySent', 'backUrl'));
     }
 
     /**
@@ -129,6 +153,8 @@ class GuestController extends Controller
             abort(404);
         }
 
+        PageView::recordView($article->id);
+
         return $this->renderGuestPage($article);
     }
 
@@ -141,6 +167,8 @@ class GuestController extends Controller
         if (empty($article)) {
             abort(404);
         }
+
+        PageView::recordView($article->id);
 
         return $this->renderGuestPage($article);
     }

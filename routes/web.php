@@ -4,7 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AppController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\GuestController;
+use App\Http\Controllers\ImageAdminController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationAdminController;
+use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\VenueController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -26,19 +29,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Route::resource('/dashboard/report', ReportController::class)->only([
     //     'index', 'show',
     // ]);
+    Route::get('/dashboard/report', [ReportController::class, 'index'])->name('report.index');
     Route::resource('/dashboard/article', ArticleController::class)->only([
         'index', 'store', 'edit', 'update', 'destroy',
     ]);
     Route::post('/dashboard/article/{article}/status', [ArticleController::class, 'updateStatus'])->name('article.status.update');
+    Route::post('/dashboard/top/{article}/copy', [AppController::class, 'copy'])->name('top.copy');
     Route::resource('/dashboard/top', AppController::class)->only([
         'index', 'show', 'store',
     ]);
     Route::resource('/dashboard/venue', VenueController::class)->only([
         'index', 'create', 'store', 'show', 'update', 'destroy',
     ]);
+    Route::resource('/dashboard/images', ImageAdminController::class)->only([
+        'index', 'store', 'destroy',
+    ]);
+    Route::resource('/dashboard/users', UserAdminController::class)->only([
+        'index',
+    ]);
     Route::get('/dashboard/reservations', [ReservationAdminController::class, 'index'])->name('reservations.index');
     Route::get('/dashboard/reservations/export', [ReservationAdminController::class, 'export'])->name('reservations.export');
     Route::get('/dashboard/reservations/{reservation}', [ReservationAdminController::class, 'show'])->name('reservations.show');
+    Route::patch('/dashboard/reservations/{reservation}/staff', [ReservationAdminController::class, 'updateStaff'])->name('reservations.updateStaff');
 });
 
 Route::get('/dashboard/article/images/{image}', [ArticleController::class, 'image'])->name('article.image');

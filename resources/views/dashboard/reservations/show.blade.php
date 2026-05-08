@@ -3,8 +3,7 @@
     <x-slot:page>reservation</x-slot:page>
     <x-slot:name>{{ $user->name }}</x-slot:name>
     <x-slot:role>{{ $user->role }}</x-slot:role>
-    <x-slot:keyword>{{ @$keyword }}</x-slot:keyword>
-    <x-slot:state>{{ @$state }}</x-slot:state>
+    <x-slot:login>{{ $user->last_login_at?->format('Y.m.d H:i') }}</x-slot:login>
     <x-slot:old>{{ @$old }}</x-slot:old>
 
     <div class="content reservation-admin-page">
@@ -62,6 +61,27 @@
                     <dd>{{ $reservation->memo ?: '未設定' }}</dd>
                 </div>
             </dl>
+
+            <form
+                action="{{ route('reservations.updateStaff', $reservation) }}"
+                method="POST"
+                class="reservation-staff-form"
+            >
+                @csrf
+                @method('PATCH')
+                <div class="reservation-staff-field">
+                    <label for="reservation-staff">担当者</label>
+                    <input
+                        id="reservation-staff"
+                        type="text"
+                        name="staff"
+                        value="{{ old('staff', $reservation->staff ?? '') }}"
+                        placeholder="担当者名を入力"
+                        maxlength="100"
+                    >
+                </div>
+                <button type="submit" class="reservation-staff-submit">保存</button>
+            </form>
         </div>
     </div>
 

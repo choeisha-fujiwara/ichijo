@@ -21,16 +21,53 @@ use Illuminate\Support\Facades\Mail;
 
 class ArticleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
+
+        $validated = $request->validate([
+            'prefill_image_id' => ['nullable', 'integer', 'exists:images,id'],
+            'prefill_type' => ['nullable', 'in:header,body'],
+        ]);
+
         $data = Article::orderBy('created_at', 'desc')
             ->paginate(100)
             ->withQueryString();
         $images = Image::orderBy('created_at', 'desc')->get();
         $venues = $this->availableVenues();
+        $userEmails = User::query()
+            ->whereNotNull('email')
+            ->where('email', '!=', '')
+            ->orderBy('name')
+            ->pluck('email')
+            ->unique()
+            ->values();
 
-        return view('dashboard.top.create', compact('user', 'data', 'images', 'venues'));
+        $prefillHeaderImage = null;
+        $prefillBodyImages = [];
+
+        if (!empty($validated['prefill_image_id']) && !empty($validated['prefill_type'])) {
+            $prefillImage = Image::find((int) $validated['prefill_image_id']);
+
+            if ($prefillImage) {
+                $payload = [
+                    'id' => $prefillImage->id,
+                    'url' => route('article.image', $prefillImage),
+                    'original_name' => $prefillImage->original_name,
+                    'path' => $prefillImage->path,
+                ];
+
+                if ($validated['prefill_type'] === 'header' && str_contains((string) $prefillImage->path, '/header/')) {
+                    $prefillHeaderImage = $payload;
+                }
+
+                if ($validated['prefill_type'] === 'body' && str_contains((string) $prefillImage->path, '/body/')) {
+                    $prefillBodyImages = [$payload];
+                }
+            }
+        }
+
+        return view('dashboard.top.create', compact('user', 'data', 'images', 'venues', 'prefillHeaderImage', 'prefillBodyImages', 'userEmails'));
     }
 
     public function edit(Article $article)
@@ -39,8 +76,15 @@ class ArticleController extends Controller
         $article->load(['images', 'reservationSlots']);
         $images = Image::orderBy('created_at', 'desc')->get();
         $venues = $this->availableVenues($article);
+        $userEmails = User::query()
+            ->whereNotNull('email')
+            ->where('email', '!=', '')
+            ->orderBy('name')
+            ->pluck('email')
+            ->unique()
+            ->values();
 
-        return view('dashboard.top.edit', compact('user', 'article', 'images', 'venues'));
+        return view('dashboard.top.edit', compact('user', 'article', 'images', 'venues', 'userEmails'));
     }
 
     public function store(Request $request): RedirectResponse

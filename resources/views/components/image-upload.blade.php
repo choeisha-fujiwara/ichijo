@@ -7,6 +7,9 @@
     'savedImages' => [],
     'savedType' => null,
     'selectedName' => null,
+    'initialSelectedId' => null,
+    'initialPreviewUrl' => null,
+    'initialSelections' => [],
 ])
 
 @php
@@ -40,6 +43,7 @@ if ($resolvedSavedType === null) {
         savedImages: @js($savedImagesPayload),
         savedType: @js($resolvedSavedType),
         selectedName: @js($selectedName),
+        initialSelections: @js($initialSelections),
     })"
     class="image-upload image-upload-addable"
 >
@@ -151,6 +155,7 @@ function imageUploadAddable(config = {}) {
         savedImages: Array.isArray(config.savedImages) ? config.savedImages : [],
         savedType: config.savedType || null,
         selectedName: config.selectedName || null,
+        initialSelections: Array.isArray(config.initialSelections) ? config.initialSelections : [],
         showSavedModal: false,
         activeSlotId: null,
 
@@ -159,6 +164,18 @@ function imageUploadAddable(config = {}) {
         },
 
         init() {
+            if (this.initialSelections.length > 0) {
+                this.slots = this.initialSelections.map((item, index) => ({
+                    id: index + 1,
+                    dragging: false,
+                    preview: item?.url || null,
+                    selectedSavedImageId: item?.id || null,
+                    file: null,
+                    caption: item?.caption || '',
+                }));
+                this.nextId = this.slots.length + 1;
+            }
+
             if (!Array.isArray(this.slots) || this.slots.length === 0) {
                 this.slots = [{ id: 1, dragging: false, preview: null, selectedSavedImageId: null, file: null, caption: '' }];
                 this.nextId = 2;
@@ -172,6 +189,7 @@ function imageUploadAddable(config = {}) {
             }));
             this.nextId = Math.max(...this.slots.map(slot => slot.id), 0) + 1;
             this.$nextTick(() => this.syncAllSlotInputs());
+            this.dispatchPreviewChange();
         },
 
         slotInput(slotId) {
@@ -360,6 +378,8 @@ function imageUploadAddable(config = {}) {
         savedImages: @js($savedImagesPayload),
         savedType: @js($resolvedSavedType),
         selectedName: @js($selectedName),
+        initialSelectedId: @js($initialSelectedId),
+        initialPreviewUrl: @js($initialPreviewUrl),
     })"
     x-on:dragover.prevent="dragging = true"
     x-on:dragleave.prevent="dragging = false"
@@ -451,10 +471,18 @@ function imageUpload(config = {}) {
         savedType: config.savedType || null,
         selectedName: config.selectedName || null,
         selectedSavedImageId: null,
+        initialSelectedId: config.initialSelectedId || null,
+        initialPreviewUrl: config.initialPreviewUrl || null,
         showSavedModal: false,
 
         init() {
+            if (this.initialSelectedId && this.initialPreviewUrl) {
+                this.selectedSavedImageId = this.initialSelectedId;
+                this.previews = [this.initialPreviewUrl];
+            }
+
             this.$nextTick(() => this.syncInputFiles());
+            this.dispatchPreviewChange();
         },
 
         syncInputFiles() {

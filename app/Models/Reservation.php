@@ -28,6 +28,7 @@ class Reservation extends Model
         'phone',
         'email',
         'memo',
+        'staff',
     ];
 
     public function images(): HasMany

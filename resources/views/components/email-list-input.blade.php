@@ -1,19 +1,23 @@
 @props([
     'name' => 'emails',
     'oldValues' => [],
+    'options' => [],
 ])
 
-<div x-data="emailListInput({ initialValues: @js($oldValues) })" class="email-list">
+<div x-data="emailListInput({ initialValues: @js($oldValues), options: @js($options) })" class="email-list">
     <div>
         <template x-for="(email, index) in emails" :key="`email-${index}`">
             <div class="email-row">
-                <input
-                    type="email"
+                <select
                     :name="`{{ $name }}[]`"
                     x-model="emails[index]"
-                    placeholder="mail@example.com"
                     class="email-input"
-                />
+                >
+                    <option value="">選択してください</option>
+                    <template x-for="option in options" :key="option">
+                        <option :value="option" x-text="option"></option>
+                    </template>
+                </select>
                 <button
                     type="button"
                     x-show="emails.length > 1"
@@ -37,9 +41,13 @@ function emailListInput(config = {}) {
     const initial = Array.isArray(config.initialValues)
         ? config.initialValues.filter(v => v !== null && String(v).trim() !== '')
         : [];
+    const options = Array.isArray(config.options)
+        ? config.options.filter(v => v !== null && String(v).trim() !== '')
+        : [];
 
     return {
-        emails: initial.length > 0 ? [initial[0]] : [''],
+        options,
+        emails: initial.length > 0 ? initial : [''],
         addLock: false,
 
         init() {

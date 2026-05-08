@@ -1,0 +1,80 @@
+@use "mixin" as m;
+
+.users-admin-page {
+    padding: 92px 32px 48px 80px;
+    overflow-y: auto;
+
+    @include m.mq(sp) {
+        padding: 16px 12px 32px;
+    }
+}
+
+.users-admin-shell {
+    width: min(100%, 100%);
+    display: grid;
+    gap: 24px;
+}
+
+.users-admin-head {
+    padding: 16px;
+    border: 1px solid #dce5f2;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+
+    h2 {
+        font-size: 20px;
+        line-height: 1.2;
+        font-weight: 700;
+        color: var(--color-text-em);
+        letter-spacing: 0.03em;
+    }
+
+    p {
+        margin-top: 8px;
+        font-size: 13px;
+        color: var(--color-secondary);
+    }
+}
+
+.users-admin-table-wrap {
+    overflow-x: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.users-admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+
+    th,
+    td {
+        padding: 12px 14px;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+        font-size: 13px;
+        color: #334155;
+        white-space: nowrap;
+    }
+
+    th {
+        background: #f8fafc;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: 0;
+    }
+}
+
+.users-admin-empty {
+    text-align: center;
+    color: #64748b;
+}
+
+.users-admin-pagination {
+    display: flex;
+    justify-content: center;
+}

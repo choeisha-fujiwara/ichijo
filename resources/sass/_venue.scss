@@ -508,4 +508,43 @@
     img {
         border-radius: 12px;
     }
+
+    .venue-file-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+    }
+
+    .venue-file-trigger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: fit-content;
+        min-height: 32px;
+        padding: 0 14px;
+        border: 1px solid #93c5fd;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e40af;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.22);
+            filter: brightness(1.02);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+    }
 }
