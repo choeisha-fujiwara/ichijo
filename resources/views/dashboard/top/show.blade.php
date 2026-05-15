@@ -153,7 +153,7 @@
                     <dl class="top-detail-definition">
                         <div>
                             <dt>作成者</dt>
-                            <dd>{{ $article->user?->name ?: '未設定' }}</dd>
+                            <dd>{{ $article->user?->name ?: ($article->manager ?: '未設定') }}</dd>
                         </div>
                         <div>
                             <dt>通知メールアドレス</dt>

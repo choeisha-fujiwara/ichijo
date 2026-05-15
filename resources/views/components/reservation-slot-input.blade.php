@@ -34,7 +34,7 @@
                     'start_minute' => isset($slot['start_minute']) ? str_pad((string) $slot['start_minute'], 2, '0', STR_PAD_LEFT) : $startMinute,
                     'end_hour' => isset($slot['end_hour']) ? str_pad((string) $slot['end_hour'], 2, '0', STR_PAD_LEFT) : $endHour,
                     'end_minute' => isset($slot['end_minute']) ? str_pad((string) $slot['end_minute'], 2, '0', STR_PAD_LEFT) : $endMinute,
-                    'capacity' => $slot['capacity'] ?? null,
+                    'capacity' => max(1, (int) ($slot['capacity'] ?? 1)),
                 ];
             }
 
@@ -48,7 +48,7 @@
                 'start_minute' => $startMinute,
                 'end_hour' => $endHour,
                 'end_minute' => $endMinute,
-                'capacity' => $slot->capacity ?? null,
+                'capacity' => max(1, (int) ($slot->capacity ?? 1)),
             ];
         })
         ->values()
@@ -158,7 +158,9 @@
                     <input
                         type="number"
                         :name="`slots[${index}][capacity]`"
-                        x-model="slot.capacity"
+                        x-model.number="slot.capacity"
+                        x-on:input="slot.capacity = normalizeCapacity(slot.capacity, 1)"
+                        x-on:blur="slot.capacity = normalizeCapacity(slot.capacity, 1)"
                         min="1"
                         step="1"
                         inputmode="numeric"
@@ -185,12 +187,26 @@ function reservationSlotInput(config = {}) {
     return {
         slots: Array.isArray(config.initialSlots) && config.initialSlots.length > 0
             ? config.initialSlots
-            : [{ id: 1, dates: [], start_hour: '10', start_minute: '00', end_hour: '11', end_minute: '00', capacity: null }],
+            : [{ id: 1, dates: [], start_hour: '10', start_minute: '00', end_hour: '11', end_minute: '00', capacity: 1 }],
         nextId: 2,
         addSlotLock: false,
         hours: Array.from({ length: 9 }, (_, i) => String(i + 10).padStart(2, '0')),
         minutes: ['00', '15', '30', '45'],
         defaultEndHour: '11',
+
+        normalizeCapacity(value, fallback = 1) {
+            if (value === null || value === undefined || value === '') {
+                return fallback;
+            }
+
+            const normalized = Number.parseInt(String(value), 10);
+            if (Number.isNaN(normalized) || normalized < 1) {
+                return fallback;
+            }
+
+            return normalized;
+        },
+
         normalizeHour(value, fallback = '10') {
             if (value === null || value === undefined || value === '') {
                 return fallback;
@@ -234,7 +250,7 @@ function reservationSlotInput(config = {}) {
 
         init() {
             if (!Array.isArray(this.slots) || this.slots.length === 0) {
-                this.slots = [{ id: 1, dates: [], start_hour: '10', start_minute: '00', end_hour: '11', end_minute: '00', capacity: null }];
+                this.slots = [{ id: 1, dates: [], start_hour: '10', start_minute: '00', end_hour: '11', end_minute: '00', capacity: 1 }];
                 this.nextId = 2;
                 return;
             }
@@ -255,7 +271,7 @@ function reservationSlotInput(config = {}) {
                 start_minute: this.normalizeMinute(slot.start_minute ?? this.parseTimePart(slot.start_time, 'minute'), '00'),
                 end_hour: this.normalizeHour(slot.end_hour ?? this.parseTimePart(slot.end_time, 'hour'), this.defaultEndHour),
                 end_minute: this.normalizeMinute(slot.end_minute ?? this.parseTimePart(slot.end_time, 'minute'), '00'),
-                capacity: slot.capacity ?? null,
+                capacity: this.normalizeCapacity(slot.capacity, 1),
             })).map(({ _startHourFromTime, _startMinuteFromTime, _endHourFromTime, _endMinuteFromTime, ...slot }) => slot);
             this.nextId = Math.max(...this.slots.map(slot => slot.id), 0) + 1;
 
@@ -283,7 +299,7 @@ function reservationSlotInput(config = {}) {
             if (this.addSlotLock) return;
             this.addSlotLock = true;
             const newSlotId = this.nextId++;
-            this.slots.push({ id: newSlotId, dates: [], bulkMode: false, rangeStart: null, start_hour: '10', start_minute: '00', end_hour: this.defaultEndHour, end_minute: '00', capacity: null });
+            this.slots.push({ id: newSlotId, dates: [], bulkMode: false, rangeStart: null, start_hour: '10', start_minute: '00', end_hour: this.defaultEndHour, end_minute: '00', capacity: 1 });
             window.setTimeout(() => {
                 this.addSlotLock = false;
             }, 120);

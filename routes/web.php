@@ -9,6 +9,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationAdminController;
 use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\VenueController;
+use App\Http\Controllers\DevRoleSwitchController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 require __DIR__.'/auth.php';
@@ -45,8 +46,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'index', 'store', 'destroy',
     ]);
     Route::resource('/dashboard/users', UserAdminController::class)->only([
-        'index',
+        'index', 'create', 'store', 'edit', 'update', 'destroy',
     ]);
+    Route::post('/dashboard/dev-role/switch', [DevRoleSwitchController::class, 'switch'])->name('dev-role.switch');
+    Route::post('/dashboard/dev-role/reset', [DevRoleSwitchController::class, 'reset'])->name('dev-role.reset');
     Route::get('/dashboard/reservations', [ReservationAdminController::class, 'index'])->name('reservations.index');
     Route::get('/dashboard/reservations/export', [ReservationAdminController::class, 'export'])->name('reservations.export');
     Route::get('/dashboard/reservations/{reservation}', [ReservationAdminController::class, 'show'])->name('reservations.show');

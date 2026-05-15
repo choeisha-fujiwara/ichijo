@@ -35,22 +35,10 @@ class ArticleController extends Controller
             ->withQueryString();
         $images = Image::orderBy('created_at', 'desc')->get();
         $venues = $this->availableVenues();
-        $currentRole = Auth::user()->role;
-        $excludeRoles = match ($currentRole) {
-            'developer' => [],
-            'system'    => ['developer'],
-            'admin'     => ['developer', 'system'],
-            'manager'   => ['developer', 'system', 'admin'],
-            default     => ['developer', 'system', 'admin', 'manager'],
-        };
-        $userEmails = User::query()
-            ->when(!empty($excludeRoles), fn($q) => $q->whereNotIn('role', $excludeRoles))
-            ->whereNotNull('email')
-            ->where('email', '!=', '')
-            ->orderBy('id')
-            ->pluck('email')
-            ->unique()
-            ->values();
+        $currentUser = Auth::user();
+        $currentRole = (string) $currentUser->role;
+        $currentAffiliation = (string) ($currentUser->affiliation ?? '');
+        $userEmails = $this->availableUserEmails($currentRole, $currentAffiliation);
 
         $prefillHeaderImage = null;
         $prefillBodyImages = [];
@@ -85,22 +73,10 @@ class ArticleController extends Controller
         $article->load(['images', 'reservationSlots']);
         $images = Image::orderBy('created_at', 'desc')->get();
         $venues = $this->availableVenues($article);
-        $currentRole = Auth::user()->role;
-        $excludeRoles = match ($currentRole) {
-            'developer' => [],
-            'system'    => ['developer'],
-            'admin'     => ['developer', 'system'],
-            'manager'   => ['developer', 'system', 'admin'],
-            default     => ['developer', 'system', 'admin', 'manager'],
-        };
-        $userEmails = User::query()
-            ->when(!empty($excludeRoles), fn($q) => $q->whereNotIn('role', $excludeRoles))
-            ->whereNotNull('email')
-            ->where('email', '!=', '')
-            ->orderBy('id')
-            ->pluck('email')
-            ->unique()
-            ->values();
+        $currentUser = Auth::user();
+        $currentRole = (string) $currentUser->role;
+        $currentAffiliation = (string) ($currentUser->affiliation ?? '');
+        $userEmails = $this->availableUserEmails($currentRole, $currentAffiliation);
 
         return view('dashboard.top.edit', compact('user', 'article', 'images', 'venues', 'userEmails'));
     }
@@ -282,9 +258,18 @@ class ArticleController extends Controller
 
     public function destroy(Article $article): RedirectResponse
     {
-        $article->delete();
+        $reservationCount = $article->reservations()->count();
 
-        return redirect()->route('top.index')->with('msg', '記事を削除しました');
+        DB::transaction(function () use ($article): void {
+            $article->reservations()->delete();
+            $article->delete();
+        });
+
+        $msg = $reservationCount > 0
+            ? "記事を削除しました（紐づく予約{$reservationCount}件も共に削除）"
+            : '記事を削除しました';
+
+        return redirect()->route('top.index')->with('msg', $msg);
     }
 
     public function image(Image $image)
@@ -350,6 +335,29 @@ class ArticleController extends Controller
         return ArticleVenue::query()
             ->orderBy('venue_name')
             ->get();
+    }
+
+    private function availableUserEmails(string $currentRole, string $currentAffiliation)
+    {
+        $allowedRoles = match ($currentRole) {
+            'developer' => ['developer', 'system', 'admin', 'manager', 'staff'],
+            'system' => ['system', 'admin', 'manager', 'staff'],
+            'admin' => ['admin', 'manager', 'staff'],
+            'manager' => ['manager', 'staff'],
+            default => ['staff'],
+        };
+
+        $shouldFilterByAffiliation = $currentAffiliation !== '' && $currentAffiliation !== '管理用';
+
+        return User::query()
+            ->whereIn('role', $allowedRoles)
+            ->when($shouldFilterByAffiliation, fn ($q) => $q->where('affiliation', $currentAffiliation))
+            ->whereNotNull('email')
+            ->where('email', '!=', '')
+            ->orderBy('id')
+            ->pluck('email')
+            ->unique()
+            ->values();
     }
 
     private function resolveHeaderImage(Request $request, array $validated): array

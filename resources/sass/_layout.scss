@@ -70,11 +70,49 @@
         font-size: 13px;
         font-weight: 400;
         display: flex;
+        align-items: center;
+        flex-wrap: wrap;
         gap: 16px;
         @include m.mq(sp) {
             width: 38%;
             font-size: 12px;
             margin-left: 12px;
+        }
+
+        .dev-role-switcher {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 0px;
+
+            .dev-role-switcher-form,
+            .dev-role-switcher-reset {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            label {
+                font-size: 13px;
+                font-weight: 400;
+                color: var(--color-secondary);
+            }
+
+            select,
+            button {
+                height: 28px;
+                border: 1px solid #cbd5e1;
+                border-radius: 6px;
+                padding: 0 16px;
+                font-size: 12px;
+                background: #ffffff;
+                color: #334155;
+                text-align: center;
+            }
+
+            button {
+                cursor: pointer;
+            }
         }
     }
     .page-name {

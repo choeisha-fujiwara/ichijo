@@ -57,8 +57,8 @@
     font-weight: 700;
 
     &.is-active {
-        border-color: #1d4ed8;
-        background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+        border-color: var(--color-active);
+        background: linear-gradient(180deg, var(--color-active) 0%, var(--color-active) 100%);
         color: #ffffff;
     }
 }
@@ -225,8 +225,8 @@
 }
 
 .image-modal-create {
-    border: 1px solid #1d4ed8;
-    background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+    border: 1px solid var(--color-active);
+    background: linear-gradient(180deg, var(--color-active) 0%, var(--color-active) 100%);
     color: #ffffff;
     transition: .3s ease;
     &:hover {
@@ -250,7 +250,7 @@
         }
         &:hover {
             transition: .3s ease;
-            color: #b91c1c;
+            color: var(--color-danger-deep);
         }
     }
 }
@@ -277,7 +277,7 @@
 
     &:hover,
     &.is-dragging {
-        border-color: #3b82f6;
+        border-color: var(--color-active);
         background: #eff6ff;
     }
 
@@ -366,7 +366,7 @@
     align-items: center;
     gap: 8px;
     padding: 10px 24px;
-    background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+    background: linear-gradient(180deg, var(--color-active) 0%, var(--color-active) 100%);
     color: #fff;
     font-size: 14px;
     font-weight: 700;

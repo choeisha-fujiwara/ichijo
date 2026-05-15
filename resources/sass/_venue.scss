@@ -41,7 +41,7 @@
     min-height: 40px;
     padding: 0 20px 0 16px;
     border-radius: 999px;
-    background: #2563eb;
+    background: var(--color-active);
     color: #ffffff;
     font-size: 13px;
     font-weight: 700;
@@ -174,7 +174,7 @@
             border: 1px solid #93c5fd;
             border-radius: 999px;
             background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            color: #1e40af;
+            color: var(--color-active);
             font-size: 12px;
             font-weight: 700;
             letter-spacing: 0.02em;
@@ -189,7 +189,7 @@
             border: 1px solid #93c5fd;
             border-radius: 999px;
             background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            color: #1e40af;
+            color: var(--color-active);
             font-size: 12px;
             font-weight: 700;
             letter-spacing: 0.02em;
@@ -272,7 +272,7 @@
     .image-upload-select-btn {
         border: 1px solid #93c5fd;
         background: #eff6ff;
-        color: #1d4ed8;
+        color: var(--color-active);
     }
 
     .image-upload-library-btn {
@@ -308,7 +308,7 @@
         cursor: pointer;
 
         &:hover {
-            color: #dc2626;
+            color: var(--color-danger);
         }
     }
 
@@ -341,33 +341,33 @@
 
         .venue-submit-button {
             border: none;
-            background: linear-gradient(135deg, #1f6feb 0%, #3b82f6 100%);
+            background: linear-gradient(135deg, var(--color-active) 0%, var(--color-active) 100%);
             color: #ffffff;
             cursor: pointer;
 
             &:hover {
                 transform: translateY(-1px);
-                box-shadow: 0 10px 22px rgba(31, 111, 235, 0.24);
+                box-shadow: 0 10px 22px rgba(37, 99, 235, 0.24);
                 filter: brightness(0.99);
             }
 
             &:active {
                 transform: translateY(0);
-                box-shadow: 0 4px 10px rgba(31, 111, 235, 0.2);
+                box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
             }
         }
 
         .venue-delete-button {
-            border: 1px solid #fca5a5;
-            background: #fee2e2;
-            color: #dc2626;
+            border: 1px solid var(--color-danger-border);
+            background: var(--color-danger-soft);
+            color: var(--color-danger);
             cursor: pointer;
 
             &:hover {
                 transform: translateY(-1px);
-                border-color: #f87171;
-                background: #fecaca;
-                color: #b91c1c;
+                border-color: var(--color-danger-border-hover);
+                background: var(--color-danger-soft-hover);
+                color: var(--color-danger-deep);
                 box-shadow: 0 8px 16px rgba(220, 38, 38, 0.18);
             }
 
@@ -385,7 +385,7 @@
             &:hover {
                 transform: translateY(-1px);
                 border-color: #93c5fd;
-                color: #1d4ed8;
+                color: var(--color-active);
                 box-shadow: 0 8px 16px rgba(37, 99, 235, 0.12);
             }
 
@@ -465,21 +465,21 @@
     }
 
     .image-upload-select-btn {
-        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
         border-color: #93c5fd;
-        color: #1e40af;
-        box-shadow: 0 6px 14px rgba(59, 130, 246, 0.2);
+        color: var(--color-active);
+        box-shadow: 0 6px 14px rgba(37, 99, 235, 0.2);
         transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 
         &:hover {
             transform: translateY(-1px);
-            box-shadow: 0 10px 22px rgba(59, 130, 246, 0.28);
+            box-shadow: 0 10px 22px rgba(37, 99, 235, 0.28);
             filter: brightness(1.02);
         }
 
         &:active {
             transform: translateY(0);
-            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
         }
     }
 
@@ -493,14 +493,14 @@
         height: 32px;
         border-radius: 999px;
         background: rgba(255, 255, 255, 0.92);
-        border: 1px solid #fecaca;
+        border: 1px solid var(--color-danger-soft-hover);
         display: inline-flex;
         align-items: center;
         justify-content: center;
 
         &:hover {
-            background: #fee2e2;
-            border-color: #fca5a5;
+            background: var(--color-danger-soft);
+            border-color: var(--color-danger-border);
         }
     }
 }
@@ -530,7 +530,7 @@
         border: 1px solid #93c5fd;
         border-radius: 999px;
         background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        color: #1e40af;
+        color: var(--color-active);
         font-size: 12px;
         font-weight: 700;
         letter-spacing: 0.02em;

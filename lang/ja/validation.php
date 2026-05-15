@@ -93,7 +93,7 @@ return [
     'min' => [
         'numeric' => ':attributeには、:min以上の数字を入力してください。',
         'file' => ':attributeには、:min kb以上のファイルを入力してください。',
-        'string' => '入力内容をご確認ください。',
+        'string' => ':attributeは、:min文字以上で入力してください。',
         'array' => ':attributeは:min個以上入力してください。',
     ],
     'min_digits' => ':attributeは、:min桁以上で入力してください。',

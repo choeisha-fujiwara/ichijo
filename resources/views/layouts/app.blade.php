@@ -38,6 +38,31 @@
                 <div class="user-state">
                     <p>ログイン日時：{{ $login }}</p>
                     <p>ユーザー名：{{ $name }}</p>
+                    @php
+                        $currentRole = (string) (auth()->user()?->role ?? $role ?? '');
+                        $devRoleSwitchEnabled = (int) session('dev_role_switch_user_id', 0) === (int) auth()->id();
+                        $switchableRoles = ['developer', 'system', 'admin', 'manager', 'staff'];
+                    @endphp
+                    @if ($currentRole === 'developer' || $devRoleSwitchEnabled)
+                        <div class="dev-role-switcher">
+                            <form method="POST" action="{{ route('dev-role.switch') }}" class="dev-role-switcher-form">
+                                @csrf
+                                <label for="dev-role-switch">検証ロール</label>
+                                <select id="dev-role-switch" name="role">
+                                    @foreach ($switchableRoles as $switchRole)
+                                        <option value="{{ $switchRole }}" @selected($currentRole === $switchRole)>{{ $switchRole }}</option>
+                                    @endforeach
+                                </select>
+                                <button type="submit">切替</button>
+                            </form>
+                            @if ($devRoleSwitchEnabled)
+                                <form method="POST" action="{{ route('dev-role.reset') }}" class="dev-role-switcher-reset">
+                                    @csrf
+                                    <button type="submit">解除</button>
+                                </form>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </div>
         </header>
@@ -48,9 +73,10 @@
                 <li class="{{ $page == 'reservation' ? 'active' : null }}"><a href="{{ route('reservations.index') }}"><span class="material-symbols-outlined">event_available</span><span class="menu-text">予約一覧</span></a></li>
                 <li class="{{ $page == 'venue' ? 'active' : null }}"><a href="{{ route('venue.index') }}"><span class="material-symbols-outlined">deployed_code</span><span class="menu-text">会場管理</span></a></li>
                 <li class="{{ $page == 'images' ? 'active' : null }}"><a href="{{ route('images.index') }}"><span class="material-symbols-outlined">photo_library</span><span class="menu-text">画像管理</span></a></li>
-                 {{-- --- To be released later ---
+                @if (in_array($role, ['developer', 'system', 'admin', 'manager']))
                 <li class="{{ $page == 'users' ? 'active' : null }}"><a href="{{ route('users.index') }}"><span class="material-symbols-outlined">person</span><span class="menu-text">ユーザー管理</span></a></li>
-                <li class="{{ $page == 'report' ? 'active' : null }}"><a href="{{ route('report.index') }}"><span class="material-symbols-outlined">grouped_bar_chart</span><span class="menu-text">レポート</span></a></li> --}}
+                @endif
+                <li class="{{ $page == 'report' ? 'active' : null }}"><a href="{{ route('report.index') }}"><span class="material-symbols-outlined">grouped_bar_chart</span><span class="menu-text">レポート</span></a></li>
                 <li class="logout"><p><span class="material-symbols-outlined icon">logout</span><span class="menu-text">ログアウト</span></p></li>
                 </ul>
                 <div class="menu-btn">

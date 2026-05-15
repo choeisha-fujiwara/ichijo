@@ -66,8 +66,13 @@
     } else {
         $initialSlots = old('slots', []);
     }
-    $initialEmails = old('emails', $isEdit ? ($article->emails ?? []) : []);
     $emailOptions = collect($userEmails ?? [])->filter()->unique()->values();
+    $initialEmails = collect(old('emails', $isEdit ? ($article->emails ?? []) : []))
+        ->filter()
+        ->values();
+    if ((string) (auth()->user()?->role ?? '') !== 'developer') {
+        $initialEmails = $initialEmails->intersect($emailOptions)->values();
+    }
     $currentBodyImageUrls = $isEdit
         ? $currentBodyImageItems->pluck('url')->values()->all()
         : $prefillBodyImages->pluck('url')->values()->all();
@@ -282,10 +287,10 @@
                     {{-- @if ($isEdit)
                         <a href="{{ route('top.show', $article) }}" class="article-cancel">戻る</a>
                     @endif --}}
-                    <button type="submit" class="article-submit">{{ $isEdit ? '更新する' : '保存' }}</button>
                     @if ($isEdit)
                         <button type="button" class="article-delete" onclick="if(confirm('この記事を削除しますか？')) { document.getElementById('article-delete-form').submit(); }">削除する</button>
                     @endif
+                    <button type="submit" class="article-submit">{{ $isEdit ? '更新する' : '保存' }}</button>
                 </div>
             </div>
         </form>

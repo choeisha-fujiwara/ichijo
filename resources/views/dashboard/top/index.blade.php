@@ -96,8 +96,9 @@
                             </div>
                         </a>
                         <div class="top-list-delete"
-                            x-data
-                            x-on:click.prevent="if (confirm('「{{ addslashes($item->title) }}」を削除しますか？\nこの操作は元に戻せません。')) { $refs.deleteForm.submit(); }"
+                            data-count="{{ (int) ($item->reservations_count ?? 0) }}"
+                            data-title="{{ e($item->title) }}"
+                            onclick="(function(el){ var c=+el.getAttribute('data-count'); var t=el.getAttribute('data-title'); var m='「'+t+'」を削除しますか？'; if(c>0){m+='\nこの記事には'+c+'件の予約があります。予約も全て削除されます。';} m+='\nこの操作は元に戻せません。'; if(confirm(m)){el.querySelector('form').submit();} })(this)"
                         >
                             <span class="material-symbols-outlined">delete</span>
                             <form x-ref="deleteForm"

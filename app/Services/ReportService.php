@@ -16,16 +16,25 @@ class ReportService
      *
      * @param  Carbon  $from
      * @param  Carbon  $to
+     * @param  int|null  $venueId
      * @return array{ labels: array, views: array, reservations: array }
      */
-    public function dailySummary(Carbon $from, Carbon $to): array
+    public function dailySummary(Carbon $from, Carbon $to, ?int $venueId = null): array
     {
-        $views = PageView::whereBetween('date', [$from->toDateString(), $to->toDateString()])
+        $viewQuery = PageView::whereBetween('date', [$from->toDateString(), $to->toDateString()]);
+        $reservationQuery = Reservation::whereBetween('created_at', [$from->startOfDay(), $to->copy()->endOfDay()]);
+
+        if ($venueId) {
+            $viewQuery->whereIn('article_id', Article::where('venue_id', $venueId)->pluck('id'));
+            $reservationQuery->whereIn('article_id', Article::where('venue_id', $venueId)->pluck('id'));
+        }
+
+        $views = $viewQuery
             ->select('date', DB::raw('SUM(view_count) as total'))
             ->groupBy('date')
             ->pluck('total', 'date');
 
-        $reservations = Reservation::whereBetween('created_at', [$from->startOfDay(), $to->copy()->endOfDay()])
+        $reservations = $reservationQuery
             ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as total'))
             ->groupBy('date')
             ->pluck('total', 'date');
@@ -57,17 +66,26 @@ class ReportService
      *
      * @param  Carbon  $from
      * @param  Carbon  $to
+     * @param  int|null  $venueId
      * @return Collection
      */
-    public function articleSummary(Carbon $from, Carbon $to): Collection
+    public function articleSummary(Carbon $from, Carbon $to, ?int $venueId = null): Collection
     {
-        $views = PageView::whereBetween('date', [$from->toDateString(), $to->toDateString()])
+        $viewQuery = PageView::whereBetween('date', [$from->toDateString(), $to->toDateString()]);
+        $reservationQuery = Reservation::whereBetween('created_at', [$from->startOfDay(), $to->copy()->endOfDay()])
+            ->whereNotNull('article_id');
+
+        if ($venueId) {
+            $viewQuery->whereIn('article_id', Article::where('venue_id', $venueId)->pluck('id'));
+            $reservationQuery->whereIn('article_id', Article::where('venue_id', $venueId)->pluck('id'));
+        }
+
+        $views = $viewQuery
             ->select('article_id', DB::raw('SUM(view_count) as total_views'))
             ->groupBy('article_id')
             ->pluck('total_views', 'article_id');
 
-        $reservations = Reservation::whereBetween('created_at', [$from->startOfDay(), $to->copy()->endOfDay()])
-            ->whereNotNull('article_id')
+        $reservations = $reservationQuery
             ->select('article_id', DB::raw('COUNT(*) as total_reservations'))
             ->groupBy('article_id')
             ->pluck('total_reservations', 'article_id');
@@ -76,6 +94,7 @@ class ReportService
 
         $articles = Article::withTrashed()
             ->whereIn('id', $articleIds)
+            ->when($venueId, fn($q) => $q->where('venue_id', $venueId))
             ->pluck('title', 'id');
 
         return $articleIds->map(function ($id) use ($views, $reservations, $articles) {
@@ -85,6 +104,8 @@ class ReportService
                 'total_views' => (int) ($views[$id] ?? 0),
                 'total_reservations' => (int) ($reservations[$id] ?? 0),
             ];
+        })->reject(function ($item) {
+            return $item['title'] === '（削除済み）';
         })->sortByDesc('total_views')->values();
     }
 }

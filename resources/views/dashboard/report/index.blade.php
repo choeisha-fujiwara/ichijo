@@ -26,6 +26,17 @@
                         <label for="report-to">終了日</label>
                         <input type="date" id="report-to" name="to" value="{{ $filters['to'] }}">
                     </div>
+                    <div class="report-filter-group">
+                        <label for="report-venue">会場</label>
+                        <select id="report-venue" name="venue_id">
+                            <option value="">すべて</option>
+                            @foreach ($venues as $venue)
+                                <option value="{{ $venue->id }}" @selected($filters['venue_id'] == $venue->id)>
+                                    {{ $venue->venue_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                     <button type="submit" class="report-filter-btn">絞り込む</button>
                 </div>
             </form>
@@ -127,7 +138,7 @@
                         borderColor: 'rgba(16, 185, 129, 1)',
                         borderWidth: 2,
                         pointRadius: 3,
-                        tension: 0.3,
+                        tension: 0,
                         yAxisID: 'yReservations',
                     },
                 ],

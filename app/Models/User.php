@@ -3,17 +3,20 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use LogicException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use App\Models\Article;
+use App\Models\ReservationAccessLog;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -24,6 +27,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'affiliation',
     ];
 
     /**
@@ -53,6 +58,18 @@ class User extends Authenticatable
     public function articles(): HasMany
     {
         return $this->hasMany(Article::class);
+    }
+
+    public function reservationAccessLogs(): HasMany
+    {
+        return $this->hasMany(ReservationAccessLog::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::forceDeleting(function (): void {
+            throw new LogicException('User force delete is not allowed.');
+        });
     }
 
 }

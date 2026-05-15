@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ArticleVenue;
 use App\Models\Reservation;
+use App\Models\ReservationAccessLog;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -29,6 +30,17 @@ class ReservationAdminController extends Controller
             'article.venue:id,venue_name',
             'reservationSlot:id,article_id,date,start_time,end_time',
         ]);
+
+        if (in_array($user->role, ['staff', 'manager']) && !empty($user->affiliation)) {
+            $query->whereHas('article.venue', fn ($q) => $q->where('venue_name', $user->affiliation));
+        }
+
+        if ($user->role === 'staff') {
+            $today = now()->toDateString();
+            $thirtyDaysLater = now()->addDays(30)->toDateString();
+            $query->whereDate('reservation_datetime', '>=', $today)
+                ->whereDate('reservation_datetime', '<=', $thirtyDaysLater);
+        }
 
         if (!empty($venueId)) {
             $query->whereHas('article', fn ($q) => $q->where('venue_id', $venueId));
@@ -59,9 +71,22 @@ class ReservationAdminController extends Controller
         return view('dashboard.reservations.index', compact('user', 'reservations', 'sort', 'venues', 'filters'));
     }
 
-    public function show(Reservation $reservation)
+    public function show(Request $request, Reservation $reservation)
     {
         $user = auth()->user();
+
+        if (in_array($user->role, ['staff', 'manager'])) {
+            ReservationAccessLog::create([
+                'reservation_id' => $reservation->id,
+                'user_id'        => $user->id,
+                'ip_address'     => (string) $request->ip(),
+                'user_agent'     => (string) ($request->userAgent() ?? ''),
+                'url'            => (string) $request->fullUrl(),
+                'method'         => (string) $request->method(),
+                'referer'        => (string) ($request->headers->get('referer') ?? ''),
+                'accessed_at'    => now(),
+            ]);
+        }
 
         $reservation->load([
             'article:id,title',
@@ -87,6 +112,7 @@ class ReservationAdminController extends Controller
 
     public function export(Request $request): StreamedResponse
     {
+        $user = auth()->user();
         $sort = (string) $request->query('sort', 'created_desc');
 
         $validated = $request->validate([
@@ -103,6 +129,17 @@ class ReservationAdminController extends Controller
             'article:id,title',
             'reservationSlot:id,article_id,date,start_time,end_time',
         ]);
+
+        if (in_array($user->role, ['staff', 'manager']) && !empty($user->affiliation)) {
+            $query->whereHas('article.venue', fn ($q) => $q->where('venue_name', $user->affiliation));
+        }
+
+        if ($user->role === 'staff') {
+            $today = now()->toDateString();
+            $thirtyDaysLater = now()->addDays(30)->toDateString();
+            $query->whereDate('reservation_datetime', '>=', $today)
+                ->whereDate('reservation_datetime', '<=', $thirtyDaysLater);
+        }
 
         if (!empty($venueId)) {
             $query->whereHas('article', fn ($q) => $q->where('venue_id', $venueId));

@@ -23,11 +23,11 @@
             </tr>
             <tr>
                 <th style="text-align: left; padding: 8px 10px; border-bottom: 1px solid #e2e8f0; color: #475569;">お名前</th>
-                <td style="padding: 8px 10px; border-bottom: 1px solid #e2e8f0;">{{ $payload['fullName'] ?: '未設定' }}　様</td>
+                <td style="padding: 8px 10px; border-bottom: 1px solid #e2e8f0;">{{ $payload['fullName'] ?: '未設定' }} 様</td>
             </tr>
             <tr>
                 <th style="text-align: left; padding: 8px 10px; border-bottom: 1px solid #e2e8f0; color: #475569;">フリガナ</th>
-                <td style="padding: 8px 10px; border-bottom: 1px solid #e2e8f0;">{{ $payload['fullNameKana'] ?: '未設定' }}　様</td>
+                <td style="padding: 8px 10px; border-bottom: 1px solid #e2e8f0;">{{ $payload['fullNameKana'] ?: '未設定' }} 様</td>
             </tr>
             <tr>
                 <th style="text-align: left; padding: 8px 10px; border-bottom: 1px solid #e2e8f0; color: #475569;">電話番号</th>

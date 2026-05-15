@@ -9,9 +9,47 @@
     <div class="content venue-page">
         <form action="{{ route('venue.store') }}" method="POST" enctype="multipart/form-data" class="venue-form">
             @csrf
-                <div class="input-item venue-image">
+                <div class="input-item">
                     <label>画像</label>
-                    <x-image-upload name="image" />
+                    <div class="images-upload-wrap" x-data="venueImageUpload()">
+                        <label
+                            class="images-upload-drop"
+                            x-bind:class="dragging ? 'is-dragging' : ''"
+                            x-on:dragover.prevent="dragging = true"
+                            x-on:dragleave.prevent="dragging = false"
+                            x-on:drop.prevent="onDrop($event)"
+                            for="venue-image-input"
+                        >
+                            <template x-if="!previewUrl">
+                                <span class="material-symbols-outlined">upload_file</span>
+                            </template>
+                            <template x-if="!previewUrl">
+                                <p>クリックまたはドラッグ＆ドロップで画像を選択</p>
+                            </template>
+                            <template x-if="!previewUrl">
+                                <p class="images-upload-hint">JPEG / PNG / GIF / WebP・最大10MB</p>
+                            </template>
+                            <template x-if="previewUrl">
+                                <img
+                                    :src="previewUrl"
+                                    alt="選択中の画像プレビュー"
+                                    style="display: block; width: 100%; max-height: 240px; object-fit: contain; border-radius: 8px;"
+                                >
+                            </template>
+                            <template x-if="previewName">
+                                <p class="images-upload-hint" x-text="previewName"></p>
+                            </template>
+                            <input
+                                id="venue-image-input"
+                                type="file"
+                                name="image"
+                                accept="image/jpeg,image/png,image/gif,image/webp"
+                                class="images-upload-input"
+                                x-ref="fileInput"
+                                x-on:change="onFileChange($event)"
+                            >
+                        </label>
+                    </div>
                 </div>
                 <div class="input-item">
                     <label>会場名</label>
@@ -62,4 +100,43 @@
             @endforeach
         @endif
     </ul>
+
+    <script>
+    @once
+    function venueImageUpload() {
+        return {
+            dragging: false,
+            previewUrl: null,
+            previewName: null,
+
+            setPreview(file) {
+                if (!file || !file.type.startsWith('image/')) {
+                    return;
+                }
+
+                if (this.previewUrl) {
+                    URL.revokeObjectURL(this.previewUrl);
+                }
+
+                this.previewUrl = URL.createObjectURL(file);
+                this.previewName = file.name;
+            },
+
+            onDrop(e) {
+                this.dragging = false;
+                const files = e.dataTransfer?.files;
+                if (files && files.length > 0) {
+                    this.$refs.fileInput.files = files;
+                    const event = new Event('change', { bubbles: true });
+                    this.$refs.fileInput.dispatchEvent(event);
+                }
+            },
+            onFileChange(e) {
+                const file = e.target?.files?.[0] ?? null;
+                this.setPreview(file);
+            },
+        };
+    }
+    @endonce
+    </script>
 </x-app-layout>

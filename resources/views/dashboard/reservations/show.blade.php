@@ -7,7 +7,7 @@
     <x-slot:old>{{ @$old }}</x-slot:old>
 
     <div class="content reservation-admin-page">
-        <div class="reservation-detail-shell">
+        <div class="reservation-detail-shell" @if($user->role === 'staff') id="reservation-detail-shell-nocopy" @endif>
             <div class="reservation-detail-head">
                 <h2>予約詳細</h2>
                 <a href="{{ route('reservations.index') }}" class="reservation-back-link">一覧に戻る</a>
@@ -95,4 +95,57 @@
             @endforeach
         @endif
     </ul>
+
+    @if($user->role === 'staff')
+    <div id="ss-blackout" style="display:none;position:fixed;inset:0;background:#000;z-index:999999;"></div>
+    <script>
+    (function () {
+        var shell = document.getElementById('reservation-detail-shell-nocopy');
+        if (!shell) return;
+        var staffField = shell.querySelector('.reservation-staff-field');
+        var blackout = document.getElementById('ss-blackout');
+        var blackoutTimer = null;
+
+        function showBlackout() {
+            blackout.style.display = 'block';
+            clearTimeout(blackoutTimer);
+            blackoutTimer = setTimeout(function () {
+                blackout.style.display = 'none';
+            }, 2000);
+        }
+
+        function isScreenshotKey(e) {
+            // PrintScreen (Windows)
+            if (e.key === 'PrintScreen') return true;
+            // Win+Shift+S (Windows Snipping Tool)
+            if (e.shiftKey && e.metaKey && (e.key === 'S' || e.key === 's')) return true;
+            // Mac: Cmd+Shift+3, Cmd+Shift+4, Cmd+Shift+5
+            if (e.metaKey && e.shiftKey && ['3','4','5'].includes(e.key)) return true;
+            // Mac: Cmd+Ctrl+Shift+3, Cmd+Ctrl+Shift+4
+            if (e.metaKey && e.ctrlKey && e.shiftKey && ['3','4'].includes(e.key)) return true;
+            return false;
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (isScreenshotKey(e)) showBlackout();
+        });
+
+        function isInStaffField(target) {
+            return staffField && staffField.contains(target);
+        }
+
+        shell.addEventListener('contextmenu', function (e) {
+            if (!isInStaffField(e.target)) e.preventDefault();
+        });
+
+        shell.addEventListener('copy', function (e) {
+            if (!isInStaffField(e.target)) e.preventDefault();
+        });
+
+        shell.addEventListener('selectstart', function (e) {
+            if (!isInStaffField(e.target)) e.preventDefault();
+        });
+    })();
+    </script>
+    @endif
 </x-app-layout>

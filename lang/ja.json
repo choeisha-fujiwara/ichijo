@@ -141,5 +141,7 @@
     "Forgot your password?": "パスワードをお忘れの場合",
     "Forgot Your Password?": "パスワードをお忘れの場合",
     "Hello!": " ",
-    "Regards,": " "
+    "Regards,": " ",
+    "The password field is required.": "パスワードは必須です。",
+    "The password must be at least 8 characters.": "パスワードは8文字以上である必要があります。"
 }

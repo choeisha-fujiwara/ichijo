@@ -114,6 +114,25 @@ services:
             - '/dev/shm:/dev/shm'
         networks:
             - sail
+    scheduler:
+        build:
+            context: ./vendor/laravel/sail/runtimes/8.2
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP:-1000}'
+        image: sail-8.2/app
+        command: php artisan schedule:work
+        volumes:
+            - '.:/var/www/html'
+            - './docker/8.1/php-upload.ini:/etc/php/8.2/cli/conf.d/100-upload.ini'
+        environment:
+            WWWUSER: '${WWWUSER:-root}'
+            LARAVEL_SAIL: 1
+        networks:
+            - sail
+        depends_on:
+            - laravel.test
+            - mysql
 networks:
     sail:
         driver: bridge

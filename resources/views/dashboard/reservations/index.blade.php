@@ -33,7 +33,7 @@
                                 <option value="reserved_asc" @selected($sort === 'reserved_asc')>予約日時が古い順</option>
                             </select>
                         </form>
-                        @if ($user->role !== 'staff')
+                        @if ($user->role !== 'staff' && $user->role !== 'manager')
                         <a href="{{ route('reservations.export', array_filter(array_merge(['sort' => $sort], $filters))) }}" class="reservation-export-link">CSV出力</a>
                         @endif
                     </div>
@@ -42,6 +42,7 @@
                 <form method="GET" action="{{ route('reservations.index') }}" class="reservation-admin-filter" aria-label="予約絞り込み">
                     <input type="hidden" name="sort" value="{{ $sort }}">
 
+                    @if ($user->role !== 'staff' && $user->role !== 'manager')
                     <div class="reservation-filter-field">
                         <label for="filter-venue-id">会場</label>
                         <select id="filter-venue-id" name="venue_id">
@@ -53,6 +54,7 @@
                             @endforeach
                         </select>
                     </div>
+                    @endif
 
                     <div class="reservation-filter-field reservation-filter-field-date">
                         <label for="filter-reserved-from">予約日</label>

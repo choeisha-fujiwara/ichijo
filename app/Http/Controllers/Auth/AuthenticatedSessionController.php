@@ -12,6 +12,8 @@ use App\Models\User;
 
 class AuthenticatedSessionController extends Controller
 {
+    private const SWITCHABLE_ROLES = ['developer', 'system', 'admin', 'manager', 'staff'];
+
     /**
      * Display the login view.
      */
@@ -44,6 +46,17 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = $request->user();
+        $sessionUserId = (int) $request->session()->get('dev_role_switch_user_id', 0);
+
+        if ($user && $sessionUserId === (int) $user->id) {
+            $originalRole = (string) $request->session()->get('dev_role_original_role', 'developer');
+
+            if (in_array($originalRole, self::SWITCHABLE_ROLES, true)) {
+                $user->update(['role' => $originalRole]);
+            }
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
