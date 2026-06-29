@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Article;
 use App\Models\ArticleVenue;
 use App\Models\Image;
+use App\Models\Reservation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -83,126 +84,174 @@ class ArticleController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $this->validateArticle($request);
+        try {
+            \Log::info('Article creation started', ['user_id' => Auth::id()]);
+            $validated = $this->validateArticle($request);
+            \Log::info('Article validation passed');
 
-        $user = Auth::user();
+            $user = Auth::user();
 
-        DB::transaction(function () use ($request, $validated, $user) {
-            $headerImage = $this->resolveHeaderImage($request, $validated);
-            $bodyImages = $this->resolveBodyImages($request, $validated);
+            DB::transaction(function () use ($request, $validated, $user) {
+                \Log::info('Starting image processing');
+                $headerImage = $this->resolveHeaderImage($request, $validated);
+                \Log::info('Header image resolved', ['path' => $headerImage['path']]);
 
-            $article = Article::create([
-                'user_id' => $user->id,
-                'title' => $validated['title'],
-                'body' => $validated['body'],
-                'freeword_1' => $validated['freeword_1'] ?? null,
-                'freeword_2' => $validated['freeword_2'] ?? null,
-                'header_image' => $headerImage['path'],
-                'body_image' => $bodyImages['paths'],
-                'body_image_captions' => array_values(array_filter($validated['body_image_captions'] ?? [], fn ($v) => $v !== null)),
-                'memo' => $validated['memo'] ?? null,
-                'manager' => $validated['manager'] ?? null,
-                'venue_id' => $validated['venue_id'] ?? null,
-                'emails' => !empty($validated['emails'])
-                    ? array_values(array_filter($validated['emails'], fn ($email) => !empty($email)))
-                    : null,
-                'published_at' => $validated['published_at'] ?? null,
-                'unpublished_at' => $validated['unpublished_at'] ?? null,
-                'status' => 'draft',
+                $bodyImages = $this->resolveBodyImages($request, $validated);
+                \Log::info('Body images resolved', ['count' => count($bodyImages['paths'])]);
+
+                \Log::info('Creating article record', ['title' => $validated['title']]);
+                $article = Article::create([
+                    'user_id' => $user->id,
+                    'title' => $validated['title'],
+                    'body' => $validated['body'],
+                    'freeword_1' => $validated['freeword_1'] ?? null,
+                    'freeword_2' => $validated['freeword_2'] ?? null,
+                    'header_image' => $headerImage['path'],
+                    'body_image' => $bodyImages['paths'],
+                    'body_image_captions' => array_values(array_filter($validated['body_image_captions'] ?? [], fn ($v) => $v !== null)),
+                    'memo' => $validated['memo'] ?? null,
+                    'manager' => $validated['manager'] ?? null,
+                    'venue_id' => $validated['venue_id'] ?? null,
+                    'emails' => !empty($validated['emails'])
+                        ? array_values(array_filter($validated['emails'], fn ($email) => !empty($email)))
+                        : null,
+                    'published_at' => $validated['published_at'] ?? null,
+                    'unpublished_at' => $validated['unpublished_at'] ?? null,
+                    'status' => 'draft',
+                ]);
+                \Log::info('Article record created', ['article_id' => $article->id]);
+
+                \Log::info('Syncing article images');
+                $this->syncArticleImages($article, null, $headerImage['meta'], $bodyImages['meta'], true, false, true, []);
+                \Log::info('Article images synced');
+
+                \Log::info('Syncing reservation slots', ['slot_count' => count($validated['slots'] ?? [])]);
+                $this->syncReservationSlots($article, $validated['slots'] ?? []);
+                \Log::info('Reservation slots synced');
+            });
+
+            \Log::info('Article creation completed successfully', ['article_id' => $article->id ?? null]);
+            return redirect()->route('top.index')->with('msg', '記事を保存しました');
+        } catch (\Exception $e) {
+            \Log::error('Article creation failed', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
             ]);
-
-            $this->syncArticleImages($article, null, $headerImage['meta'], $bodyImages['meta'], true, false, true, []);
-            $this->syncReservationSlots($article, $validated['slots'] ?? []);
-        });
-
-        return redirect()->route('top.index')->with('msg', '記事を保存しました');
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => '記事の保存に失敗しました。入力内容を確認してください。']);
+        }
     }
 
     public function update(Request $request, Article $article): RedirectResponse
     {
-        $validated = $this->validateArticle($request, $article);
+        try {
+            \Log::info('Article update started', ['article_id' => $article->id, 'user_id' => Auth::id()]);
+            $validated = $this->validateArticle($request, $article);
+            \Log::info('Article validation passed for update');
 
-        DB::transaction(function () use ($request, $validated, $article) {
-            $replaceHeader = $this->hasUploadedFile($request, 'header_image') || !empty($validated['header_selected_image_id']);
-            $removeHeader = !$replaceHeader && !empty($validated['remove_header_image']);
-            $addBody = $this->hasUploadedFile($request, 'body_image') || !empty($validated['body_selected_image_ids']);
-            $originalHeaderImage = $article->header_image;
-            $originalBodyImages = $article->body_image ?? [];
-            $originalBodyCaptions = $article->body_image_captions ?? [];
-            $removeBodyIndexes = collect($validated['remove_body_image_indexes'] ?? [])
-                ->map(fn ($index) => (int) $index)
-                ->filter(fn ($index) => $index >= 0)
-                ->unique()
-                ->values();
+            DB::transaction(function () use ($request, $validated, $article) {
+                $replaceHeader = $this->hasUploadedFile($request, 'header_image') || !empty($validated['header_selected_image_id']);
+                $removeHeader = !$replaceHeader && !empty($validated['remove_header_image']);
+                $addBody = $this->hasUploadedFile($request, 'body_image') || !empty($validated['body_selected_image_ids']);
+                $originalHeaderImage = $article->header_image;
+                $originalBodyImages = $article->body_image ?? [];
+                $originalBodyCaptions = $article->body_image_captions ?? [];
+                $removeBodyIndexes = collect($validated['remove_body_image_indexes'] ?? [])
+                    ->map(fn ($index) => (int) $index)
+                    ->filter(fn ($index) => $index >= 0)
+                    ->unique()
+                    ->values();
 
-            $removedBodyPaths = [];
-            $keptBodyImages = [];
-            $keptBodyCaptions = [];
-            $editedExistingCaptions = $validated['existing_body_image_captions'] ?? [];
+                $removedBodyPaths = [];
+                $keptBodyImages = [];
+                $keptBodyCaptions = [];
+                $editedExistingCaptions = $validated['existing_body_image_captions'] ?? [];
 
-            foreach ($originalBodyImages as $index => $path) {
-                if ($removeBodyIndexes->contains($index)) {
-                    $removedBodyPaths[] = $path;
-                    continue;
+                foreach ($originalBodyImages as $index => $path) {
+                    if ($removeBodyIndexes->contains($index)) {
+                        $removedBodyPaths[] = $path;
+                        continue;
+                    }
+
+                    $keptBodyImages[] = $path;
+                    $keptBodyCaptions[] = array_key_exists($index, $editedExistingCaptions)
+                        ? $editedExistingCaptions[$index]
+                        : ($originalBodyCaptions[$index] ?? null);
                 }
 
-                $keptBodyImages[] = $path;
-                $keptBodyCaptions[] = array_key_exists($index, $editedExistingCaptions)
-                    ? $editedExistingCaptions[$index]
-                    : ($originalBodyCaptions[$index] ?? null);
-            }
+                \Log::info('Processing header image', ['replace' => $replaceHeader, 'remove' => $removeHeader]);
+                $headerImage = $replaceHeader
+                    ? $this->resolveHeaderImage($request, $validated)
+                    : ['path' => $removeHeader ? null : $article->header_image, 'meta' => null];
 
-            $headerImage = $replaceHeader
-                ? $this->resolveHeaderImage($request, $validated)
-                : ['path' => $removeHeader ? null : $article->header_image, 'meta' => null];
+                if ($addBody) {
+                    $newBodyImages = $this->resolveBodyImages($request, $validated);
+                    $bodyImages = [
+                        'paths' => array_merge($keptBodyImages, $newBodyImages['paths']),
+                        'meta' => $newBodyImages['meta'],
+                    ];
+                    $newCaptions = array_values(array_filter($validated['body_image_captions'] ?? [], fn ($v) => $v !== null));
+                    $mergedCaptions = array_merge($keptBodyCaptions, $newCaptions);
+                } else {
+                    $bodyImages = ['paths' => $keptBodyImages, 'meta' => []];
+                    $mergedCaptions = $keptBodyCaptions;
+                }
 
-            if ($addBody) {
-                $newBodyImages = $this->resolveBodyImages($request, $validated);
-                $bodyImages = [
-                    'paths' => array_merge($keptBodyImages, $newBodyImages['paths']),
-                    'meta' => $newBodyImages['meta'],
-                ];
-                $newCaptions = array_values(array_filter($validated['body_image_captions'] ?? [], fn ($v) => $v !== null));
-                $mergedCaptions = array_merge($keptBodyCaptions, $newCaptions);
-            } else {
-                $bodyImages = ['paths' => $keptBodyImages, 'meta' => []];
-                $mergedCaptions = $keptBodyCaptions;
-            }
+                \Log::info('Updating article record', ['title' => $validated['title']]);
+                $article->update([
+                    'title' => $validated['title'],
+                    'body' => $validated['body'],
+                    'freeword_1' => $validated['freeword_1'] ?? null,
+                    'freeword_2' => $validated['freeword_2'] ?? null,
+                    'header_image' => $headerImage['path'],
+                    'body_image' => $bodyImages['paths'],
+                    'body_image_captions' => $mergedCaptions,
+                    'memo' => $validated['memo'] ?? null,
+                    'manager' => $validated['manager'] ?? null,
+                    'venue_id' => $validated['venue_id'] ?? null,
+                    'emails' => !empty($validated['emails'])
+                        ? array_values(array_filter($validated['emails'], fn ($email) => !empty($email)))
+                        : null,
+                    'published_at' => $validated['published_at'] ?? null,
+                    'unpublished_at' => $validated['unpublished_at'] ?? null,
+                ]);
+                \Log::info('Article record updated');
 
-            $article->update([
-                'title' => $validated['title'],
-                'body' => $validated['body'],
-                'freeword_1' => $validated['freeword_1'] ?? null,
-                'freeword_2' => $validated['freeword_2'] ?? null,
-                'header_image' => $headerImage['path'],
-                'body_image' => $bodyImages['paths'],
-                'body_image_captions' => $mergedCaptions,
-                'memo' => $validated['memo'] ?? null,
-                'manager' => $validated['manager'] ?? null,
-                'venue_id' => $validated['venue_id'] ?? null,
-                'emails' => !empty($validated['emails'])
-                    ? array_values(array_filter($validated['emails'], fn ($email) => !empty($email)))
-                    : null,
-                'published_at' => $validated['published_at'] ?? null,
-                'unpublished_at' => $validated['unpublished_at'] ?? null,
+                \Log::info('Syncing article images');
+                $this->syncArticleImages(
+                    $article,
+                    $originalHeaderImage,
+                    $headerImage['meta'],
+                    $bodyImages['meta'],
+                    $replaceHeader,
+                    $removeHeader,
+                    $addBody,
+                    $removedBodyPaths
+                );
+                \Log::info('Article images synced');
+
+                \Log::info('Syncing reservation slots', ['slot_count' => count($validated['slots'] ?? [])]);
+                $this->syncReservationSlots($article, $validated['slots'] ?? [], true);
+                \Log::info('Reservation slots synced');
+            });
+
+            \Log::info('Article update completed successfully', ['article_id' => $article->id]);
+            return redirect()->route('top.show', $article)->with('msg', '記事を更新しました');
+        } catch (\Exception $e) {
+            \Log::error('Article update failed', [
+                'article_id' => $article->id,
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
             ]);
-
-            $this->syncArticleImages(
-                $article,
-                $originalHeaderImage,
-                $headerImage['meta'],
-                $bodyImages['meta'],
-                $replaceHeader,
-                $removeHeader,
-                $addBody,
-                $removedBodyPaths
-            );
-
-            $article->reservationSlots()->delete();
-            $this->syncReservationSlots($article, $validated['slots'] ?? []);
-        });
-
-        return redirect()->route('top.show', $article)->with('msg', '記事を更新しました');
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => '記事の更新に失敗しました。入力内容を確認してください。']);
+        }
     }
 
     public function show($id)
@@ -295,11 +344,11 @@ class ArticleController extends Controller
             'freeword_1' => ['nullable', 'string', 'max:255'],
             'freeword_2' => ['nullable', 'string', 'max:255'],
             'memo' => ['nullable', 'string', 'max:255'],
-            'header_image' => ['nullable', 'image', 'max:10240'],
+            'header_image' => ['nullable', 'image', 'max:100000'],
             'header_selected_image_id' => ['nullable', 'integer', 'exists:images,id'],
             'remove_header_image' => ['nullable', 'boolean'],
             'body_image' => ['nullable', 'array'],
-            'body_image.*' => ['nullable', 'image', 'max:10240'],
+            'body_image.*' => ['nullable', 'image', 'max:100000'],
             'body_selected_image_ids' => ['nullable', 'array'],
             'body_selected_image_ids.*' => ['nullable', 'integer', 'exists:images,id'],
             'remove_body_image_indexes' => ['nullable', 'array'],
@@ -309,7 +358,7 @@ class ArticleController extends Controller
             'body_image_captions' => ['nullable', 'array'],
             'body_image_captions.*' => ['nullable', 'string', 'max:255'],
             'emails' => ['nullable', 'array'],
-            'emails.*' => ['nullable', 'email:rfc,dns', 'max:255'],
+            'emails.*' => ['nullable', 'email:rfc', 'max:255'],
             'manager' => ['nullable', 'string', 'max:255'],
             'venue_id' => [
                 'nullable',
@@ -317,6 +366,7 @@ class ArticleController extends Controller
                 'exists:article_venues,id',
             ],
             'slots' => ['nullable', 'array'],
+            'slots.*.id' => ['nullable', 'integer'],
             'slots.*.date' => ['nullable', 'date'],
             'slots.*.dates' => ['nullable', 'array'],
             'slots.*.dates.*' => ['nullable', 'date'],
@@ -344,20 +394,22 @@ class ArticleController extends Controller
             'system' => ['system', 'admin', 'manager', 'staff'],
             'admin' => ['admin', 'manager', 'staff'],
             'manager' => ['manager', 'staff'],
+            'staff' => ['manager', 'staff'],
             default => ['staff'],
         };
 
-        $shouldFilterByAffiliation = $currentAffiliation !== '' && $currentAffiliation !== '管理用';
-
         return User::query()
             ->whereIn('role', $allowedRoles)
-            ->when($shouldFilterByAffiliation, fn ($q) => $q->where('affiliation', $currentAffiliation))
             ->whereNotNull('email')
             ->where('email', '!=', '')
             ->orderBy('id')
-            ->pluck('email')
-            ->unique()
-            ->values();
+            ->get(['email', 'name', 'affiliation'])
+            ->unique('email')
+            ->values()
+            ->map(fn ($user) => [
+                'value' => $user->email,
+                'label' => trim($user->name . ' (' . ($user->affiliation ?? '') . ')'),
+            ]);
     }
 
     private function resolveHeaderImage(Request $request, array $validated): array
@@ -367,6 +419,7 @@ class ArticleController extends Controller
         $uploadedHeader = $this->uploadedFiles($request, 'header_image')[0] ?? null;
 
         if ($uploadedHeader) {
+            \Log::info('Processing uploaded header image');
             $headerImage = $this->storeAsWebp($uploadedHeader, 'uploads/header');
             $headerImagePath = $headerImage['path'];
             $headerImageMeta = [
@@ -376,6 +429,7 @@ class ArticleController extends Controller
                 'mime_type' => 'image/webp',
             ];
         } elseif (!empty($validated['header_selected_image_id'])) {
+            \Log::info('Using selected header image', ['image_id' => $validated['header_selected_image_id']]);
             $selectedHeader = Image::find($validated['header_selected_image_id']);
             if ($selectedHeader && str_contains((string) $selectedHeader->path, '/header/')) {
                 $headerImagePath = $selectedHeader->path;
@@ -385,7 +439,11 @@ class ArticleController extends Controller
                     'size' => $selectedHeader->size,
                     'mime_type' => $selectedHeader->mime_type,
                 ];
+            } else {
+                \Log::warning('Selected header image not found or invalid', ['image_id' => $validated['header_selected_image_id']]);
             }
+        } else {
+            \Log::info('No header image provided');
         }
 
         return ['path' => $headerImagePath, 'meta' => $headerImageMeta];
@@ -402,6 +460,8 @@ class ArticleController extends Controller
             ->unique()
             ->values();
 
+        \Log::info('Resolving body images', ['uploaded_count' => count($uploadedBodyImages), 'selected_count' => $selectedBodyImageIds->count()]);
+
         if ($selectedBodyImageIds->isNotEmpty()) {
             $selectedBodyImages = Image::whereIn('id', $selectedBodyImageIds)
                 ->get()
@@ -410,6 +470,7 @@ class ArticleController extends Controller
             foreach ($selectedBodyImageIds as $selectedId) {
                 $selectedBody = $selectedBodyImages->firstWhere('id', $selectedId);
                 if (!$selectedBody) {
+                    \Log::warning('Selected body image not found', ['image_id' => $selectedId]);
                     continue;
                 }
                 $bodyImagePaths[] = $selectedBody->path;
@@ -423,7 +484,8 @@ class ArticleController extends Controller
         }
 
         if (!empty($uploadedBodyImages)) {
-            foreach ($uploadedBodyImages as $image) {
+            foreach ($uploadedBodyImages as $index => $image) {
+                \Log::info('Processing uploaded body image', ['index' => $index, 'name' => $image->getClientOriginalName()]);
                 $storedBodyImage = $this->storeAsWebp($image, 'uploads/body');
                 $bodyImagePaths[] = $storedBodyImage['path'];
                 $bodyImagesMeta[] = [
@@ -445,11 +507,28 @@ class ArticleController extends Controller
 
     private function uploadedFiles(Request $request, string $key): array
     {
-        return collect(Arr::wrap($request->file($key)))
+        $files = collect(Arr::wrap($request->file($key)))
             ->flatten(10)
-            ->filter(fn ($file) => $file instanceof UploadedFile && $file->isValid())
+            ->filter(function ($file) use ($key) {
+                $isValid = $file instanceof UploadedFile && $file->isValid();
+                if (!$isValid && $file instanceof UploadedFile) {
+                    \Log::warning('Invalid uploaded file', [
+                        'field' => $key,
+                        'name' => $file->getClientOriginalName(),
+                        'error' => $file->getError(),
+                        'error_message' => $file->getErrorMessage(),
+                    ]);
+                }
+                return $isValid;
+            })
             ->values()
             ->all();
+
+        if (!empty($files)) {
+            \Log::info('Collected valid uploaded files', ['field' => $key, 'count' => count($files)]);
+        }
+
+        return $files;
     }
 
     private function syncArticleImages(
@@ -463,84 +542,178 @@ class ArticleController extends Controller
         array $removedBodyPaths = []
     ): void
     {
-        if (($replaceHeader || $removeHeader) && !empty($originalHeaderImage)) {
-            $article->images()->where('path', $originalHeaderImage)->delete();
-        }
+        try {
+            if (($replaceHeader || $removeHeader) && !empty($originalHeaderImage)) {
+                \Log::info('Deleting old header image', ['path' => $originalHeaderImage]);
+                $article->images()->where('path', $originalHeaderImage)->delete();
+            }
 
-        if (!empty($removedBodyPaths)) {
-            $article->images()->whereIn('path', $removedBodyPaths)->delete();
-        }
+            if (!empty($removedBodyPaths)) {
+                \Log::info('Deleting old body images', ['count' => count($removedBodyPaths)]);
+                $article->images()->whereIn('path', $removedBodyPaths)->delete();
+            }
 
-        $sortOrder = (int) ($article->images()->max('sort_order') ?? -1) + 1;
+            $sortOrder = (int) ($article->images()->max('sort_order') ?? -1) + 1;
 
-        if ($replaceHeader && !empty($headerImageMeta)) {
-            Image::create([
-                'article_id' => $article->id,
-                'path' => $headerImageMeta['path'],
-                'original_name' => $headerImageMeta['original_name'],
-                'size' => $headerImageMeta['size'],
-                'mime_type' => $headerImageMeta['mime_type'] ?: 'image/webp',
-                'sort_order' => $sortOrder++,
-            ]);
-        }
-
-        if ($replaceBody) {
-            foreach ($bodyImagesMeta as $bodyImageMeta) {
+            if ($replaceHeader && !empty($headerImageMeta)) {
+                \Log::info('Creating new header image record', ['path' => $headerImageMeta['path']]);
                 Image::create([
                     'article_id' => $article->id,
-                    'path' => $bodyImageMeta['path'],
-                    'original_name' => $bodyImageMeta['original_name'],
-                    'size' => $bodyImageMeta['size'],
-                    'mime_type' => $bodyImageMeta['mime_type'] ?: 'image/webp',
+                    'path' => $headerImageMeta['path'],
+                    'original_name' => $headerImageMeta['original_name'],
+                    'size' => $headerImageMeta['size'],
+                    'mime_type' => $headerImageMeta['mime_type'] ?: 'image/webp',
                     'sort_order' => $sortOrder++,
                 ]);
             }
+
+            if ($replaceBody) {
+                foreach ($bodyImagesMeta as $index => $bodyImageMeta) {
+                    \Log::info('Creating body image record', ['index' => $index, 'path' => $bodyImageMeta['path']]);
+                    Image::create([
+                        'article_id' => $article->id,
+                        'path' => $bodyImageMeta['path'],
+                        'original_name' => $bodyImageMeta['original_name'],
+                        'size' => $bodyImageMeta['size'],
+                        'mime_type' => $bodyImageMeta['mime_type'] ?: 'image/webp',
+                        'sort_order' => $sortOrder++,
+                    ]);
+                }
+            }
+
+            \Log::info('Image sync completed successfully');
+        } catch (\Exception $e) {
+            \Log::error('Image sync failed', [
+                'article_id' => $article->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
         }
     }
 
-    private function syncReservationSlots(Article $article, array $slots): void
+    private function syncReservationSlots(Article $article, array $slots, bool $isUpdate = false): void
     {
-        foreach ($slots as $slot) {
-            $dates = [];
-            if (!empty($slot['dates']) && is_array($slot['dates'])) {
-                $dates = array_values(array_filter($slot['dates']));
-            } elseif (!empty($slot['date'])) {
-                $dates = [$slot['date']];
+        try {
+            $existingSlots = $isUpdate
+                ? $article->reservationSlots()->get()->keyBy('id')
+                : collect();
+            $retainedSlotIds = [];
+
+            foreach ($slots as $slotIndex => $slot) {
+                $dates = [];
+                if (!empty($slot['dates']) && is_array($slot['dates'])) {
+                    $dates = array_values(array_filter($slot['dates']));
+                } elseif (!empty($slot['date'])) {
+                    $dates = [$slot['date']];
+                }
+
+                $startHour = $slot['start_hour'] ?? null;
+                $startMinute = $slot['start_minute'] ?? null;
+                $endHour = $slot['end_hour'] ?? null;
+                $endMinute = $slot['end_minute'] ?? null;
+                $capacity = isset($slot['capacity']) && $slot['capacity'] !== null && $slot['capacity'] !== ''
+                    ? (int) $slot['capacity']
+                    : null;
+
+                if (
+                    empty($dates)
+                    || $startHour === null
+                    || $startMinute === null
+                    || $endHour === null
+                    || $endMinute === null
+                ) {
+                    \Log::debug('Skipping incomplete slot', ['slot_index' => $slotIndex]);
+                    continue;
+                }
+
+                $startTime = sprintf('%s:%s:00', $startHour, $startMinute);
+                $endTime = sprintf('%s:%s:00', $endHour, $endMinute);
+
+                if ($endTime < $startTime) {
+                    \Log::debug('Skipping slot with invalid time range', ['start' => $startTime, 'end' => $endTime]);
+                    continue;
+                }
+
+                $slotId = isset($slot['id']) && $slot['id'] !== ''
+                    ? (int) $slot['id']
+                    : null;
+
+                foreach (array_values($dates) as $dateIndex => $date) {
+                    $payload = [
+                        'date' => $date,
+                        'start_time' => $startTime,
+                        'end_time' => $endTime,
+                        'capacity' => $capacity ?? 0,
+                    ];
+
+                    $targetExistingSlot = null;
+                    if ($isUpdate && $slotId !== null && $dateIndex === 0) {
+                        $targetExistingSlot = $existingSlots->get($slotId);
+                    }
+
+                    if ($targetExistingSlot) {
+                        \Log::info('Updating existing slot', ['slot_id' => $targetExistingSlot->id]);
+                        $targetExistingSlot->update($payload);
+                        $retainedSlotIds[] = (int) $targetExistingSlot->id;
+                        continue;
+                    }
+
+                    \Log::info('Creating new slot', ['date' => $date, 'start_time' => $startTime, 'end_time' => $endTime]);
+                    $createdSlot = $article->reservationSlots()->create($payload);
+                    $retainedSlotIds[] = (int) $createdSlot->id;
+                }
             }
 
-            $startHour = $slot['start_hour'] ?? null;
-            $startMinute = $slot['start_minute'] ?? null;
-            $endHour = $slot['end_hour'] ?? null;
-            $endMinute = $slot['end_minute'] ?? null;
-            $capacity = isset($slot['capacity']) && $slot['capacity'] !== null && $slot['capacity'] !== ''
-                ? (int) $slot['capacity']
-                : null;
-
-            if (
-                empty($dates)
-                || $startHour === null
-                || $startMinute === null
-                || $endHour === null
-                || $endMinute === null
-            ) {
-                continue;
+            if (! $isUpdate) {
+                \Log::info('Slot sync completed (create mode)', ['retained_count' => count($retainedSlotIds)]);
+                return;
             }
 
-            $startTime = sprintf('%s:%s:00', $startHour, $startMinute);
-            $endTime = sprintf('%s:%s:00', $endHour, $endMinute);
+            $retainedSlotIds = array_values(array_unique($retainedSlotIds));
+            $deleteCandidateIds = $existingSlots
+                ->keys()
+                ->map(fn ($id) => (int) $id)
+                ->reject(fn ($id) => in_array($id, $retainedSlotIds, true))
+                ->values();
 
-            if ($endTime < $startTime) {
-                continue;
+            if ($deleteCandidateIds->isEmpty()) {
+                \Log::info('Slot sync completed (update mode)', ['retained_count' => count($retainedSlotIds)]);
+                return;
             }
 
-            foreach ($dates as $date) {
-                $article->reservationSlots()->create([
-                    'date' => $date,
-                    'start_time' => $startTime,
-                    'end_time' => $endTime,
-                    'capacity' => $capacity ?? 0,
-                ]);
+            $reservedSlotIds = Reservation::query()
+                ->whereIn('reservation_slot_id', $deleteCandidateIds->all())
+                ->whereNull('deleted_at')
+                ->pluck('reservation_slot_id')
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->all();
+
+            foreach ($deleteCandidateIds as $slotId) {
+                if (in_array((int) $slotId, $reservedSlotIds, true)) {
+                    \Log::info('Skipping deletion of reserved slot', ['slot_id' => $slotId]);
+                    continue;
+                }
+
+                $slotToDelete = $existingSlots->get((int) $slotId);
+                if ($slotToDelete) {
+                    \Log::info('Deleting unreserved slot', ['slot_id' => $slotId]);
+                    $slotToDelete->delete();
+                }
             }
+
+            \Log::info('Slot sync completed (update mode)', [
+                'retained_count' => count($retainedSlotIds),
+                'deleted_count' => count($deleteCandidateIds) - count($reservedSlotIds),
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Slot sync failed', [
+                'article_id' => $article->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
         }
     }
 
@@ -551,28 +724,62 @@ class ArticleController extends Controller
         $baseName = Str::slug($baseName) ?: 'image';
         $path = trim($directory, '/').'/'.$baseName.'-'.Str::uuid().'.webp';
 
-        $rawContent = file_get_contents($file->getRealPath());
-        $imageResource = $rawContent !== false ? imagecreatefromstring($rawContent) : false;
+        try {
+            $realPath = $file->getRealPath();
+            if ($realPath === false) {
+                throw new \RuntimeException('アップロードファイルのパスが取得できません。');
+            }
 
-        if ($imageResource === false) {
-            throw new \RuntimeException('画像の変換に失敗しました。');
+            if (!is_readable($realPath)) {
+                throw new \RuntimeException('アップロードファイルが読み込み不可です。');
+            }
+
+            $rawContent = file_get_contents($realPath);
+            if ($rawContent === false) {
+                throw new \RuntimeException('ファイル内容の読み込みに失敗しました。');
+            }
+
+            $imageResource = imagecreatefromstring($rawContent);
+            if ($imageResource === false) {
+                throw new \RuntimeException('画像形式の認識に失敗しました。サポートされていない形式の可能性があります。');
+            }
+
+            ob_start();
+            $encoded = imagewebp($imageResource, null, 80);
+            $webpBinary = ob_get_clean();
+            imagedestroy($imageResource);
+
+            if ($encoded === false || $webpBinary === false) {
+                throw new \RuntimeException('WebP形式への変換に失敗しました。');
+            }
+
+            if (empty($webpBinary)) {
+                throw new \RuntimeException('WebP画像のバイナリが空です。');
+            }
+
+            $storageSuccess = Storage::disk('public')->put($path, $webpBinary);
+            if (!$storageSuccess) {
+                throw new \RuntimeException('ストレージへのファイル保存に失敗しました。ディスク容量またはパーミッションを確認してください。');
+            }
+
+            $savedSize = Storage::disk('public')->size($path);
+            if ($savedSize === false || $savedSize === 0) {
+                Storage::disk('public')->delete($path);
+                throw new \RuntimeException('保存されたファイルのサイズ確認に失敗しました。');
+            }
+
+            return [
+                'path' => $path,
+                'original_name' => $originalName,
+                'size' => $savedSize,
+            ];
+        } catch (\Exception $e) {
+            \Log::error('Image conversion error: ' . $e->getMessage(), [
+                'file' => $originalName,
+                'directory' => $directory,
+                'exception' => $e,
+            ]);
+            throw $e;
         }
-
-        ob_start();
-        $encoded = imagewebp($imageResource, null, 80);
-        $webpBinary = ob_get_clean();
-        imagedestroy($imageResource);
-
-        if ($encoded === false || $webpBinary === false) {
-            throw new \RuntimeException('WebP画像の生成に失敗しました。');
-        }
-
-        Storage::disk('public')->put($path, $webpBinary);
-
-        return [
-            'path' => $path,
-            'original_name' => $originalName,
-            'size' => Storage::disk('public')->size($path),
-        ];
     }
 }

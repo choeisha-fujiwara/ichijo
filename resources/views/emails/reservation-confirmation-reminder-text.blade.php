@@ -39,7 +39,7 @@
 
 ご来場予定日時: {{ $slotDateTime ? $slotDateTime->format('Y年m月d日 H:i') : '未設定' }}
 
-ご予約者様名: {{ $reservation->firstname }} {{ $reservation->lastname ?? '' }}
+ご予約者様名: {{ $reservation->firstname }} {{ $reservation->lastname ?? '' }}　様
 
 
 ご不明な点がございましたら、お気軽にお問い合わせください。

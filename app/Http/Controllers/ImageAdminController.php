@@ -36,7 +36,7 @@ class ImageAdminController extends Controller
         $validated = $request->validate([
             'type'   => ['required', 'in:header,body'],
             'images' => ['required', 'array', 'min:1', 'max:20'],
-            'images.*' => ['required', 'file', 'mimes:jpeg,png,gif,webp', 'max:10240'],
+            'images.*' => ['required', 'file', 'mimes:jpeg,png,gif,webp', 'max:100000'],
         ]);
 
         $type = $validated['type'];
@@ -58,6 +58,45 @@ class ImageAdminController extends Controller
         return redirect()
             ->route('images.index', ['type' => $type])
             ->with('msg', 'アップロードしました。');
+    }
+
+    public function getImagesPaginated(Request $request)
+    {
+        $validated = $request->validate([
+            'type' => ['nullable', 'in:header,body'],
+            'page' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        $type = (string) ($validated['type'] ?? 'header');
+        $page = (int) ($validated['page'] ?? 1);
+
+        $query = Image::query()
+            ->where('path', 'like', $type === 'body' ? '%/body/%' : '%/header/%')
+            ->orderByDesc('created_at');
+
+        $paginated = $query->paginate(5, ['*'], 'page', $page);
+
+        $images = $paginated->getCollection()
+            ->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'url' => route('article.image', $image),
+                    'original_name' => $image->original_name,
+                    'path' => $image->path,
+                ];
+            })
+            ->all();
+
+        return response()->json([
+            'images' => $images,
+            'pagination' => [
+                'current_page' => $paginated->currentPage(),
+                'per_page' => $paginated->perPage(),
+                'total' => $paginated->total(),
+                'last_page' => $paginated->lastPage(),
+                'has_more' => $paginated->hasMorePages(),
+            ],
+        ]);
     }
 
     public function destroy(Request $request, Image $image): RedirectResponse

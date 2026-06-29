@@ -17,9 +17,10 @@ class ReportService
      * @param  Carbon  $from
      * @param  Carbon  $to
      * @param  int|null  $venueId
+     * @param  int|null  $articleId
      * @return array{ labels: array, views: array, reservations: array }
      */
-    public function dailySummary(Carbon $from, Carbon $to, ?int $venueId = null): array
+    public function dailySummary(Carbon $from, Carbon $to, ?int $venueId = null, ?int $articleId = null): array
     {
         $viewQuery = PageView::whereBetween('date', [$from->toDateString(), $to->toDateString()]);
         $reservationQuery = Reservation::whereBetween('created_at', [$from->startOfDay(), $to->copy()->endOfDay()]);
@@ -27,6 +28,11 @@ class ReportService
         if ($venueId) {
             $viewQuery->whereIn('article_id', Article::where('venue_id', $venueId)->pluck('id'));
             $reservationQuery->whereIn('article_id', Article::where('venue_id', $venueId)->pluck('id'));
+        }
+
+        if ($articleId) {
+            $viewQuery->where('article_id', $articleId);
+            $reservationQuery->where('article_id', $articleId);
         }
 
         $views = $viewQuery
@@ -67,9 +73,10 @@ class ReportService
      * @param  Carbon  $from
      * @param  Carbon  $to
      * @param  int|null  $venueId
+     * @param  int|null  $articleId
      * @return Collection
      */
-    public function articleSummary(Carbon $from, Carbon $to, ?int $venueId = null): Collection
+    public function articleSummary(Carbon $from, Carbon $to, ?int $venueId = null, ?int $articleId = null): Collection
     {
         $viewQuery = PageView::whereBetween('date', [$from->toDateString(), $to->toDateString()]);
         $reservationQuery = Reservation::whereBetween('created_at', [$from->startOfDay(), $to->copy()->endOfDay()])
@@ -78,6 +85,11 @@ class ReportService
         if ($venueId) {
             $viewQuery->whereIn('article_id', Article::where('venue_id', $venueId)->pluck('id'));
             $reservationQuery->whereIn('article_id', Article::where('venue_id', $venueId)->pluck('id'));
+        }
+
+        if ($articleId) {
+            $viewQuery->where('article_id', $articleId);
+            $reservationQuery->where('article_id', $articleId);
         }
 
         $views = $viewQuery

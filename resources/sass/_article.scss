@@ -238,58 +238,90 @@
 		}
 
 		.article-venue {
-			padding: 14px;
-			border: 1px solid #dbeafe;
-			border-radius: 14px;
-			background: #f8fbff;
-			display: grid;
-			gap: 10px;
+			display: block;
 
 			h2 {
 				font-size: 16px;
-				font-weight: 700;
-				color: #0f172a;
+				font-weight: 500;
+				text-align: center;
+				padding: 8px 0;
+				border: 1px solid #e2e8f0;
+				border-radius: 8px;
+				color: #475569;
 				margin: 0;
 			}
 
 			.article-venue-image {
+				margin-top: 16px;
 				overflow: hidden;
-				border-radius: 12px;
+				border-radius: 8px;
 
 				img {
 					width: 100%;
-					height: 140px;
+					height: auto;
 					object-fit: cover;
 					background: #e2e8f0;
-					display: block;
 				}
 			}
 
 			dl {
+				margin-top: 20px;
+				padding: 0 8px;
 				display: grid;
-				gap: 8px;
-				margin: 0;
+				gap: 12px;
 
 				div {
-					display: grid;
-					gap: 0;
+					display: flex;
+					justify-content: flex-start;
+					align-items: flex-start;
+					border-bottom: 1px solid #e2e8f0;
+					padding-bottom: 9px;
+
+					&:last-child {
+						border-bottom: 0;
+					}
 				}
 			}
 
 			dt {
-				font-size: 11px;
+				font-size: 14px;
 				font-weight: 700;
-				color: #64748b;
+				color: #475569;
+				white-space: nowrap;
+				line-height: 1.6;
+				width: 4.8em;
 				margin: 0;
 			}
 
 			dd {
-				font-size: 12px;
+				width: calc(100% - 4.8em);
+				font-size: 14px;
 				line-height: 1.6;
 				color: #1e293b;
-				white-space: pre-wrap;
+				display: flex;
+				justify-content: flex-start;
+				align-items: flex-start;
 				margin: 0;
-				padding-top: 2px;
+				white-space: pre-wrap;
+			}
+
+			a {
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+				margin-left: -2px;
+				font-size: 12px;
+				font-weight: 600;
+				color: #1d4ed8;
+				text-decoration: none;
+
+				.material-symbols-outlined {
+					font-size: 16px;
+				}
+
+				&:hover {
+					text-decoration: underline;
+				}
 			}
 		}
 
@@ -424,7 +456,7 @@
 		min-height: 44px;
 		padding: 8px 12px 10px;
 		border: 1px solid var(--color-line-deep);
-		border-radius: 10px;
+		border-radius: 8px;
 		background: #ffffff;
 		color: var(--color-primary);
 		font-size: 14px;
@@ -465,7 +497,7 @@
 		padding: 24px 24px 32px;
 		border: 1px dashed var(--color-line-deep);
 		border-radius: 12px;
-		background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+		// background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -491,7 +523,7 @@
 		.image-upload-select-btn {
 			margin-top: 8px;
 			height: 36px;
-			padding: 0 16px;
+			padding: 0 17px 1.6px 16px;
 			border-width: 1px;
 			border-style: solid;
 			border: 1px solid #93c5fd;
@@ -600,7 +632,7 @@
 	.email-add-btn {
 		margin-top: 16px;
 		height: 40px;
-		padding: 0 16px;
+		padding: 0 16px 1px 15px;
 		border: 1px solid #93c5fd;
 		border-radius: 999px;
 		background: #eff6ff;
@@ -796,9 +828,8 @@
 		padding: 16px;
 		border: 1px solid var(--color-line);
 		border-radius: 12px;
-		background: #f9fbff;
 		display: flex;
-		flex-wrap: nowrap;
+		flex-wrap: wrap;
 		gap: 12px;
         margin-bottom: 16px;
 		align-items: flex-start;
@@ -816,10 +847,12 @@
 	}
 
 	.reservation-slots {
+		position: relative;
+
 		input[type="date"],
 		input[type="number"],
 		select {
-			height: 44px;
+			height: 40px;
 			padding: 0 10px;
 			border: 1px solid var(--color-line-deep);
 			border-radius: 8px;
@@ -831,48 +864,81 @@
 			-webkit-appearance: none;
 			background-image: none;
 		}
-        .reservation-slot-date {
-            width: 100%;
 
-			.reservation-slot-date-actions {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 8px;
-				margin-bottom: 8px;
-			}
+		.reservation-slot-toolbar {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			flex-wrap: wrap;
+			margin-bottom: 16px;
+		}
 
-			.reservation-slot-date-mode-btn,
-			.reservation-slot-date-clear-btn {
-				height: 28px;
-				padding: 0 10px;
-				border-radius: 999px;
-				border: 1px solid var(--color-line-deep);
-				background: #ffffff;
-				font-size: 12px;
-				font-weight: 600;
-				color: var(--color-secondary);
-				cursor: pointer;
-			}
+		.reservation-slot-summary {
+			margin: 0;
+			font-size: 12px;
+			color: var(--color-secondary);
+		}
 
-			.reservation-slot-date-mode-btn.is-active {
-				border-color: #60a5fa;
-				background: #dbeafe;
-				color: var(--color-active);
-			}
+		.reservation-slot-empty {
+			margin: 0;
+			padding: 16px;
+			border: 1px dashed var(--color-line-deep);
+			border-radius: 8px;
+			font-size: 13px;
+			color: var(--color-secondary);
+		}
 
-			.reservation-slot-date-clear-btn {
-				border-color: var(--color-danger-border);
-				background: var(--color-danger-soft);
-				color: var(--color-danger);
-			}
+		.reservation-slot-list-date {
+			min-width: 180px;
+		}
 
-			.reservation-slot-date-help {
-				margin: 8px 0 0;
-				font-size: 12px;
-				line-height: 1.5;
-				color: var(--color-secondary);
-			}
-        }
+		.reservation-slot-card-list {
+			padding-right: 48px;
+		}
+
+		.reservation-slot-date-mode-btn,
+		.reservation-slot-date-clear-btn,
+		.reservation-slot-time-add-btn {
+			height: 40px;
+			padding: 8px 24px 8px 23px;
+			border-radius: 999px;
+			border: 1px solid var(--color-line-deep);
+			background: #ffffff;
+			font-weight: 600;
+			color: var(--color-secondary);
+			cursor: pointer;
+		}
+
+		.reservation-slot-date-mode-btn {
+			border-color: #93c5fd;
+			background: #eff6ff;
+			color: var(--color-active);
+            padding: 8px 28px 8px 18px;
+            &.decision {
+                padding: 8px 24px 8px 24px;
+            }
+		}
+
+		.reservation-slot-date-clear-btn {
+			border-color: var(--color-danger-border);
+			background: var(--color-danger-soft);
+			color: var(--color-danger);
+		}
+
+		.reservation-slot-time-add-btn {
+			border-color: #bfdbfe;
+			background: #f8fbff;
+			color: var(--color-active);
+            margin-right: 8px;
+		}
+
+		.reservation-slot-date-help {
+			margin: 8px 0 0;
+			font-size: 12px;
+			line-height: 1.5;
+			color: var(--color-secondary);
+		}
+
         .reservation-slot-times {
             display: flex;
             align-items: center;
@@ -905,6 +971,151 @@
 				-webkit-appearance: inner-spin-button;
 			}
 		}
+
+		.reservation-slot-modal {
+			position: fixed;
+			inset: 0;
+			z-index: 2147483647;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 8px;
+		}
+
+		.reservation-slot-modal-backdrop {
+			position: absolute;
+			inset: 0;
+			border: none;
+			background: rgba(15, 23, 42, 0.55);
+			cursor: pointer;
+		}
+
+		.reservation-slot-modal-panel {
+			position: relative;
+			width: min(1200px, 100%);
+			max-height: calc(100vh - 16px);
+			overflow: auto;
+			background: #ffffff;
+			border-radius: 16px;
+			border: 1px solid #dbe4f0;
+			box-shadow: 0 20px 50px rgba(15, 23, 42, 0.22);
+			padding: 12px;
+		}
+
+		.reservation-slot-modal-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 8px;
+
+			h3 {
+				margin: 0;
+					font-size: 16px;
+			}
+		}
+
+		.reservation-slot-modal-close {
+			width: 36px;
+			height: 36px;
+			border-radius: 999px;
+			border: 1px solid var(--color-line-deep);
+			background: #ffffff;
+			font-size: 20px;
+			line-height: 1;
+            text-align: center;
+            padding: 0 0 1px;
+			cursor: pointer;
+		}
+
+		.reservation-slot-modal-body {
+			display: grid;
+			grid-template-columns: minmax(420px, 1fr) minmax(420px, 1fr);
+			gap: 12px;
+		}
+
+		.reservation-slot-modal-label {
+			margin: 0 0 8px;
+			font-size: 12px;
+			font-weight: 700;
+			color: var(--color-secondary);
+		}
+
+		.reservation-slot-modal-calendar-wrap,
+		.reservation-slot-modal-times-wrap {
+			border: 1px solid var(--color-line);
+			border-radius: 12px;
+			padding: 8px;
+			background: #ffffff;
+		}
+
+		.reservation-slot-modal-calendar {
+			display: block;
+			overflow-x: auto;
+			background: #ffffff;
+			border-radius: 8px;
+			padding: 4px;
+
+			.ui-datepicker {
+				width: max-content;
+				background: #ffffff;
+			}
+
+			.ui-datepicker-header {
+				background: #ffffff;
+			}
+
+			.ui-datepicker-calendar td .ui-state-default {
+				background: #ffffff;
+			}
+
+			.ui-datepicker-calendar td.reservation-slot-selected .ui-state-default {
+				border-color: #1d4ed8;
+				background: #2563eb;
+				color: #ffffff;
+			}
+		}
+
+		.reservation-slot-modal-times-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 8px;
+			margin-bottom: 6px;
+		}
+
+		.reservation-slot-time-row-list {
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+		}
+
+		.reservation-slot-time-row {
+			position: relative;
+			display: grid;
+			grid-template-columns: auto auto auto minmax(72px, 96px) 24px;
+			align-items: center;
+			gap: 8px;
+			padding: 6px 36px 6px 8px;
+			border: 1px solid var(--color-line);
+			border-radius: 8px;
+		}
+
+		.reservation-slot-time-row-capacity {
+			min-width: 72px;
+			text-align: center;
+		}
+
+		.reservation-slot-time-sep {
+			font-size: 13px;
+			color: var(--color-secondary);
+		}
+
+		.reservation-slot-modal-footer {
+			display: flex;
+			justify-content: flex-end;
+			gap: 8px;
+			margin-top: 8px;
+		}
 	}
 
 	.reservation-slot-remove,
@@ -912,7 +1123,13 @@
 		cursor: pointer;
         position: absolute;
         right: 8px;
-        bottom: 4px;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
+	.reservation-slot-card-list > .reservation-slot-remove {
+		top: 16px;
+		transform: none;
 	}
 
 	.email-row {

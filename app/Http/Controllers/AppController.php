@@ -56,7 +56,7 @@ class AppController extends Controller
             }
         }
 
-        $data = $query->paginate(100)->withQueryString();
+        $data = $query->paginate(10)->withQueryString();
         $venues = ArticleVenue::query()
             ->orderBy('venue_name')
             ->get(['id', 'venue_name']);

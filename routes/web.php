@@ -31,6 +31,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //     'index', 'show',
     // ]);
     Route::get('/dashboard/report', [ReportController::class, 'index'])->name('report.index');
+    Route::get('/dashboard/report/articles/export', [ReportController::class, 'exportArticles'])->name('report.articles.export');
     Route::resource('/dashboard/article', ArticleController::class)->only([
         'index', 'store', 'edit', 'update', 'destroy',
     ]);
@@ -45,6 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/dashboard/images', ImageAdminController::class)->only([
         'index', 'store', 'destroy',
     ]);
+    Route::get('/dashboard/images-paginated', [ImageAdminController::class, 'getImagesPaginated'])->name('images.paginated');
     Route::resource('/dashboard/users', UserAdminController::class)->only([
         'index', 'create', 'store', 'edit', 'update', 'destroy',
     ]);
@@ -53,6 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/reservations', [ReservationAdminController::class, 'index'])->name('reservations.index');
     Route::get('/dashboard/reservations/export', [ReservationAdminController::class, 'export'])->name('reservations.export');
     Route::get('/dashboard/reservations/{reservation}', [ReservationAdminController::class, 'show'])->name('reservations.show');
+    Route::delete('/dashboard/reservations/{reservation}', [ReservationAdminController::class, 'destroy'])->name('reservations.destroy');
     Route::patch('/dashboard/reservations/{reservation}/staff', [ReservationAdminController::class, 'updateStaff'])->name('reservations.updateStaff');
 });
 

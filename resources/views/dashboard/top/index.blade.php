@@ -120,8 +120,8 @@
             </div>
 
             @if (method_exists($data, 'links'))
-                <div class="top-list-pagination">
-                    {{ $data->links('vendor.pagination.count') }}
+                <div class="top-list-pagination paginations">
+                    {{ $data->links('vendor.pagination.paginate') }}
                 </div>
             @endif
         </div>

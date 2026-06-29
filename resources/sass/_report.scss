@@ -678,7 +678,8 @@
 // レポートページ（新）
 // ============================================================
 .report-page {
-    padding: 92px 32px 48px 80px;
+    width: 100vw;
+    padding: 92px 24px 48px 80px;
     overflow-y: auto;
 
     @include m.mq(sp) {
@@ -687,9 +688,54 @@
 }
 
 .report-shell {
-    width: min(100%, 100%);
-    display: grid;
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
     gap: 24px;
+}
+
+.report-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    background: rgba(248, 250, 252, 0.75);
+    border-radius: 12px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+    z-index: 10;
+}
+
+.report-shell.is-loading .report-loading {
+    opacity: 1;
+    visibility: visible;
+}
+
+.report-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 3px solid #bfdbfe;
+    border-top-color: #2563eb;
+    animation: report-spinner-rotate 0.9s linear infinite;
+}
+
+.report-loading-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+}
+
+@keyframes report-spinner-rotate {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .report-head {
@@ -724,18 +770,19 @@
     display: flex;
     align-items: flex-end;
     gap: 16px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
 .report-filter-group {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
 
     label {
         font-size: 12px;
         font-weight: 600;
         color: #475569;
+        padding-left: 4px;
     }
 
     input[type="date"],
@@ -755,6 +802,21 @@
         }
     }
 
+    input[type="date"] {
+        position: relative;
+        cursor: pointer;
+
+        &::-webkit-calendar-picker-indicator {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+    }
+
     select {
         cursor: pointer;
         padding-right: 32px;
@@ -762,12 +824,19 @@
         background-repeat: no-repeat;
         background-position: right 10px center;
     }
+    &.select-article-group {
+        width: calc(100% - 652px);
+         @include m.mq(sp) {
+            max-width: 100%;
+        }
+    }
 }
 
 .report-filter-sep {
     font-size: 16px;
     color: #94a3b8;
-    padding-bottom: 8px;
+    padding-bottom: 12px;
+    margin: 0 -8px;
 }
 
 .report-filter-btn {
@@ -781,6 +850,7 @@
     cursor: pointer;
     transition: background 0.15s;
     height: 38px;
+    white-space: nowrap;
 
     &:hover {
         background: var(--color-active);
@@ -853,6 +923,47 @@
     background: #fff;
 }
 
+.report-table-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    .report-section-title {
+        margin-bottom: 0;
+    }
+
+    @include m.mq(sp) {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
+
+.report-export-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 14px;
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: var(--color-active);
+    font-size: 12px;
+    font-weight: 700;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 16px rgba(37, 99, 235, 0.14);
+    }
+
+    @include m.mq(sp) {
+        width: 100%;
+    }
+}
+
 .report-table-scroll {
     overflow-x: auto;
 }
@@ -869,6 +980,11 @@
         text-align: left;
         font-size: 13px;
         color: #334155;
+        &.report-table-num {
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
     }
 
     th {
@@ -881,12 +997,6 @@
     tbody tr:last-child td {
         border-bottom: 0;
     }
-}
-
-.report-table-num {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
 }
 
 .report-empty {

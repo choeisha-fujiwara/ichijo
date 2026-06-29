@@ -155,11 +155,13 @@ class UserAdminController extends Controller
         }
 
         $venues = ArticleVenue::orderBy('venue_name')->get(['id', 'venue_name']);
+        $availableRoles = ['staff', 'manager'];
 
         return view('dashboard.users.edit', [
             'user' => $currentUser,
             'target' => $user,
             'venues' => $venues,
+            'availableRoles' => $availableRoles,
         ]);
     }
 
@@ -178,11 +180,13 @@ class UserAdminController extends Controller
         $venueNames = ArticleVenue::query()->pluck('venue_name')->toArray();
 
         $validated = $request->validate([
+            'role' => ['required', 'in:staff,manager'],
             'password' => ['nullable', 'string', 'min:8'],
             'affiliation' => ['required', 'string', 'max:255', Rule::in($venueNames)],
         ]);
 
         $updates = [
+            'role' => $validated['role'],
             'affiliation' => $validated['affiliation'],
         ];
 
@@ -191,6 +195,10 @@ class UserAdminController extends Controller
         }
 
         $user->update($updates);
+
+        if ((int) $currentUser->id === (int) $user->id && $validated['role'] === 'staff') {
+            return redirect()->route('article.index')->with('msg', 'ユーザー情報を更新しました。');
+        }
 
         return redirect()->route('users.index')->with('msg', 'ユーザー情報を更新しました。');
     }
@@ -223,6 +231,10 @@ class UserAdminController extends Controller
 
     private function canEditTarget(User $user, User $target): bool
     {
+        if ((int) $user->id === (int) $target->id) {
+            return true;
+        }
+
         if ($target->role === 'staff') {
             return in_array($user->role, ['manager', 'admin', 'system', 'developer'], true);
         }

@@ -83,8 +83,8 @@
                 </div>
             @endif
             @if ($article->venue)
-                <section class="article-venue" aria-label="お問い合わせ先">
-                    <h2>お問い合わせ先</h2>
+                <section class="article-venue" aria-label="イベント会場 ／ お問い合わせ先">
+                    <h2>イベント会場 ／ お問い合わせ先</h2>
                     @if (!empty($article->venue->image))
                         <div class="article-venue-image">
                             <img src="{{ route('venue.image', $article->venue) }}" alt="{{ $article->venue->venue_name }} の画像">
@@ -347,8 +347,8 @@
                             aria-label="電話番号（市外局番または先頭）"
                             value="{{ old('phone-1') }}"
                             placeholder="例）090"
-                            minlength="3"
-                            maxlength="3"
+                            minlength="2"
+                            maxlength="5"
                             class=""
                             required
                         />
@@ -550,6 +550,11 @@
                 )
             ).sort();
 
+            // 最初の予約がある月を初期表示
+            if (availableMonthKeys.length > 0) {
+                activeMonth = monthKeyToDate(availableMonthKeys[0]);
+            }
+
             const formatDateKey = (date) => {
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -690,11 +695,16 @@
                     return;
                 }
 
+                const availableSlots = dayData.slots.filter((slot) => Number(slot.capacity || 0) > 0);
+                if (availableSlots.length === 0) {
+                    return;
+                }
+
                 activeDate = dateKey;
                 modalDate.textContent = `${dayData.label} の予約枠`;
                 slotList.innerHTML = '';
 
-                dayData.slots.forEach((slot) => {
+                availableSlots.forEach((slot) => {
                     const button = document.createElement('button');
                     button.type = 'button';
                     button.className = 'reservation-slot-option';

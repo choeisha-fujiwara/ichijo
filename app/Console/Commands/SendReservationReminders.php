@@ -42,7 +42,7 @@ class SendReservationReminders extends Command
         $count = 0;
         foreach ($reservations as $reservation) {
             try {
-                Mail::send(new ReservationConfirmationReminder($reservation));
+                Mail::to($reservation->email)->send(new ReservationConfirmationReminder($reservation));
                 $count++;
                 $this->info("メール送信完了: {$reservation->firstname} ({$reservation->email})");
             } catch (\Exception $e) {

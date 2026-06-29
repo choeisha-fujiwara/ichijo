@@ -10,7 +10,26 @@
         <div class="reservation-detail-shell" @if($user->role === 'staff') id="reservation-detail-shell-nocopy" @endif>
             <div class="reservation-detail-head">
                 <h2>予約詳細</h2>
-                <a href="{{ route('reservations.index') }}" class="reservation-back-link">一覧に戻る</a>
+                <div class="reservation-detail-actions">
+                    <a href="{{ route('reservations.index') }}" class="reservation-back-link">一覧に戻る</a>
+                    @if ($user->role !== 'staff' && $user->role !== 'manager')
+                        <div
+                            class="top-list-delete reservation-detail-delete"
+                            data-name="{{ e(trim(($reservation->firstname ?? '') . ' ' . ($reservation->lastname ?? '')) ?: 'この予約') }}"
+                            onclick="(function(el){ var n=el.getAttribute('data-name'); var m='「'+n+'」の予約を削除しますか？'; m+='\nこの操作は元に戻せません。'; if(confirm(m)){el.querySelector('form').submit();} })(this)"
+                        >
+                            <span class="material-symbols-outlined">delete</span>
+                            <form
+                                action="{{ route('reservations.destroy', $reservation) }}"
+                                method="POST"
+                                style="display:none"
+                            >
+                                @csrf
+                                @method('DELETE')
+                            </form>
+                        </div>
+                    @endif
+                </div>
             </div>
 
             <div class="reservation-detail-status-row">

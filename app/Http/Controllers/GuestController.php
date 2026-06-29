@@ -14,8 +14,10 @@ use App\Models\PageView;
 use App\Services\GuestService;
 use App\Mail\SendMail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 
 class GuestController extends Controller
 {
@@ -48,30 +50,44 @@ class GuestController extends Controller
 
         $validated = $request->validated();
 
-        $data = new Reservation();
-        $data->fill([
-            'article_id' => $validated['article_id'],
-            'reservation_slot_id' => $validated['reservation_slot_id'],
-            'reservation_datetime' => $validated['reservation_datetime'],
-            'firstname' => $validated['first_name'],
-            'lastname' => $validated['last_name'],
-            'firstname_kana' => $validated['first_name_kana'],
-            'lastname_kana' => $validated['last_name_kana'],
-            'zipcode' => $validated['postal_code_1'].'-'.$validated['postal_code_2'],
-            'prefecture' => $validated['address_prefectures'],
-            'city' => $validated['address_municipalities'],
-            'address' => $validated['address_detail'],
-            'building' => $validated['address_building'] ?? null,
-            'phone' => $validated['phone-1'].'-'.$validated['phone-2'].'-'.$validated['phone-3'],
-            'email' => $validated['email'],
-            'memo' => $validated['memo'] ?? null,
-        ])->save();
+        $slot = DB::transaction(function () use ($validated) {
+            $slot = ReservationSlot::query()
+                ->lockForUpdate()
+                ->where('id', $validated['reservation_slot_id'])
+                ->where('article_id', $validated['article_id'])
+                ->first();
+
+            if (! $slot || $slot->capacity <= $slot->reserved_count) {
+                throw ValidationException::withMessages([
+                    'reservation_slot_id' => '選択した予約枠は受け付けできません。',
+                ]);
+            }
+
+            $data = new Reservation();
+            $data->fill([
+                'article_id' => $validated['article_id'],
+                'reservation_slot_id' => $validated['reservation_slot_id'],
+                'reservation_datetime' => $validated['reservation_datetime'],
+                'firstname' => $validated['first_name'],
+                'lastname' => $validated['last_name'],
+                'firstname_kana' => $validated['first_name_kana'],
+                'lastname_kana' => $validated['last_name_kana'],
+                'zipcode' => $validated['postal_code_1'].'-'.$validated['postal_code_2'],
+                'prefecture' => $validated['address_prefectures'],
+                'city' => $validated['address_municipalities'],
+                'address' => $validated['address_detail'],
+                'building' => $validated['address_building'] ?? null,
+                'phone' => $validated['phone-1'].'-'.$validated['phone-2'].'-'.$validated['phone-3'],
+                'email' => $validated['email'],
+                'memo' => $validated['memo'] ?? null,
+            ])->save();
+
+            $slot->increment('reserved_count');
+
+            return $slot->fresh();
+        });
 
         $name = trim(($validated['first_name'] ?? '').' '.($validated['last_name'] ?? ''));
-
-        $slot = ReservationSlot::where('id', $validated['reservation_slot_id'])->first();
-        $slot->reserved_count += 1;
-        $slot->save();
 
         $article = Article::with('venue')->find($validated['article_id']);
         $venueName = $article?->venue?->venue_name;

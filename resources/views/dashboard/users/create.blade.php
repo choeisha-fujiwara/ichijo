@@ -50,8 +50,10 @@
                     <label for="password">パスワード</label>
                     <input
                         id="password"
-                        type="password"
+                        type="text"
+                        pattern="^[a-zA-Z0-9]+$"
                         name="password"
+                        placeholder="半角英数字で入力してください"
                         required
                         autocomplete="new-password"
                     >

@@ -44,7 +44,7 @@ class VenueController extends Controller
             'manager' => ['nullable', 'string', 'max:255'],
             'access' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
-            'image' => ['nullable', 'image', 'max:12400'],
+            'image' => ['nullable', 'image', 'max:100000'],
         ]);
 
         if ($request->hasFile('image')) {
@@ -70,7 +70,7 @@ class VenueController extends Controller
             'manager' => ['nullable', 'string', 'max:255'],
             'access' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
-            'image' => ['nullable', 'image', 'max:12400'],
+            'image' => ['nullable', 'image', 'max:100000'],
         ]);
 
         if ($request->hasFile('image')) {

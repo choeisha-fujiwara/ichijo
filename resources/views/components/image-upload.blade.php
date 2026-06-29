@@ -95,6 +95,7 @@ if ($resolvedSavedType === null) {
                     :name="fieldName + '_captions[' + slotIndex + ']'"
                     placeholder="キャプションを入力（任意）"
                     x-model="slot.caption"
+                    @change="dispatchPreviewChange()"
                     class="existing-media-caption-input"
                     style="margin-top: 8px;"
                 >
@@ -125,20 +126,34 @@ if ($resolvedSavedType === null) {
                 <h3>保存画像を選択</h3>
                 <button type="button" class="saved-image-close" x-on:click="closeSavedImageModal()">閉じる</button>
             </div>
-            <div class="saved-image-grid" x-show="filteredSavedImages().length > 0">
-                <template x-for="image in filteredSavedImages()" :key="image.id">
-                    <button
-                        type="button"
-                        class="saved-image-item"
-                        :class="{ 'selected': isImageSelectedInSlot(image.id) }"
-                        x-on:click="selectSavedImageForSlot(image)"
-                    >
-                        <img :src="image.url" :alt="image.original_name" class="saved-image-thumb">
-                        <p class="saved-image-name" x-text="image.original_name"></p>
-                    </button>
-                </template>
-            </div>
-            <p class="saved-image-empty" x-show="filteredSavedImages().length === 0">選択可能な保存画像がありません。</p>
+            <template x-if="isLoadingImages">
+                <div class="saved-image-loading" style="text-align: center; padding: 2rem;">
+                    <p>読み込み中...</p>
+                </div>
+            </template>
+            <template x-if="!isLoadingImages && paginatedImages.length > 0">
+                <div class="saved-image-grid">
+                    <template x-for="image in paginatedImages" :key="image.id">
+                        <button
+                            type="button"
+                            class="saved-image-item"
+                            :class="{ 'selected': isImageSelectedInSlot(image.id) }"
+                            x-on:click="selectSavedImageForSlot(image)"
+                        >
+                            <img :src="image.url" :alt="image.original_name" class="saved-image-thumb">
+                            <p class="saved-image-name" x-text="image.original_name"></p>
+                        </button>
+                    </template>
+                </div>
+            </template>
+            <template x-if="paginatedImages.length > 0">
+                <div class="saved-image-pagination" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 16px; padding: 0 16px;">
+                    <button type="button" class="saved-image-prev" :disabled="currentPage <= 1 || isLoadingImages" x-on:click="prevPage()">前へ</button>
+                    <span class="saved-image-page-info" style="min-width: 100px; text-align: center;" x-text="`${currentPage} / ${totalPages}`"></span>
+                    <button type="button" class="saved-image-next" :disabled="currentPage >= totalPages || isLoadingImages" x-on:click="nextPage()">次へ</button>
+                </div>
+            </template>
+            <p class="saved-image-empty" x-show="!isLoadingImages && paginatedImages.length === 0">選択可能な保存画像がありません。</p>
         </div>
     </div>
 </div>
@@ -158,6 +173,10 @@ function imageUploadAddable(config = {}) {
         initialSelections: Array.isArray(config.initialSelections) ? config.initialSelections : [],
         showSavedModal: false,
         activeSlotId: null,
+        paginatedImages: [],
+        currentPage: 1,
+        totalPages: 1,
+        isLoadingImages: false,
 
         get selectedInputName() {
             return this.selectedName ? `${this.selectedName}[]` : null;
@@ -330,12 +349,53 @@ function imageUploadAddable(config = {}) {
 
         openSavedImageModal(slotId) {
             this.activeSlotId = slotId;
+            this.currentPage = 1;
+            this.paginatedImages = [];
             this.showSavedModal = true;
+            this.$nextTick(() => {
+                this.loadImages(1);
+            });
         },
 
         closeSavedImageModal() {
             this.showSavedModal = false;
             this.activeSlotId = null;
+            this.paginatedImages = [];
+            this.currentPage = 1;
+            this.totalPages = 1;
+        },
+
+        async loadImages(page) {
+            this.isLoadingImages = true;
+            try {
+                const response = await fetch(`{{ route('images.paginated') }}?type=${encodeURIComponent(this.savedType || '')}&page=${page}`);
+                const data = await response.json();
+                this.paginatedImages = data.images || [];
+                this.currentPage = data.pagination.current_page;
+                this.totalPages = data.pagination.last_page;
+            } catch (error) {
+                console.error('Failed to load images:', error);
+                this.paginatedImages = [];
+            } finally {
+                this.isLoadingImages = false;
+            }
+        },
+
+        goToPage(page) {
+            if (page < 1 || page > this.totalPages) return;
+            this.loadImages(page);
+        },
+
+        nextPage() {
+            if (this.currentPage < this.totalPages) {
+                this.goToPage(this.currentPage + 1);
+            }
+        },
+
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.goToPage(this.currentPage - 1);
+            }
         },
 
         findSlot(slotId) {
@@ -439,20 +499,34 @@ function imageUploadAddable(config = {}) {
                 <h3>保存画像を選択</h3>
                 <button type="button" class="saved-image-close" x-on:click="closeSavedImageModal()">閉じる</button>
             </div>
-            <div class="saved-image-grid" x-show="filteredSavedImages().length > 0">
-                <template x-for="image in filteredSavedImages()" :key="image.id">
-                    <button
-                        type="button"
-                        class="saved-image-item"
-                        :class="{ 'selected': Number(selectedSavedImageId) === Number(image.id) }"
-                        x-on:click="selectSavedImage(image)"
-                    >
-                        <img :src="image.url" :alt="image.original_name" class="saved-image-thumb">
-                        <p class="saved-image-name" x-text="image.original_name"></p>
-                    </button>
-                </template>
-            </div>
-            <p class="saved-image-empty" x-show="filteredSavedImages().length === 0">選択可能な保存画像がありません。</p>
+            <template x-if="isLoadingImages">
+                <div class="saved-image-loading" style="text-align: center; padding: 2rem;">
+                    <p>読み込み中...</p>
+                </div>
+            </template>
+            <template x-if="!isLoadingImages && paginatedImages.length > 0">
+                <div class="saved-image-grid">
+                    <template x-for="image in paginatedImages" :key="image.id">
+                        <button
+                            type="button"
+                            class="saved-image-item"
+                            :class="{ 'selected': Number(selectedSavedImageId) === Number(image.id) }"
+                            x-on:click="selectSavedImage(image)"
+                        >
+                            <img :src="image.url" :alt="image.original_name" class="saved-image-thumb">
+                            <p class="saved-image-name" x-text="image.original_name"></p>
+                        </button>
+                    </template>
+                </div>
+            </template>
+            <template x-if="paginatedImages.length > 0">
+                <div class="saved-image-pagination" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 16px; padding: 0 16px;">
+                    <button type="button" class="saved-image-prev" :disabled="currentPage <= 1 || isLoadingImages" x-on:click="prevPage()">前へ</button>
+                    <span class="saved-image-page-info" style="min-width: 100px; text-align: center;" x-text="`${currentPage} / ${totalPages}`"></span>
+                    <button type="button" class="saved-image-next" :disabled="currentPage >= totalPages || isLoadingImages" x-on:click="nextPage()">次へ</button>
+                </div>
+            </template>
+            <p class="saved-image-empty" x-show="!isLoadingImages && paginatedImages.length === 0">選択可能な保存画像がありません。</p>
         </div>
     </div>
 </div>
@@ -474,6 +548,10 @@ function imageUpload(config = {}) {
         initialSelectedId: config.initialSelectedId || null,
         initialPreviewUrl: config.initialPreviewUrl || null,
         showSavedModal: false,
+        paginatedImages: [],
+        currentPage: 1,
+        totalPages: 1,
+        isLoadingImages: false,
 
         init() {
             if (this.initialSelectedId && this.initialPreviewUrl) {
@@ -607,11 +685,52 @@ function imageUpload(config = {}) {
         },
 
         openSavedImageModal() {
+            this.currentPage = 1;
+            this.paginatedImages = [];
             this.showSavedModal = true;
+            this.$nextTick(() => {
+                this.loadImages(1);
+            });
         },
 
         closeSavedImageModal() {
             this.showSavedModal = false;
+            this.paginatedImages = [];
+            this.currentPage = 1;
+            this.totalPages = 1;
+        },
+
+        async loadImages(page) {
+            this.isLoadingImages = true;
+            try {
+                const response = await fetch(`{{ route('images.paginated') }}?type=${encodeURIComponent(this.savedType || '')}&page=${page}`);
+                const data = await response.json();
+                this.paginatedImages = data.images || [];
+                this.currentPage = data.pagination.current_page;
+                this.totalPages = data.pagination.last_page;
+            } catch (error) {
+                console.error('Failed to load images:', error);
+                this.paginatedImages = [];
+            } finally {
+                this.isLoadingImages = false;
+            }
+        },
+
+        goToPage(page) {
+            if (page < 1 || page > this.totalPages) return;
+            this.loadImages(page);
+        },
+
+        nextPage() {
+            if (this.currentPage < this.totalPages) {
+                this.goToPage(this.currentPage + 1);
+            }
+        },
+
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.goToPage(this.currentPage - 1);
+            }
         },
 
         selectSavedImage(image) {

@@ -15,7 +15,7 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <meta name="robots" content="noindex, nofollow, noarchive" />
-<style>body{margin:0;padding:0;background:#fff;}.loading{width:100vw;height:100vh;background:#fff;position:fixed;top:0;left:0;z-index:99999999;display:flex;justify-content:center;align-items:center;padding-bottom:8vh;}.loading img{width: 240px;height:auto}</style>
+<style>body{margin:0;padding:0;background:#fff;}.loading{width:100vw;height:100vh;background:#fff;position:fixed;top:0;left:0;z-index:99999999;display:flex;justify-content:center;align-items:center;padding-bottom:8vh;}.loading img{width:240px;height:auto}.modal,.menu-modal{opacity:0;visibility:hidden;pointer-events:none}.modal.active,.menu-modal.sp-active{opacity:1;visibility:visible;pointer-events:auto}[x-cloak]{display:none!important}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600&family=Poppins:wght@500&display=swap">
@@ -111,13 +111,97 @@
     @endif
     <script>
         $(function() {
+            let publishPickerFollowListener = null;
+            let publishPickerFollowInput = null;
+            let publishPickerFollowRafId = null;
+
+            const setPublishPeriodDatepickerClass = function() {
+                $("#ui-datepicker-div")
+                    .addClass("publish-period-datepicker")
+                    .removeClass("reservation-slot-datepicker");
+            };
+
+            const clearPublishPeriodDatepickerClass = function() {
+                $("#ui-datepicker-div").removeClass("publish-period-datepicker");
+            };
+
+            const stopPublishPeriodDatepickerFollow = function() {
+                if (publishPickerFollowListener) {
+                    window.removeEventListener("resize", publishPickerFollowListener);
+                    document.removeEventListener("scroll", publishPickerFollowListener, true);
+                }
+
+                if (publishPickerFollowRafId !== null) {
+                    window.cancelAnimationFrame(publishPickerFollowRafId);
+                }
+
+                publishPickerFollowListener = null;
+                publishPickerFollowInput = null;
+                publishPickerFollowRafId = null;
+            };
+
+            const updatePublishPeriodDatepickerPosition = function() {
+                if (!publishPickerFollowInput) {
+                    return;
+                }
+
+                const $picker = $("#ui-datepicker-div");
+                if ($picker.length === 0 || !$picker.is(":visible") || !$picker.hasClass("publish-period-datepicker")) {
+                    return;
+                }
+
+                const inputRect = publishPickerFollowInput.getBoundingClientRect();
+                const pickerWidth = $picker.outerWidth() || 0;
+                const pickerHeight = $picker.outerHeight() || 0;
+                const viewportPadding = 8;
+                const maxLeft = Math.max(viewportPadding, window.innerWidth - pickerWidth - viewportPadding);
+                const pickerLeft = Math.min(Math.max(inputRect.left, viewportPadding), maxLeft);
+
+                let pickerTop = inputRect.top - pickerHeight - 24;
+                if (pickerTop < viewportPadding) {
+                    pickerTop = inputRect.bottom + 8;
+                }
+
+                $picker.css({
+                    position: "fixed",
+                    top: `${pickerTop}px`,
+                    left: `${pickerLeft}px`,
+                });
+            };
+
+            const startPublishPeriodDatepickerFollow = function(input) {
+                stopPublishPeriodDatepickerFollow();
+                publishPickerFollowInput = input;
+
+                publishPickerFollowListener = function() {
+                    if (publishPickerFollowRafId !== null) {
+                        return;
+                    }
+
+                    publishPickerFollowRafId = window.requestAnimationFrame(function() {
+                        publishPickerFollowRafId = null;
+                        updatePublishPeriodDatepickerPosition();
+                    });
+                };
+
+                window.addEventListener("resize", publishPickerFollowListener);
+                document.addEventListener("scroll", publishPickerFollowListener, true);
+                updatePublishPeriodDatepickerPosition();
+            };
+
             if (window.matchMedia("(max-width: 576px)").matches) {
                 $("#from").datepicker({
                     defaultDate: 0,
                     changeMonth: true,
                     numberOfMonths: 1,
                     dateFormat: "yy-mm-dd",
+                    beforeShow: function() {
+                        setPublishPeriodDatepickerClass();
+                        window.setTimeout(() => startPublishPeriodDatepickerFollow(this), 0);
+                    },
                     onClose: function(selectedDate) {
+                        clearPublishPeriodDatepickerClass();
+                        stopPublishPeriodDatepickerFollow();
                         $("#to").datepicker("option", "minDate", selectedDate);
                     }
                 });
@@ -126,7 +210,13 @@
                     changeMonth: true,
                     numberOfMonths: 1,
                     dateFormat: "yy-mm-dd",
+                    beforeShow: function() {
+                        setPublishPeriodDatepickerClass();
+                        window.setTimeout(() => startPublishPeriodDatepickerFollow(this), 0);
+                    },
                     onClose: function(selectedDate) {
+                        clearPublishPeriodDatepickerClass();
+                        stopPublishPeriodDatepickerFollow();
                         $("#from").datepicker("option", "maxDate", selectedDate);
                     }
                 });
@@ -136,7 +226,13 @@
                     changeMonth: true,
                     numberOfMonths: 2,
                     dateFormat: "yy-mm-dd",
+                    beforeShow: function() {
+                        setPublishPeriodDatepickerClass();
+                        window.setTimeout(() => startPublishPeriodDatepickerFollow(this), 0);
+                    },
                     onClose: function(selectedDate) {
+                        clearPublishPeriodDatepickerClass();
+                        stopPublishPeriodDatepickerFollow();
                         $("#to").datepicker("option", "minDate", selectedDate);
                     }
                 });
@@ -145,12 +241,73 @@
                     changeMonth: true,
                     numberOfMonths: 2,
                     dateFormat: "yy-mm-dd",
+                    beforeShow: function() {
+                        setPublishPeriodDatepickerClass();
+                        window.setTimeout(() => startPublishPeriodDatepickerFollow(this), 0);
+                    },
                     onClose: function(selectedDate) {
+                        clearPublishPeriodDatepickerClass();
+                        stopPublishPeriodDatepickerFollow();
                         $("#from").datepicker("option", "maxDate", selectedDate);
                     }
                 });
             };
         });
+    </script>
+    <script>
+        document.addEventListener('click', function (event) {
+            const link = event.target.closest('a[href]');
+            if (!link) {
+                return;
+            }
+
+            const rawHref = link.getAttribute('href') || '';
+            if (
+                rawHref === '' ||
+                rawHref.startsWith('#') ||
+                rawHref.startsWith('javascript:') ||
+                link.hasAttribute('download') ||
+                link.target === '_blank'
+            ) {
+                return;
+            }
+
+            let url;
+            try {
+                url = new URL(link.href, window.location.href);
+            } catch (e) {
+                return;
+            }
+
+            if (url.origin !== window.location.origin) {
+                return;
+            }
+
+            const menuButton = document.querySelector('.menu-btn');
+            const menu = document.querySelector('.menu');
+            const menuModal = document.querySelector('.menu-modal');
+            const logoutModal = document.querySelector('.logout-modal');
+
+            if (menuButton) {
+                menuButton.classList.remove('active');
+            }
+            if (menu) {
+                menu.classList.remove('sp-active');
+            }
+            if (menuModal) {
+                menuModal.classList.remove('sp-active');
+            }
+            if (logoutModal) {
+                logoutModal.classList.remove('active');
+            }
+
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.display = 'flex';
+                loading.style.opacity = '1';
+                loading.classList.remove('loading-end');
+            }
+        }, true);
     </script>
     {{-- <script src="{{ asset('build/assets/app-C1vQWtqv.js') }}"></script> --}}
     @stack('scripts')

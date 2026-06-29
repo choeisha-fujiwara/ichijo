@@ -37,10 +37,30 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="role">ロール</label>
+                    <select
+                        id="role"
+                        name="role"
+                        required
+                    >
+                        <option value="">選択してください</option>
+                        @foreach ($availableRoles as $role)
+                            <option value="{{ $role }}" @selected(old('role', in_array($target->role, $availableRoles, true) ? $target->role : '') === $role)>
+                                {{ $role }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('role')
+                        <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
                     <label for="password">パスワード</label>
                     <input
                         id="password"
-                        type="password"
+                        type="text"
+                        pattern="^[a-zA-Z0-9]+$"
                         name="password"
                         autocomplete="new-password"
                         placeholder="変更しない場合は空欄"

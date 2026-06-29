@@ -8,10 +8,16 @@
 
     @php
         $venues  = $venues  ?? collect();
+        $articles = $articles ?? collect();
         $filters = $filters ?? [];
     @endphp
     <div class="content reservation-admin-page">
         <div class="reservation-admin-shell">
+            {{-- <div class="reservation-loading" id="reservation-loading" aria-hidden="true">
+                <div class="reservation-loading-spinner" aria-hidden="true"></div>
+                <p class="reservation-loading-text">読み込み中...</p>
+            </div> --}}
+
             <div class="reservation-admin-head">
                 <div class="reservation-admin-head-main">
                     <div>
@@ -34,13 +40,36 @@
                             </select>
                         </form>
                         @if ($user->role !== 'staff' && $user->role !== 'manager')
-                        <a href="{{ route('reservations.export', array_filter(array_merge(['sort' => $sort], $filters))) }}" class="reservation-export-link">CSV出力</a>
+                        <a
+                            id="reservations-export-link"
+                            href="{{ route('reservations.export', array_filter(array_merge(['sort' => $sort], $filters))) }}"
+                            class="reservation-export-link"
+                        >CSV出力</a>
                         @endif
                     </div>
                 </div>
 
                 <form method="GET" action="{{ route('reservations.index') }}" class="reservation-admin-filter" aria-label="予約絞り込み">
                     <input type="hidden" name="sort" value="{{ $sort }}">
+
+                    <div class="reservation-filter-field reservation-filter-field-date">
+                        <label for="filter-reserved-from">予約日</label>
+                        <div class="reservation-filter-date-range">
+                            <input
+                                id="filter-reserved-from"
+                                type="date"
+                                name="reserved_from"
+                                value="{{ $filters['reserved_from'] ?? '' }}"
+                            >
+                            <span>-</span>
+                            <input
+                                id="filter-reserved-to"
+                                type="date"
+                                name="reserved_to"
+                                value="{{ $filters['reserved_to'] ?? '' }}"
+                            >
+                        </div>
+                    </div>
 
                     @if ($user->role !== 'staff' && $user->role !== 'manager')
                     <div class="reservation-filter-field">
@@ -56,23 +85,16 @@
                     </div>
                     @endif
 
-                    <div class="reservation-filter-field reservation-filter-field-date">
-                        <label for="filter-reserved-from">予約日</label>
-                        <div class="reservation-filter-date-range">
-                            <input
-                                id="filter-reserved-from"
-                                type="date"
-                                name="reserved_from"
-                                value="{{ $filters['reserved_from'] ?? '' }}"
-                            >
-                            <span>〜</span>
-                            <input
-                                id="filter-reserved-to"
-                                type="date"
-                                name="reserved_to"
-                                value="{{ $filters['reserved_to'] ?? '' }}"
-                            >
-                        </div>
+                    <div class="reservation-filter-field">
+                        <label for="filter-article-id">記事</label>
+                        <select id="filter-article-id" name="article_id">
+                            <option value="">すべての記事</option>
+                            @foreach ($articles as $article)
+                                <option value="{{ $article->id }}" @selected((string) ($filters['article_id'] ?? '') === (string) $article->id)>
+                                    {{ $article->title }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
 
                     <div class="reservation-filter-actions">
@@ -86,61 +108,8 @@
                 @endif
             </div>
 
-            <div class="reservation-admin-table" role="list">
-                @forelse ($reservations as $reservation)
-                    @php
-                        $slotDateTime = null;
-                        if (!empty($reservation->reservation_datetime)) {
-                            try {
-                                $slotDateTime = \Carbon\Carbon::parse($reservation->reservation_datetime);
-                            } catch (\Throwable $e) {
-                                $slotDateTime = null;
-                            }
-                        }
-
-                        if (!$slotDateTime && $reservation->reservationSlot?->date && $reservation->reservationSlot?->start_time) {
-                            try {
-                                $slotDateTime = \Carbon\Carbon::parse($reservation->reservationSlot->date->format('Y-m-d') . ' ' . substr((string) $reservation->reservationSlot->start_time, 0, 5));
-                            } catch (\Throwable $e) {
-                                $slotDateTime = null;
-                            }
-                        }
-
-                        if (!$slotDateTime) {
-                            $statusLabel = '日時未設定';
-                            $statusClass = 'is-unscheduled';
-                        } elseif ($slotDateTime->lt(now())) {
-                            $statusLabel = '来場済み';
-                            $statusClass = 'is-finished';
-                        } else {
-                            $statusLabel = '予約済み';
-                            $statusClass = 'is-booked';
-                        }
-                    @endphp
-                    <a href="{{ route('reservations.show', $reservation) }}" class="reservation-admin-row" role="listitem">
-                        <div class="reservation-admin-main">
-                            <h3>{{ $reservation->article?->title ?? '（記事未設定）' }}</h3>
-                            <h3>{{ $reservation->article?->venue?->venue_name ?? '（会場未設定）' }}</h3>
-                            <div class="reservation-admin-main-p">
-                                <p class="reservation-admin-date">予約日時: {{ $slotDateTime ? $slotDateTime->format('Y-m-d H:i') : '未設定' }}</p>
-                                <p class="reservation-admin-name">ご予約者様名: {{ $reservation->firstname ?? '未設定' }} 様</p>
-                                <p class="reservation-admin-staff">担当者: {{ $reservation->staff ?? '未設定' }}</p>
-                            </div>
-                        </div>
-                        <div class="reservation-admin-side">
-                            {{-- <span class="reservation-admin-status {{ $statusClass }}">{{ $statusLabel }}</span> --}}
-                            <span class="reservation-admin-arrow">詳細を見る</span>
-                        </div>
-                    </a>
-                @empty
-                    <div class="reservation-admin-empty">
-                        <p>予約データがありません。</p>
-                    </div>
-                @endforelse
-            </div>
-
-            <div class="reservation-admin-pagination">
-                {{ $reservations->links('vendor.pagination.count') }}
+            <div id="reservation-admin-results">
+                @include('dashboard.reservations.partials.list', ['user' => $user, 'reservations' => $reservations])
             </div>
         </div>
     </div>
@@ -155,4 +124,212 @@
             @endforeach
         @endif
     </ul>
+
+    @php
+        $articlesForJs = $articles->map(function ($article) {
+            return [
+                'id' => $article->id,
+                'title' => $article->title,
+                'venue_id' => $article->venue_id,
+            ];
+        })->values();
+    @endphp
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const reservationShell = document.querySelector('.reservation-admin-shell');
+            const filterForm = document.querySelector('.reservation-admin-filter');
+            const venueSelect = document.getElementById('filter-venue-id');
+            const articleSelect = document.getElementById('filter-article-id');
+            const reservedFromInput = document.getElementById('filter-reserved-from');
+            const reservedToInput = document.getElementById('filter-reserved-to');
+            const resultsContainer = document.getElementById('reservation-admin-results');
+            const exportLink = document.getElementById('reservations-export-link');
+            const exportBaseUrl = "{{ route('reservations.export') }}";
+            let allArticles = @json($articlesForJs);
+            let debounceTimer = null;
+            let activeController = null;
+            let latestRequestId = 0;
+
+            const setLoading = (loading) => {
+                if (!reservationShell) {
+                    return;
+                }
+
+                reservationShell.classList.toggle('is-loading', loading);
+                reservationShell.setAttribute('aria-busy', loading ? 'true' : 'false');
+            };
+
+            const renderArticleOptions = () => {
+                if (!articleSelect) {
+                    return;
+                }
+
+                const selectedVenueId = venueSelect ? String(venueSelect.value || '') : '';
+                const currentArticleId = String(articleSelect.value || '');
+
+                const filteredArticles = allArticles.filter((article) => {
+                    return selectedVenueId === '' || String(article.venue_id) === selectedVenueId;
+                });
+
+                articleSelect.innerHTML = '';
+
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = filteredArticles.length > 0 ? 'すべての記事' : '該当記事なし';
+                articleSelect.appendChild(defaultOption);
+
+                filteredArticles.forEach((article) => {
+                    const option = document.createElement('option');
+                    option.value = String(article.id);
+                    option.textContent = article.title;
+                    articleSelect.appendChild(option);
+                });
+
+                const isCurrentArticleAvailable = filteredArticles.some((article) => String(article.id) === currentArticleId);
+                articleSelect.value = isCurrentArticleAvailable ? currentArticleId : '';
+                articleSelect.disabled = filteredArticles.length === 0;
+            };
+
+            const renderVenueOptions = (venues) => {
+                if (!venueSelect) {
+                    return;
+                }
+
+                const currentVenueId = String(venueSelect.value || '');
+
+                venueSelect.innerHTML = '';
+
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = venues.length > 0 ? 'すべての会場' : '該当会場なし';
+                venueSelect.appendChild(defaultOption);
+
+                venues.forEach((venue) => {
+                    const option = document.createElement('option');
+                    option.value = String(venue.id);
+                    option.textContent = venue.venue_name;
+                    venueSelect.appendChild(option);
+                });
+
+                const isCurrentVenueAvailable = venues.some((venue) => String(venue.id) === currentVenueId);
+                venueSelect.value = isCurrentVenueAvailable ? currentVenueId : '';
+                venueSelect.disabled = venues.length === 0;
+            };
+
+            const fetchFilteredResults = async () => {
+                if (!filterForm || !reservedFromInput || !reservedToInput || !resultsContainer) {
+                    return;
+                }
+
+                const reservedFrom = String(reservedFromInput.value || '').trim();
+                const reservedTo = String(reservedToInput.value || '').trim();
+
+                if (reservedFrom === '' || reservedTo === '') {
+                    return;
+                }
+
+                const params = new URLSearchParams(new FormData(filterForm));
+                params.set('async', '1');
+                params.delete('async');
+                const requestId = latestRequestId + 1;
+                latestRequestId = requestId;
+
+                if (activeController) {
+                    activeController.abort();
+                }
+
+                activeController = new AbortController();
+                setLoading(true);
+
+                try {
+                    const response = await fetch(`${filterForm.action}?${params.toString()}`, {
+                        signal: activeController.signal,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json',
+                        },
+                    });
+
+                    if (requestId !== latestRequestId) {
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        return;
+                    }
+
+                    const payload = await response.json();
+
+                    if (typeof payload.results_html === 'string') {
+                        resultsContainer.innerHTML = payload.results_html;
+                    }
+
+                    if (Array.isArray(payload.venues)) {
+                        renderVenueOptions(payload.venues);
+                    }
+
+                    if (Array.isArray(payload.articles)) {
+                        allArticles = payload.articles;
+                        renderArticleOptions();
+                    }
+
+                    updateExportLink();
+                } catch (error) {
+                    if (error && error.name === 'AbortError') {
+                        return;
+                    }
+
+                    // Keep current UI when async filtering fails.
+                } finally {
+                    if (requestId === latestRequestId) {
+                        setLoading(false);
+                    }
+                }
+            };
+
+            const scheduleFetchFilteredResults = () => {
+                if (debounceTimer) {
+                    window.clearTimeout(debounceTimer);
+                }
+
+                debounceTimer = window.setTimeout(fetchFilteredResults, 320);
+            };
+
+            const updateExportLink = () => {
+                if (!filterForm || !exportLink) {
+                    return;
+                }
+
+                const params = new URLSearchParams(new FormData(filterForm));
+                exportLink.href = `${exportBaseUrl}?${params.toString()}`;
+            };
+
+            renderArticleOptions();
+            updateExportLink();
+
+            if (venueSelect) {
+                venueSelect.addEventListener('change', function () {
+                    renderArticleOptions();
+                    updateExportLink();
+                });
+            }
+
+            if (articleSelect) {
+                articleSelect.addEventListener('change', updateExportLink);
+            }
+
+            if (reservedFromInput) {
+                reservedFromInput.addEventListener('change', scheduleFetchFilteredResults);
+                reservedFromInput.addEventListener('change', updateExportLink);
+            }
+
+            if (reservedToInput) {
+                reservedToInput.addEventListener('change', scheduleFetchFilteredResults);
+                reservedToInput.addEventListener('change', updateExportLink);
+            }
+        });
+    </script>
+    @endpush
 </x-app-layout>

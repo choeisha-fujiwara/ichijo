@@ -66,29 +66,42 @@
     } else {
         $initialSlots = old('slots', []);
     }
-    $emailOptions = collect($userEmails ?? [])->filter()->unique()->values();
+    $emailOptions = collect($userEmails ?? [])
+        ->filter(fn ($option) => is_array($option) && !empty($option['value']))
+        ->mapWithKeys(fn ($option) => [
+            $option['value'] => $option['label'] ?? $option['value'],
+        ])
+        ->all();
     $initialEmails = collect(old('emails', $isEdit ? ($article->emails ?? []) : []))
         ->filter()
         ->values();
     if ((string) (auth()->user()?->role ?? '') !== 'developer') {
-        $initialEmails = $initialEmails->intersect($emailOptions)->values();
+        $initialEmails = $initialEmails->intersect(array_keys($emailOptions))->values();
     }
-    $currentBodyImageUrls = $isEdit
+    $currentBodyImageUrls = $isEdit && $currentBodyImageItems->isNotEmpty()
         ? $currentBodyImageItems->pluck('url')->values()->all()
-        : $prefillBodyImages->pluck('url')->values()->all();
-    $currentBodyCaptions = $isEdit
+        : [];
+    $currentBodyCaptions = $isEdit && $currentBodyImageItems->isNotEmpty()
         ? $currentBodyImageItems
             ->pluck('caption')
             ->map(fn ($caption) => (string) ($caption ?? ''))
             ->values()
             ->all()
-        : array_fill(0, count($currentBodyImageUrls), '');
+        : [];
+    $currentBodyImageSourceIndexes = $isEdit
+        ? $currentBodyImageItems
+            ->pluck('index')
+            ->map(fn ($index) => (int) $index)
+            ->values()
+            ->all()
+        : [];
     $venuesPayload = collect($venues)
         ->map(fn ($venue) => [
             'id' => $venue->id,
             'name' => $venue->venue_name,
             'address' => $venue->address,
             'phone' => $venue->phone,
+            'fax' => $venue->fax,
             'access' => $venue->access,
             'map_url' => $venue->map_url,
             'image_url' => !empty($venue->image) ? route('venue.image', $venue) : null,
@@ -110,6 +123,7 @@
         headerImageUrl: @js($initialHeaderPreviewUrl),
         bodyImageUrls: @js($currentBodyImageUrls),
         bodyCaptions: @js($currentBodyCaptions),
+        bodyImageSourceIndexes: @js($currentBodyImageSourceIndexes),
         removeHeaderImage: @js((bool) old('remove_header_image', false)),
         removeBodyIndexes: @js(array_values(array_map('intval', old('remove_body_image_indexes', [])))),
         publishedAt: @js(old('published_at', optional($article->published_at ?? null)->format('Y-m-d'))),
@@ -224,7 +238,8 @@
                                         rows="4"
                                         placeholder="キャプションを入力（任意）"
                                         class="existing-media-caption-input"
-                                        x-model="preview.bodyCaptions[{{ $loop->index }}]"
+                                        x-model="existingBodyCaptions[{{ $loop->index }}]"
+                                        @input="syncBodyImagePreview()"
                                     >{{ old('existing_body_image_captions.' . $item['index'], $item['caption']) }}</textarea>
                                     <button
                                         type="button"
@@ -329,13 +344,13 @@
                         </template>
                     </div>
                     <template x-if="selectedVenue()">
-                        <section class="article-venue" aria-label="会場情報">
+                        <section class="article-venue" aria-label="お問い合わせ先">
+                            <h2>お問い合わせ先</h2>
                             <template x-if="selectedVenue().image_url">
                                 <div class="article-venue-image">
                                     <img :src="selectedVenue().image_url" :alt="`${selectedVenue().name} の画像`">
                                 </div>
                             </template>
-                            <h2>イベント会場</h2>
                             <dl>
                                 <div>
                                     <dt>会場名</dt>
@@ -345,9 +360,23 @@
                                     <dt>住所</dt>
                                     <dd x-text="selectedVenue().address"></dd>
                                 </div>
+                                <div x-show="selectedVenue().phone">
+                                    <dt>TEL</dt>
+                                    <dd x-text="selectedVenue().phone"></dd>
+                                </div>
+                                <div x-show="selectedVenue().fax">
+                                    <dt>FAX</dt>
+                                    <dd x-text="selectedVenue().fax"></dd>
+                                </div>
                                 <div x-show="selectedVenue().access">
                                     <dt>アクセス</dt>
                                     <dd x-text="selectedVenue().access"></dd>
+                                </div>
+                                <div x-show="selectedVenue().map_url">
+                                    <dt>地図</dt>
+                                    <dd>
+                                        <a :href="selectedVenue().map_url" target="_blank" rel="noopener noreferrer"><span class="material-symbols-outlined">location_on</span>Google Map を開く</a>
+                                    </dd>
                                 </div>
                             </dl>
                         </section>
@@ -366,6 +395,13 @@
 <script>
 function articleFormPreview(initialState = {}) {
     return {
+        existingBodyImageUrls: Array.isArray(initialState.bodyImageUrls) ? initialState.bodyImageUrls : [],
+        existingBodyCaptions: Array.isArray(initialState.bodyCaptions) ? initialState.bodyCaptions.map((value) => String(value || '')) : [],
+        existingBodyImageSourceIndexes: Array.isArray(initialState.bodyImageSourceIndexes)
+            ? initialState.bodyImageSourceIndexes.map((index) => Number(index))
+            : [],
+        addedBodyImageUrls: [],
+        addedBodyCaptions: [],
         preview: {
             title: initialState.title || '',
             body: initialState.body || '',
@@ -385,6 +421,34 @@ function articleFormPreview(initialState = {}) {
             unpublishedAt: initialState.unpublishedAt || '',
         },
 
+        init() {
+            this.syncBodyImagePreview();
+        },
+
+        syncBodyImagePreview() {
+            const existingItems = this.existingBodyImageUrls
+                .map((url, index) => ({
+                    url,
+                    caption: String(this.existingBodyCaptions[index] || ''),
+                    sourceIndex: Number.isInteger(this.existingBodyImageSourceIndexes[index])
+                        ? this.existingBodyImageSourceIndexes[index]
+                        : index,
+                }))
+                .filter((item) => typeof item.url === 'string' && item.url.length > 0)
+                .filter((item) => !this.preview.removeBodyIndexes.includes(item.sourceIndex));
+
+            const addedItems = this.addedBodyImageUrls
+                .map((url, index) => ({
+                    url,
+                    caption: String(this.addedBodyCaptions[index] || ''),
+                }))
+                .filter((item) => typeof item.url === 'string' && item.url.length > 0);
+
+            const merged = [...existingItems, ...addedItems];
+            this.preview.bodyImageUrls = merged.map((item) => item.url);
+            this.preview.bodyCaptions = merged.map((item) => item.caption);
+        },
+
         toggleBodyImageRemoval(index) {
             const normalized = Number(index);
             if (!Number.isInteger(normalized) || normalized < 0) {
@@ -393,10 +457,12 @@ function articleFormPreview(initialState = {}) {
 
             if (this.preview.removeBodyIndexes.includes(normalized)) {
                 this.preview.removeBodyIndexes = this.preview.removeBodyIndexes.filter((value) => value !== normalized);
+                this.syncBodyImagePreview();
                 return;
             }
 
             this.preview.removeBodyIndexes = [...this.preview.removeBodyIndexes, normalized].sort((a, b) => a - b);
+            this.syncBodyImagePreview();
         },
 
         isBodyImageMarkedForRemoval(index) {
@@ -431,10 +497,11 @@ function articleFormPreview(initialState = {}) {
             }
 
             if (name === 'body_image') {
-                this.preview.bodyImageUrls = previews;
-                this.preview.bodyCaptions = captions.length > 0
+                this.addedBodyImageUrls = previews;
+                this.addedBodyCaptions = captions.length > 0
                     ? captions.slice(0, previews.length)
-                    : this.preview.bodyCaptions.slice(0, previews.length);
+                    : Array(previews.length).fill('');
+                this.syncBodyImagePreview();
             }
         },
 
