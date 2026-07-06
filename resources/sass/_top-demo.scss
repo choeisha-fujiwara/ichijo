@@ -148,7 +148,8 @@
 .top-demo-card-image {
     position: relative;
     width: 100%;
-    aspect-ratio: 4 / 3;
+    height: 16vw;
+    overflow: hidden;
     background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
 
     img {
