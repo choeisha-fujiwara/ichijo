@@ -37,6 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     ]);
     Route::post('/dashboard/article/{article}/status', [ArticleController::class, 'updateStatus'])->name('article.status.update');
     Route::post('/dashboard/top/{article}/copy', [AppController::class, 'copy'])->name('top.copy');
+    Route::get('/dashboard/top-demo', [AppController::class, 'demo'])->name('top.demo');
     Route::resource('/dashboard/top', AppController::class)->only([
         'index', 'show', 'store',
     ]);

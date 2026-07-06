@@ -74,8 +74,67 @@ class AppController extends Controller
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
             ->header('Pragma', 'no-cache')
             ->header('Expires', 0);
-    }    
-    
+    }
+
+    /**
+     * 記事一覧のカード型グリッドデザインを検証するためのデモ表示。
+     * 既存の index() には手を加えず、同じデータ取得ロジックを別ビューに描画する。
+     */
+    public function demo(Request $request)
+    {
+        $user = Auth::user();
+        $validated = $request->validate([
+            'venue_id' => ['nullable', 'integer', 'exists:article_venues,id'],
+            'publish_from' => ['nullable', 'date'],
+            'publish_to' => ['nullable', 'date', 'after_or_equal:publish_from'],
+        ]);
+
+        $venueId = $validated['venue_id'] ?? null;
+        $publishFrom = $validated['publish_from'] ?? null;
+        $publishTo = $validated['publish_to'] ?? null;
+
+        $query = Article::with(['venue:id,venue_name', 'images'])
+            ->orderBy('created_at', 'desc');
+
+        if (!empty($venueId)) {
+            $query->where('venue_id', $venueId);
+        }
+
+        if (!empty($publishFrom) || !empty($publishTo)) {
+            $query->whereNotNull('published_at');
+
+            if (!empty($publishTo)) {
+                $query->whereDate('published_at', '<=', $publishTo);
+            }
+
+            if (!empty($publishFrom)) {
+                $query->where(function ($periodQuery) use ($publishFrom) {
+                    $periodQuery->whereNull('unpublished_at')
+                        ->orWhereDate('unpublished_at', '>=', $publishFrom);
+                });
+            }
+        }
+
+        $data = $query->paginate(12)->withQueryString();
+        $venues = ArticleVenue::query()
+            ->orderBy('venue_name')
+            ->get(['id', 'venue_name']);
+
+        $filters = [
+            'venue_id' => $venueId,
+            'publish_from' => $publishFrom,
+            'publish_to' => $publishTo,
+        ];
+
+        $this->loadArticleReservationCounts($data);
+
+        return response()
+            ->view('dashboard.top.demo', compact('user', 'data', 'venues', 'filters'))
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 0);
+    }
+
     /**
      * Show the form for creating a new resource.
      */
