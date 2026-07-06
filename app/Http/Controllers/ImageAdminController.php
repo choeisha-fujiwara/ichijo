@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -76,27 +77,64 @@ class ImageAdminController extends Controller
 
         $paginated = $query->paginate(5, ['*'], 'page', $page);
 
-        $images = $paginated->getCollection()
-            ->map(function ($image) {
-                return [
-                    'id' => $image->id,
-                    'url' => route('article.image', $image),
-                    'original_name' => $image->original_name,
-                    'path' => $image->path,
-                ];
-            })
-            ->all();
+        try {
+            $images = $paginated->getCollection()
+                ->map(function ($image) {
+                    return [
+                        'id' => (int) $image->id,
+                        'url' => route('article.image', $image),
+                        'original_name' => $this->safeUtf8String($image->original_name),
+                        'path' => $this->safeUtf8String($image->path),
+                    ];
+                })
+                ->all();
 
-        return response()->json([
-            'images' => $images,
-            'pagination' => [
-                'current_page' => $paginated->currentPage(),
-                'per_page' => $paginated->perPage(),
-                'total' => $paginated->total(),
-                'last_page' => $paginated->lastPage(),
-                'has_more' => $paginated->hasMorePages(),
-            ],
-        ]);
+            return response()->json([
+                'images' => $images,
+                'pagination' => [
+                    'current_page' => $paginated->currentPage(),
+                    'per_page' => $paginated->perPage(),
+                    'total' => $paginated->total(),
+                    'last_page' => $paginated->lastPage(),
+                    'has_more' => $paginated->hasMorePages(),
+                ],
+            ], 200, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        } catch (\Throwable $e) {
+            Log::error('Failed to build paginated images response.', [
+                'type' => $type,
+                'page' => $page,
+                'error' => $e->getMessage(),
+                'exception' => $e::class,
+            ]);
+
+            return response()->json([
+                'images' => [],
+                'pagination' => [
+                    'current_page' => 1,
+                    'per_page' => 5,
+                    'total' => 0,
+                    'last_page' => 1,
+                    'has_more' => false,
+                ],
+            ], 500);
+        }
+    }
+
+    private function safeUtf8String(mixed $value): string
+    {
+        $text = (string) ($value ?? '');
+
+        if ($text === '') {
+            return '';
+        }
+
+        if (mb_check_encoding($text, 'UTF-8')) {
+            return $text;
+        }
+
+        $converted = @mb_convert_encoding($text, 'UTF-8', 'UTF-8, SJIS-win, EUC-JP, ISO-2022-JP, ASCII');
+
+        return is_string($converted) ? $converted : '';
     }
 
     public function destroy(Request $request, Image $image): RedirectResponse

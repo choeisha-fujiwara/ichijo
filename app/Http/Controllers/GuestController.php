@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Validation\ValidationException;
 
 class GuestController extends Controller
@@ -120,8 +121,7 @@ class GuestController extends Controller
 
         if ($destinationEmails->isEmpty()) {
             Log::warning('Reservation notification destination is empty.', [
-                'article_id' => $article?->id,
-                'reservation_email' => $validated['email'] ?? null,
+                ...$this->reservationMailLogContext($article, $validated['email'] ?? null),
             ]);
         }
 
@@ -130,9 +130,8 @@ class GuestController extends Controller
                 Mail::to($destinationEmail)->send(new ReservationPostedNotification($notificationPayload));
             } catch (\Throwable $e) {
                 Log::error('Failed to send reservation notification email.', [
-                    'article_id' => $article?->id,
-                    'reservation_email' => $validated['email'] ?? null,
-                    'destination_email' => $destinationEmail,
+                    ...$this->reservationMailLogContext($article, $validated['email'] ?? null, $destinationEmail),
+                    'exception' => $e::class,
                     'error' => $e->getMessage(),
                 ]);
                 report($e);
@@ -145,8 +144,8 @@ class GuestController extends Controller
         } catch (\Throwable $e) {
             $autoReplySent = false;
             Log::error('Failed to send reservation auto-reply email.', [
-                'article_id' => $article?->id,
-                'reservation_email' => $validated['email'] ?? null,
+                ...$this->reservationMailLogContext($article, $validated['email'] ?? null, $validated['email'] ?? null),
+                'exception' => $e::class,
                 'error' => $e->getMessage(),
             ]);
             report($e);
@@ -248,5 +247,20 @@ class GuestController extends Controller
         }
 
         return true;
+    }
+
+    private function reservationMailLogContext(?Article $article, ?string $reservationEmail = null, ?string $destinationEmail = null): array
+    {
+        return [
+            'article_id' => $article?->id,
+            'reservation_email' => $reservationEmail,
+            'destination_email' => $destinationEmail,
+            'mail_default' => (string) Config::get('mail.default'),
+            'mail_from_address' => (string) Config::get('mail.from.address'),
+            'mail_from_name' => (string) Config::get('mail.from.name'),
+            'mail_host' => (string) Config::get('mail.mailers.smtp.host'),
+            'mail_port' => (string) Config::get('mail.mailers.smtp.port'),
+            'mail_encryption' => (string) Config::get('mail.mailers.smtp.encryption'),
+        ];
     }
 }

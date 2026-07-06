@@ -189,7 +189,7 @@
                 </div>
                 <div class="input-item title-text edit-title">
                     <label>タイトル</label>
-                    <textarea name="title" placeholder="タイトルを入力してください" class="input-title" x-model="preview.title">{{ old('title', $article->title ?? '') }}</textarea>
+                    <textarea name="title" placeholder="タイトルを入力してください" class="input-title" x-model="preview.title" required>{{ old('title', $article->title ?? '') }}</textarea>
                 </div>
                 <div class="input-item body-text edit-body-text">
                     <label>本文</label>

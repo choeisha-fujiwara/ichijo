@@ -24,7 +24,7 @@
         x-on:blur="sync()"
     ></div>
 
-    <textarea name="{{ $name }}" x-ref="textarea" class="hidden"></textarea>
+    <textarea name="{{ $name }}" x-ref="textarea" class="hidden" required></textarea>
 </div>
 
 @once
@@ -77,8 +77,27 @@ function richTextEditor(config = {}) {
             const container = document.createElement('div');
             container.innerHTML = html || '';
 
-            container.querySelectorAll('span[style]').forEach((element) => {
+            // 他サイトからの貼り付けに紛れ込む実行可能なタグを除去する
+            // （XSS対策に加え、サーバー側ファイアウォールに弾かれるのを防ぐ）
+            container.querySelectorAll('script, style, iframe, object, embed, link, meta, form, base').forEach((element) => {
+                element.remove();
+            });
+
+            container.querySelectorAll('*').forEach((element) => {
                 element.removeAttribute('style');
+
+                [...element.attributes].forEach((attribute) => {
+                    const attrName = attribute.name.toLowerCase();
+
+                    if (attrName.startsWith('on')) {
+                        element.removeAttribute(attribute.name);
+                        return;
+                    }
+
+                    if ((attrName === 'href' || attrName === 'src') && /^\s*(javascript|vbscript|data):/i.test(attribute.value)) {
+                        element.removeAttribute(attribute.name);
+                    }
+                });
             });
 
             return container.innerHTML;

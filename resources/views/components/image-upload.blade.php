@@ -33,6 +33,10 @@ if ($resolvedSavedType === null) {
         $resolvedSavedType = 'body';
     }
 }
+
+$imagesPaginatedUrl = \Illuminate\Support\Facades\Route::has('images.paginated')
+    ? route('images.paginated')
+    : url('/dashboard/images-paginated');
 @endphp
 
 @if($addable)
@@ -58,7 +62,7 @@ if ($resolvedSavedType === null) {
                     :class="slot.dragging ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300 bg-white'"
                     class="image-upload-dropzone"
                     style="min-height: 8rem;"
-                    x-on:click.self="openPicker($event, $el.querySelector('input[type=file]'))"
+                    x-on:click.self="openPicker($event, $el?.querySelector('input[type=file]') || null)"
                 >
                     <input
                         type="file"
@@ -76,7 +80,7 @@ if ($resolvedSavedType === null) {
                             <p>画像をドラッグ&amp;ドロップ</p>
                             <p>または</p>
                             <div class="image-upload-actions">
-                                <button type="button" class="image-upload-select-btn" x-on:click.stop.prevent="openPicker($event, $el.closest('.image-upload-dropzone').querySelector('input[type=file]'))">ファイルを選択</button>
+                                <button type="button" class="image-upload-select-btn" x-on:click.stop.prevent="openPicker($event, $el.closest('.image-upload-dropzone')?.querySelector('input[type=file]') || null)">ファイルを選択</button>
                                 <button type="button" class="image-upload-library-btn" x-on:click.stop.prevent="openSavedImageModal(slot.id)">保存画像から選択</button>
                             </div>
                         </div>
@@ -104,7 +108,7 @@ if ($resolvedSavedType === null) {
                     type="button"
                     x-show="slot.preview || slots.length > 1"
                     class="image-upload-remove"
-                    x-on:click.stop="removeOrClear(slot, $el.closest('.slot-wrapper').querySelector('input[type=file]'))"
+                    x-on:click.stop="removeOrClear(slot, $el.closest('.slot-wrapper')?.querySelector('input[type=file]') || null)"
                 ><span class="material-symbols-outlined delete">delete</span></button>
 
                 <template x-if="selectedInputName && slot.selectedSavedImageId">
@@ -161,6 +165,17 @@ if ($resolvedSavedType === null) {
 @once
 <script>
 function imageUploadAddable(config = {}) {
+    const resolveSameOriginPath = (rawUrl) => {
+        try {
+            const parsed = new URL(String(rawUrl || ''), window.location.origin);
+            return `${parsed.pathname}${parsed.search}`;
+        } catch (_) {
+            return '/dashboard/images-paginated';
+        }
+    };
+
+    const imagesPaginatedEndpoint = resolveSameOriginPath(@js($imagesPaginatedUrl));
+
     return {
         slots: [{ id: 1, dragging: false, preview: null, selectedSavedImageId: null, file: null, caption: '' }],
         nextId: 2,
@@ -212,7 +227,7 @@ function imageUploadAddable(config = {}) {
         },
 
         slotInput(slotId) {
-            return this.$root.querySelector(`input[type="file"][data-slot-id="${slotId}"]`);
+            return this.$root?.querySelector(`input[type="file"][data-slot-id="${slotId}"]`) || null;
         },
 
         syncSlotInput(slot) {
@@ -297,7 +312,10 @@ function imageUploadAddable(config = {}) {
             if (!file) return;
             slot.selectedSavedImageId = null;
             slot.file = file;
-            const input = event.currentTarget.querySelector('input[type="file"]');
+            const dropTarget = event?.currentTarget;
+            const input = dropTarget && typeof dropTarget.querySelector === 'function'
+                ? dropTarget.querySelector('input[type="file"]')
+                : null;
             if (input) {
                 const dt = new DataTransfer();
                 dt.items.add(file);
@@ -368,13 +386,21 @@ function imageUploadAddable(config = {}) {
         async loadImages(page) {
             this.isLoadingImages = true;
             try {
-                const response = await fetch(`{{ route('images.paginated') }}?type=${encodeURIComponent(this.savedType || '')}&page=${page}`);
+                const requestUrl = `${imagesPaginatedEndpoint}?type=${encodeURIComponent(this.savedType || '')}&page=${page}`;
+                const response = await fetch(requestUrl, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${requestUrl}`);
+                }
                 const data = await response.json();
                 this.paginatedImages = data.images || [];
                 this.currentPage = data.pagination.current_page;
                 this.totalPages = data.pagination.last_page;
             } catch (error) {
-                console.error('Failed to load images:', error);
+                console.error('Failed to load addable saved images:', error);
                 this.paginatedImages = [];
             } finally {
                 this.isLoadingImages = false;
@@ -534,6 +560,17 @@ function imageUploadAddable(config = {}) {
 @once
 <script>
 function imageUpload(config = {}) {
+    const resolveSameOriginPath = (rawUrl) => {
+        try {
+            const parsed = new URL(String(rawUrl || ''), window.location.origin);
+            return `${parsed.pathname}${parsed.search}`;
+        } catch (_) {
+            return '/dashboard/images-paginated';
+        }
+    };
+
+    const imagesPaginatedEndpoint = resolveSameOriginPath(@js($imagesPaginatedUrl));
+
     return {
         multiple: !!config.multiple,
         dragging: false,
@@ -703,13 +740,21 @@ function imageUpload(config = {}) {
         async loadImages(page) {
             this.isLoadingImages = true;
             try {
-                const response = await fetch(`{{ route('images.paginated') }}?type=${encodeURIComponent(this.savedType || '')}&page=${page}`);
+                const requestUrl = `${imagesPaginatedEndpoint}?type=${encodeURIComponent(this.savedType || '')}&page=${page}`;
+                const response = await fetch(requestUrl, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${requestUrl}`);
+                }
                 const data = await response.json();
                 this.paginatedImages = data.images || [];
                 this.currentPage = data.pagination.current_page;
                 this.totalPages = data.pagination.last_page;
             } catch (error) {
-                console.error('Failed to load images:', error);
+                console.error('Failed to load saved images:', error);
                 this.paginatedImages = [];
             } finally {
                 this.isLoadingImages = false;

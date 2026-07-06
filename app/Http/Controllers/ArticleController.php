@@ -19,6 +19,7 @@ use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Mail\SendMail;
 use Illuminate\Support\Facades\Mail;
+use App\Exceptions\ArticleSaveException;
 
 class ArticleController extends Controller
 {
@@ -31,10 +32,7 @@ class ArticleController extends Controller
             'prefill_type' => ['nullable', 'in:header,body'],
         ]);
 
-        $data = Article::orderBy('created_at', 'desc')
-            ->paginate(100)
-            ->withQueryString();
-        $images = Image::orderBy('created_at', 'desc')->get();
+        $images = collect();
         $venues = $this->availableVenues();
         $currentUser = Auth::user();
         $currentRole = (string) $currentUser->role;
@@ -65,14 +63,14 @@ class ArticleController extends Controller
             }
         }
 
-        return view('dashboard.top.create', compact('user', 'data', 'images', 'venues', 'prefillHeaderImage', 'prefillBodyImages', 'userEmails'));
+        return view('dashboard.top.create', compact('user', 'images', 'venues', 'prefillHeaderImage', 'prefillBodyImages', 'userEmails'));
     }
 
     public function edit(Article $article)
     {
         $user = auth()->user();
         $article->load(['images', 'reservationSlots']);
-        $images = Image::orderBy('created_at', 'desc')->get();
+        $images = collect();
         $venues = $this->availableVenues($article);
         $currentUser = Auth::user();
         $currentRole = (string) $currentUser->role;
@@ -132,6 +130,13 @@ class ArticleController extends Controller
 
             \Log::info('Article creation completed successfully', ['article_id' => $article->id ?? null]);
             return redirect()->route('top.index')->with('msg', '記事を保存しました');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (ArticleSaveException $e) {
+            \Log::error('Article creation failed', ['error' => $e->getMessage()]);
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
         } catch (\Exception $e) {
             \Log::error('Article creation failed', [
                 'error' => $e->getMessage(),
@@ -240,6 +245,13 @@ class ArticleController extends Controller
 
             \Log::info('Article update completed successfully', ['article_id' => $article->id]);
             return redirect()->route('top.show', $article)->with('msg', '記事を更新しました');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (ArticleSaveException $e) {
+            \Log::error('Article update failed', ['article_id' => $article->id, 'error' => $e->getMessage()]);
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
         } catch (\Exception $e) {
             \Log::error('Article update failed', [
                 'article_id' => $article->id,
@@ -727,21 +739,21 @@ class ArticleController extends Controller
         try {
             $realPath = $file->getRealPath();
             if ($realPath === false) {
-                throw new \RuntimeException('アップロードファイルのパスが取得できません。');
+                throw new \App\Exceptions\ArticleSaveException('アップロードファイルのパスが取得できません。');
             }
 
             if (!is_readable($realPath)) {
-                throw new \RuntimeException('アップロードファイルが読み込み不可です。');
+                throw new \App\Exceptions\ArticleSaveException('アップロードファイルが読み込み不可です。');
             }
 
             $rawContent = file_get_contents($realPath);
             if ($rawContent === false) {
-                throw new \RuntimeException('ファイル内容の読み込みに失敗しました。');
+                throw new \App\Exceptions\ArticleSaveException('ファイル内容の読み込みに失敗しました。');
             }
 
             $imageResource = imagecreatefromstring($rawContent);
             if ($imageResource === false) {
-                throw new \RuntimeException('画像形式の認識に失敗しました。サポートされていない形式の可能性があります。');
+                throw new \App\Exceptions\ArticleSaveException('画像形式の認識に失敗しました。サポートされていない形式の可能性があります。');
             }
 
             ob_start();
@@ -750,22 +762,22 @@ class ArticleController extends Controller
             imagedestroy($imageResource);
 
             if ($encoded === false || $webpBinary === false) {
-                throw new \RuntimeException('WebP形式への変換に失敗しました。');
+                throw new \App\Exceptions\ArticleSaveException('WebP形式への変換に失敗しました。');
             }
 
             if (empty($webpBinary)) {
-                throw new \RuntimeException('WebP画像のバイナリが空です。');
+                throw new \App\Exceptions\ArticleSaveException('WebP画像のバイナリが空です。');
             }
 
             $storageSuccess = Storage::disk('public')->put($path, $webpBinary);
             if (!$storageSuccess) {
-                throw new \RuntimeException('ストレージへのファイル保存に失敗しました。ディスク容量またはパーミッションを確認してください。');
+                throw new \App\Exceptions\ArticleSaveException('ストレージへのファイル保存に失敗しました。ディスク容量またはパーミッションを確認してください。');
             }
 
             $savedSize = Storage::disk('public')->size($path);
             if ($savedSize === false || $savedSize === 0) {
                 Storage::disk('public')->delete($path);
-                throw new \RuntimeException('保存されたファイルのサイズ確認に失敗しました。');
+                throw new \App\Exceptions\ArticleSaveException('保存されたファイルのサイズ確認に失敗しました。');
             }
 
             return [

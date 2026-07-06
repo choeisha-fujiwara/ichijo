@@ -360,7 +360,7 @@
                             aria-label="電話番号（中央）"
                             value="{{ old('phone-2') }}"
                             placeholder="例）1234"
-                            minlength="4"
+                            minlength="2"
                             maxlength="4"
                             class=""
                             required
@@ -373,7 +373,7 @@
                             aria-label="電話番号（末尾）"
                             value="{{ old('phone-3') }}"
                             placeholder="例）5678"
-                            minlength="4"
+                            minlength="2"
                             maxlength="4"
                             class=""
                             required
