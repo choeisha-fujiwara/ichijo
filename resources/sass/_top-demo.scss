@@ -180,7 +180,9 @@
 }
 
 .top-demo-card-body {
-    display: grid;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
     gap: 8px;
     padding: 14px 16px 16px;
 
@@ -219,7 +221,8 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 4px;
+    margin-top: auto;
+    padding-top: 4px;
 
     span {
         display: inline-flex;
