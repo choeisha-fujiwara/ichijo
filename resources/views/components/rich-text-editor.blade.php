@@ -32,7 +32,7 @@
 function richTextEditor(config = {}) {
     return {
         initialValue: config.initialValue || '',
-        placeholder: config.placeholder || '本文を入力してください',
+        placeholder: config.placeholder || "・文字を貼り付ける際は、「プレーンテキスト（書式なし）として貼り付け」を推奨します。\n・公開前にプレビュー画面などで、表示に不具合がないか確認することをおすすめします。",
         height: config.height || '16rem',
         linkPromptOpen: false,
 
@@ -150,6 +150,7 @@ function richTextEditor(config = {}) {
     .rich-text-editor:empty:before {
         content: attr(data-placeholder);
         color: #9ca3af;
+        white-space: pre-line;
     }
 
     .rich-text-editor h2 {

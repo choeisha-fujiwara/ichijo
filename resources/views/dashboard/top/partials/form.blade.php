@@ -193,7 +193,7 @@
                 </div>
                 <div class="input-item body-text edit-body-text">
                     <label>本文</label>
-                    <x-rich-text-editor name="body" placeholder="本文を入力してください" :value="old('body', $article->body ?? '')" />
+                    <x-rich-text-editor name="body" placeholder="・文字を貼り付ける際は、「プレーンテキスト（書式なし）として貼り付け」を推奨します。&#13;&#10;・公開前にプレビュー画面などで、表示に不具合がないか確認することをおすすめします。" :value="old('body', $article->body ?? '')" />
                 </div>
                 <div class="input-row">
                     <div class="input-item freeword-item">
