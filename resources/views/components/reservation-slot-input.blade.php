@@ -71,81 +71,98 @@
     </div>
 
     <div class="reservation-slot-list" x-show="slots.length > 0">
-        <template x-for="(slot, index) in slots" :key="slot.id">
-            <div class="reservation-slot-card reservation-slot-card-list">
-                <input type="hidden" :name="`slots[${index}][id]`" :value="slot.id">
-                <div class="input-item reservation-slot-list-date">
-                    <label>日付</label>
-                    <input
-                        type="date"
-                        :name="`slots[${index}][date]`"
-                        x-model="slot.date"
-                    />
-                </div>
-
-                <div class="reservation-slot-times">
-                    <div class="input-item">
-                        <label>開始時間</label>
-                        <input type="hidden" :name="`slots[${index}][start_hour]`" :value="slot.start_hour">
-                        <input type="hidden" :name="`slots[${index}][start_minute]`" :value="slot.start_minute">
-                        <div class="reservation-slot-time">
-                            <select :value="slot.start_hour" x-on:change="slot.start_hour = $event.target.value">
-                                <template x-for="h in hours" :key="`list-start-hour-${slot.id}-${h}`">
-                                    <option :value="h" :selected="slot.start_hour === h" x-text="h"></option>
-                                </template>
-                            </select>
-                            <span>:</span>
-                            <select :value="slot.start_minute" x-on:change="slot.start_minute = $event.target.value">
-                                <template x-for="m in minutes" :key="`list-start-minute-${slot.id}-${m}`">
-                                    <option :value="m" :selected="slot.start_minute === m" x-text="m"></option>
-                                </template>
-                            </select>
-                        </div>
-                    </div>
-
-                    <span class="material-symbols-outlined">check_indeterminate_small</span>
-
-                    <div class="input-item">
-                        <label>終了時間</label>
-                        <input type="hidden" :name="`slots[${index}][end_hour]`" :value="slot.end_hour">
-                        <input type="hidden" :name="`slots[${index}][end_minute]`" :value="slot.end_minute">
-                        <div class="reservation-slot-time">
-                            <select :value="slot.end_hour" x-on:change="slot.end_hour = $event.target.value">
-                                <template x-for="h in hours" :key="`list-end-hour-${slot.id}-${h}`">
-                                    <option :value="h" :selected="slot.end_hour === h" x-text="h"></option>
-                                </template>
-                            </select>
-                            <span>:</span>
-                            <select :value="slot.end_minute" x-on:change="slot.end_minute = $event.target.value">
-                                <template x-for="m in minutes" :key="`list-end-minute-${slot.id}-${m}`">
-                                    <option :value="m" :selected="slot.end_minute === m" x-text="m"></option>
-                                </template>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="input-item reservation-slot-capacity">
-                    <label>予約枠数</label>
-                    <input
-                        type="number"
-                        :name="`slots[${index}][capacity]`"
-                        x-model.number="slot.capacity"
-                        x-on:input="slot.capacity = normalizeCapacity(slot.capacity, 1)"
-                        x-on:blur="slot.capacity = normalizeCapacity(slot.capacity, 1)"
-                        min="1"
-                        step="1"
-                        inputmode="numeric"
-                        placeholder="1"
-                    />
-                </div>
-
+        <template x-for="group in groupedSlots()" :key="group.date || '__undated__'">
+            <div class="reservation-slot-date-group" :class="{ 'is-open': isDateOpen(group.date) }">
                 <button
                     type="button"
-                    class="reservation-slot-remove"
-                    x-on:click="removeSlot(slot.id)"
-                    aria-label="予約枠を削除"
-                ><span class="material-symbols-outlined">delete</span></button>
+                    class="reservation-slot-date-header"
+                    x-on:click="toggleDateGroup(group.date)"
+                    :aria-expanded="isDateOpen(group.date) ? 'true' : 'false'"
+                >
+                    <span class="reservation-slot-date-header-label" x-text="formatGroupDate(group.date)"></span>
+                    <span class="reservation-slot-date-header-count" x-text="`${group.items.length}件`"></span>
+                    <span class="material-symbols-outlined reservation-slot-date-header-icon">expand_more</span>
+                </button>
+
+                <div class="reservation-slot-date-body" x-show="isDateOpen(group.date)" x-collapse>
+                    <template x-for="item in group.items" :key="item.slot.id">
+                        <div class="reservation-slot-card reservation-slot-card-list">
+                            <input type="hidden" :name="`slots[${item.index}][id]`" :value="item.slot.id">
+                            <div class="input-item reservation-slot-list-date">
+                                <label>日付</label>
+                                <input
+                                    type="date"
+                                    :name="`slots[${item.index}][date]`"
+                                    x-model="item.slot.date"
+                                />
+                            </div>
+
+                            <div class="reservation-slot-times">
+                                <div class="input-item">
+                                    <label>開始時間</label>
+                                    <input type="hidden" :name="`slots[${item.index}][start_hour]`" :value="item.slot.start_hour">
+                                    <input type="hidden" :name="`slots[${item.index}][start_minute]`" :value="item.slot.start_minute">
+                                    <div class="reservation-slot-time">
+                                        <select :value="item.slot.start_hour" x-on:change="item.slot.start_hour = $event.target.value">
+                                            <template x-for="h in hours" :key="`list-start-hour-${item.slot.id}-${h}`">
+                                                <option :value="h" :selected="item.slot.start_hour === h" x-text="h"></option>
+                                            </template>
+                                        </select>
+                                        <span>:</span>
+                                        <select :value="item.slot.start_minute" x-on:change="item.slot.start_minute = $event.target.value">
+                                            <template x-for="m in minutes" :key="`list-start-minute-${item.slot.id}-${m}`">
+                                                <option :value="m" :selected="item.slot.start_minute === m" x-text="m"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <span class="material-symbols-outlined">check_indeterminate_small</span>
+
+                                <div class="input-item">
+                                    <label>終了時間</label>
+                                    <input type="hidden" :name="`slots[${item.index}][end_hour]`" :value="item.slot.end_hour">
+                                    <input type="hidden" :name="`slots[${item.index}][end_minute]`" :value="item.slot.end_minute">
+                                    <div class="reservation-slot-time">
+                                        <select :value="item.slot.end_hour" x-on:change="item.slot.end_hour = $event.target.value">
+                                            <template x-for="h in hours" :key="`list-end-hour-${item.slot.id}-${h}`">
+                                                <option :value="h" :selected="item.slot.end_hour === h" x-text="h"></option>
+                                            </template>
+                                        </select>
+                                        <span>:</span>
+                                        <select :value="item.slot.end_minute" x-on:change="item.slot.end_minute = $event.target.value">
+                                            <template x-for="m in minutes" :key="`list-end-minute-${item.slot.id}-${m}`">
+                                                <option :value="m" :selected="item.slot.end_minute === m" x-text="m"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="input-item reservation-slot-capacity">
+                                <label>予約枠数</label>
+                                <input
+                                    type="number"
+                                    :name="`slots[${item.index}][capacity]`"
+                                    x-model.number="item.slot.capacity"
+                                    x-on:input="item.slot.capacity = normalizeCapacity(item.slot.capacity, 1)"
+                                    x-on:blur="item.slot.capacity = normalizeCapacity(item.slot.capacity, 1)"
+                                    min="1"
+                                    step="1"
+                                    inputmode="numeric"
+                                    placeholder="1"
+                                />
+                            </div>
+
+                            <button
+                                type="button"
+                                class="reservation-slot-remove"
+                                x-on:click="removeSlot(item.slot.id)"
+                                aria-label="予約枠を削除"
+                            ><span class="material-symbols-outlined">delete</span></button>
+                        </div>
+                    </template>
+                </div>
             </div>
         </template>
     </div>
@@ -304,6 +321,7 @@ function reservationSlotInput(config = {}) {
         modalTimeRows: [],
         modalNextTimeRowId: 1,
         modalCalendarInitialized: false,
+        openDates: [],
 
         normalizeCapacity(value, fallback = 1) {
             if (value === null || value === undefined || value === '') {
@@ -437,6 +455,60 @@ function reservationSlotInput(config = {}) {
             return count > 0 ? `作成済み: ${count}件` : '作成済み: 0件';
         },
 
+        groupedSlots() {
+            const groups = new Map();
+
+            this.slots.forEach((slot, index) => {
+                const key = slot.date || '';
+                if (!groups.has(key)) {
+                    groups.set(key, []);
+                }
+                groups.get(key).push({ slot, index });
+            });
+
+            return [...groups.entries()]
+                .sort(([a], [b]) => {
+                    if (!a) return 1;
+                    if (!b) return -1;
+                    return a.localeCompare(b);
+                })
+                .map(([date, items]) => ({ date, items }));
+        },
+
+        isDateOpen(date) {
+            return this.openDates.includes(date || '');
+        },
+
+        openDateGroup(date) {
+            const key = date || '';
+            if (!this.openDates.includes(key)) {
+                this.openDates = [...this.openDates, key];
+            }
+        },
+
+        toggleDateGroup(date) {
+            const key = date || '';
+            if (this.openDates.includes(key)) {
+                this.openDates = this.openDates.filter((d) => d !== key);
+            } else {
+                this.openDates = [...this.openDates, key];
+            }
+        },
+
+        formatGroupDate(date) {
+            if (!date) {
+                return '日付未設定';
+            }
+
+            const parsed = new Date(`${date}T00:00:00`);
+            if (Number.isNaN(parsed.getTime())) {
+                return date;
+            }
+
+            const weekday = ['日', '月', '火', '水', '木', '金', '土'][parsed.getDay()];
+            return `${date.replace(/-/g, '.')}（${weekday}）`;
+        },
+
         init() {
             this.slots = (Array.isArray(this.slots) ? this.slots : [])
                 .map((slot) => this.normalizeSlotRecord(slot));
@@ -446,9 +518,11 @@ function reservationSlotInput(config = {}) {
         },
 
         addManualSlot() {
-            this.slots.push(this.normalizeSlotRecord({
+            const newSlot = this.normalizeSlotRecord({
                 end_hour: '11',
-            }));
+            });
+            this.slots.push(newSlot);
+            this.openDateGroup(newSlot.date);
         },
 
         removeSlot(id) {
@@ -574,6 +648,7 @@ function reservationSlotInput(config = {}) {
                     end_minute: this.normalizeMinute(slot.end_minute, '00'),
                     capacity: this.normalizeCapacity(slot.capacity, 1),
                 }));
+                generatedSlots.forEach((slot) => this.openDateGroup(slot.date));
             }
 
             this.closeBuilder();

@@ -24,7 +24,7 @@
         x-on:blur="sync()"
     ></div>
 
-    <textarea name="{{ $name }}" x-ref="textarea" class="hidden" required></textarea>
+    <textarea name="{{ $name }}" x-ref="textarea" class="hidden"></textarea>
 </div>
 
 @once
