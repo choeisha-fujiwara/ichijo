@@ -35,7 +35,7 @@ class AppController extends Controller
         $publishTo = $validated['publish_to'] ?? null;
 
         $query = Article::with(['venue:id,venue_name', 'images'])
-            ->orderBy('created_at', 'desc');
+            ->orderBy('updated_at', 'desc');
 
         if (!empty($venueId)) {
             $query->where('venue_id', $venueId);
@@ -94,7 +94,7 @@ class AppController extends Controller
         $publishTo = $validated['publish_to'] ?? null;
 
         $query = Article::with(['venue:id,venue_name', 'images'])
-            ->orderBy('created_at', 'desc');
+            ->orderBy('updated_at', 'desc');
 
         if (!empty($venueId)) {
             $query->where('venue_id', $venueId);
