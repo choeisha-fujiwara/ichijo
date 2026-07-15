@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot:title>記事一覧（デモ）</x-slot:title>
+    <x-slot:title>{{ request()->routeIs('top.demo') ? '記事一覧（デモ）' : '記事一覧' }}</x-slot:title>
     <x-slot:page>index</x-slot:page>
     <x-slot:name>{{ $user->name }}</x-slot:name>
     <x-slot:role>{{ $user->role }}</x-slot:role>
@@ -14,11 +14,11 @@
             <div class="top-list-head">
                 <div class="top-list-head-main">
                     <div>
-                        <h2>記事一覧（デモ）</h2>
+                        <h2>{{ request()->routeIs('top.demo') ? '記事一覧（デモ）' : '記事一覧' }}</h2>
                     </div>
                 </div>
 
-                <form method="GET" action="{{ route('top.demo') }}" class="top-list-filter" aria-label="記事絞り込み">
+                <form method="GET" action="{{ route(request()->routeIs('top.demo') ? 'top.demo' : 'top.index') }}" class="top-list-filter" aria-label="記事絞り込み">
                     <div class="top-list-filter-field">
                         <label for="demo_venue_id">会場</label>
                         <select id="demo_venue_id" name="venue_id">
@@ -52,7 +52,7 @@
 
                     <div class="top-list-filter-actions">
                         <button type="submit" class="top-list-filter-submit">検索</button>
-                        <a href="{{ route('top.demo') }}" class="top-list-filter-reset">リセット</a>
+                        <a href="{{ route(request()->routeIs('top.demo') ? 'top.demo' : 'top.index') }}" class="top-list-filter-reset">リセット</a>
                     </div>
                 </form>
 

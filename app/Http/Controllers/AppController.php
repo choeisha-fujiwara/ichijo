@@ -56,7 +56,7 @@ class AppController extends Controller
             }
         }
 
-        $data = $query->paginate(10)->withQueryString();
+        $data = $query->paginate(12)->withQueryString();
         $venues = ArticleVenue::query()
             ->orderBy('venue_name')
             ->get(['id', 'venue_name']);
@@ -70,7 +70,7 @@ class AppController extends Controller
         $this->loadArticleReservationCounts($data);
 
         return response()
-            ->view('dashboard.top.index', compact('user', 'data', 'venues', 'filters'))
+            ->view('dashboard.top.demo', compact('user', 'data', 'venues', 'filters'))
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
             ->header('Pragma', 'no-cache')
             ->header('Expires', 0);
