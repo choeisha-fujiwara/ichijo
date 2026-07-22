@@ -75,9 +75,6 @@
     $initialEmails = collect(old('emails', $isEdit ? ($article->emails ?? []) : []))
         ->filter()
         ->values();
-    if ((string) (auth()->user()?->role ?? '') !== 'developer') {
-        $initialEmails = $initialEmails->intersect(array_keys($emailOptions))->values();
-    }
     $currentBodyImageUrls = $isEdit && $currentBodyImageItems->isNotEmpty()
         ? $currentBodyImageItems->pluck('url')->values()->all()
         : [];
@@ -161,15 +158,15 @@
                         {{-- <p class="input-note">新しい画像を選択したときだけ差し替わります。未選択のまま保存すると現在の画像を維持します。</p> --}}
                         <div class="existing-media-preview single" :class="{ 'will-remove': preview.removeHeaderImage }">
                             <img src="{{ route('article.image', $currentHeaderImage) }}" alt="現在のヘッダー画像">
+                            <button
+                                type="button"
+                                class="existing-media-remove-btn existing-media-remove-btn-header"
+                                :class="{ 'is-active': preview.removeHeaderImage }"
+                                @click="preview.removeHeaderImage = !preview.removeHeaderImage"
+                            ><span class="material-symbols-outlined delete">delete</span>
+                                <span x-text="preview.removeHeaderImage ? '削除を取り消す' : '削除する'"></span>
+                            </button>
                         </div>
-                        <button
-                            type="button"
-                            class="existing-media-remove-btn"
-                            :class="{ 'is-active': preview.removeHeaderImage }"
-                            @click="preview.removeHeaderImage = !preview.removeHeaderImage"
-                        ><span class="material-symbols-outlined delete">delete</span>
-                            <span x-text="preview.removeHeaderImage ? '削除を取り消す' : '削除する'"></span>
-                        </button>
                         <input type="hidden" name="remove_header_image" :value="preview.removeHeaderImage ? 1 : 0">
                     </div>
                 @endif

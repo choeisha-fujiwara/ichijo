@@ -1406,6 +1406,36 @@
 			border: 1px solid var(--color-line);
 			background: #f8fafc;
 		}
+
+		&.single {
+			position: relative;
+		}
+	}
+
+	.existing-media-remove-btn.existing-media-remove-btn-header {
+		position: absolute;
+		right: 12px;
+		bottom: 12px;
+		margin-top: 0;
+		height: 40px;
+		padding: 0 16px;
+		border: 1px solid var(--color-line);
+		background: #ffffff;
+		color: var(--color-danger);
+		font-size: 13px;
+		box-shadow: 0 4px 12px rgba(15, 23, 42, 0.14);
+
+		&:hover {
+			background: var(--color-danger-soft-hover);
+			border-color: var(--color-danger-border-hover);
+			color: var(--color-danger-deep);
+		}
+
+		&.is-active {
+			background: var(--color-danger);
+			border-color: var(--color-danger);
+			color: #ffffff;
+		}
 	}
 
 	.existing-media-caption {
